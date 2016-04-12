@@ -1,0 +1,31 @@
+{
+  "name": "css-animation-builder",
+  "version": "0.1.0",
+  "description": "Animate elements using CSS classes with support for Angular2.",
+  "repository": "https://github.com/fabianweb/css-animation-builder.git",
+  "main": "index.js",
+  "keywords": [
+    "angular2",
+    "animation",
+    "animate",
+    "directive",
+    "css",
+    "animate.css"
+  ],
+  "author": "Fabian Pirklbauer",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "angular2": "^2.0.0-beta.14",
+    "es6-shim": "0.35.0",
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "^2.13.0",
+    "gulp-uglify": "^1.5.3",
+    "lodash.assign": "^4.0.7",
+    "merge2": "^1.0.2",
+    "reflect-metadata": "0.1.2",
+    "rxjs": "5.0.0-beta.2",
+    "zone.js": "^0.6.10"
+  }
+}

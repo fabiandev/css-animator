@@ -1,0 +1,9 @@
+{
+  "target": "ES5",
+  "emitDecoratorMetadata": true,
+  "experimentalDecorators": true,
+  "moduleResolution": "node",
+  "exclude": ["node_modules"],
+  "noImplicitAny": true,
+  "suppressImplicitAnyIndexErrors": true
+}
