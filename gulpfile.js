@@ -10,7 +10,9 @@ var tsConfig = assign(require('./tsconfig.json'), {
   declaration: true
 });
 
-gulp.task('default', ['process', 'bundle']);
+gulp.task('default', ['copy', 'process', 'bundle']);
+gulp.task('clean', ['clean:process', 'clean:bundle']);
+gulp.task('copy', ['copy:readme']);
 
 gulp.task('process', function() {
   var tsResult = gulp.src(['./typings/browser.d.ts', './src/**/*.ts'], {
@@ -45,13 +47,12 @@ gulp.task('bundle', function() {
     .pipe(gulp.dest('./dist/bundles'));
 });
 
-gulp.task('clean', ['clean:process', 'clean:bundle']);
-
 gulp.task('clean:process', function() {
   return del([
     './dist/**/*',
     '!./dist/bundles',
-    '!./dist/package.json'
+    '!./dist/package.json',
+    '!./dist/README.md'
   ]);
 });
 
@@ -59,4 +60,9 @@ gulp.task('clean:bundle', function() {
   return del([
     './dist/bundles/**/*'
   ]);
+});
+
+gulp.task('copy:readme', function() {
+  return gulp.src('./README.md')
+    .pipe(gulp.dest('./dist'));
 });

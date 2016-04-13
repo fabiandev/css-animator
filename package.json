@@ -1,8 +1,8 @@
 {
-  "name": "css-animation-builder",
+  "name": "css-animator",
   "version": "0.0.3",
   "description": "Animate elements using CSS classes with support for Angular2.",
-  "repository": "https://github.com/fabianweb/css-animation-builder.git",
+  "repository": "https://github.com/fabianweb/css-animator.git",
   "main": "index.js",
   "keywords": [
     "angular2",
