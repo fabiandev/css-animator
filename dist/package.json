@@ -1,0 +1,23 @@
+{
+  "name": "css-animation-builder",
+  "version": "0.0.1",
+  "description": "Animate elements using CSS classes with support for Angular2.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabianweb/css-animation-builder.git"
+  },
+  "keywords": [
+    "angular2",
+    "animation",
+    "animate",
+    "directive",
+    "css",
+    "animate.css"
+  ],
+  "author": "Fabian Pirklbauer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fabianweb/css-animation-builder/issues"
+  },
+  "homepage": "https://github.com/fabianweb/css-animation-builder#readme"
+}
