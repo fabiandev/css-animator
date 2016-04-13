@@ -4,4 +4,3 @@ function __export(m) {
 }
 __export(require('./services/animation.service'));
 __export(require('./directives/animates.directive'));
-__export(require('./animation_builder'));

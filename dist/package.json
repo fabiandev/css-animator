@@ -1,5 +1,5 @@
 {
-  "name": "css-animation-builder",
+  "name": "css-animator",
   "version": "0.0.1",
   "description": "Animate elements using CSS classes with support for Angular2.",
   "repository": {

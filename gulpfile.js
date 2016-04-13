@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var ts = require('gulp-typescript');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
-var clean = require('gulp-clean');
+var del = require('del');
 var assign = require('lodash.assign');
 var merge = require('merge2');
 
@@ -14,7 +14,7 @@ gulp.task('default', ['process', 'bundle']);
 
 gulp.task('process', function() {
   var tsResult = gulp.src(['./typings/browser.d.ts', './src/**/*.ts'], {
-      base: './src/css-animation-builder'
+      base: './src/css-animator'
     })
     .pipe(ts(assign(tsConfig, {
       module: 'commonjs'
@@ -30,33 +30,33 @@ gulp.task('bundle', function() {
   var tsResult = gulp.src(['./typings/browser.d.ts', './src/**/*.ts'])
     .pipe(ts(assign(tsConfig, {
       module: 'system',
-      outFile: 'css-animation-builder.js',
+      outFile: 'css-animator.js',
       declaration: false
     })));
 
   tsResult.js
-    .pipe(gulp.dest('./dist/bundle'))
-    .pipe(rename('css-animation-builder.min.js'))
+    .pipe(gulp.dest('./dist/bundles'))
+    .pipe(rename('css-animator.min.js'))
     .pipe(uglify({
       mangle: {
         keep_fnames: true
       }
     }))
-    .pipe(gulp.dest('./dist/bundle'));
+    .pipe(gulp.dest('./dist/bundles'));
 });
 
 gulp.task('clean', ['clean:process', 'clean:bundle']);
 
 gulp.task('clean:process', function() {
-  return gulp.src(['./dist', '!./dist/bundle'], {
-      read: false
-    })
-    .pipe(clean());
+  return del([
+    './dist/**/*',
+    '!./dist/bundles',
+    '!./dist/package.json'
+  ]);
 });
 
 gulp.task('clean:bundle', function() {
-  return gulp.src(['./dist/bundle'], {
-      read: false
-    })
-    .pipe(clean());
+  return del([
+    './dist/bundles/**/*'
+  ]);
 });

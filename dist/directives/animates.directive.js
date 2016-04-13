@@ -12,7 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var core_1 = require('angular2/core');
-var __1 = require('../..');
+var __1 = require('..');
 var AnimatesDirective = (function () {
     function AnimatesDirective(_elementRef, _animationService) {
         this._elementRef = _elementRef;
