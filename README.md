@@ -1,6 +1,8 @@
 # css-animator
 
-The documentation is work in progress. Explanations and more examples will be added very soon!
+The documentation is work in progress and shows just the most important usages and options.  
+
+Explanations and more examples will be added very soon!
 
 # Installation
 
@@ -61,11 +63,11 @@ export class AppComponent {
 ```
 
 ```html
-<div
-[animates]="{ optional default options }" #animation="animation"
-[animatesOnInit]="{ on-init options }"
-(click)="animation.start({type: 'shake'})"
-></div>
+<div #animation="animation"
+[animates]="{ optional default options }"
+[animatesOnInit]="{ on init options }"
+(click)="animation.start({type: 'shake'})">
+</div>
 ```
 
 # API
