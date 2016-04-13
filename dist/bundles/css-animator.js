@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-System.register("contracts/animation_options", [], function(exports_1, context_1) {
+System.register("css-animator/contracts/animation_options", [], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     return {
@@ -19,7 +19,7 @@ System.register("contracts/animation_options", [], function(exports_1, context_1
         }
     }
 });
-System.register("contracts/element_props", [], function(exports_2, context_2) {
+System.register("css-animator/contracts/element_props", [], function(exports_2, context_2) {
     "use strict";
     var __moduleName = context_2 && context_2.id;
     return {
@@ -28,7 +28,7 @@ System.register("contracts/element_props", [], function(exports_2, context_2) {
         }
     }
 });
-System.register("contracts/listener_ref", [], function(exports_3, context_3) {
+System.register("css-animator/contracts/listener_ref", [], function(exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
     return {
@@ -37,7 +37,7 @@ System.register("contracts/listener_ref", [], function(exports_3, context_3) {
         }
     }
 });
-System.register("contracts", [], function(exports_4, context_4) {
+System.register("css-animator/contracts", [], function(exports_4, context_4) {
     "use strict";
     var __moduleName = context_4 && context_4.id;
     return {
@@ -46,7 +46,7 @@ System.register("contracts", [], function(exports_4, context_4) {
         }
     }
 });
-System.register("animation_builder", [], function(exports_5, context_5) {
+System.register("css-animator/animation_builder", [], function(exports_5, context_5) {
     "use strict";
     var __moduleName = context_5 && context_5.id;
     var AnimationBuilder;
@@ -399,7 +399,7 @@ System.register("animation_builder", [], function(exports_5, context_5) {
         }
     }
 });
-System.register("builder", ["animation_builder"], function(exports_6, context_6) {
+System.register("css-animator/builder", ["css-animator/animation_builder"], function(exports_6, context_6) {
     "use strict";
     var __moduleName = context_6 && context_6.id;
     function exportStar_1(m) {
@@ -418,7 +418,7 @@ System.register("builder", ["animation_builder"], function(exports_6, context_6)
         }
     }
 });
-System.register("services/animation.service", ['angular2/core', "index"], function(exports_7, context_7) {
+System.register("css-animator/services/animation.service", ['angular2/core', "css-animator/index"], function(exports_7, context_7) {
     "use strict";
     var __moduleName = context_7 && context_7.id;
     var core_1, __1;
@@ -448,7 +448,7 @@ System.register("services/animation.service", ['angular2/core', "index"], functi
         }
     }
 });
-System.register("directives/animates.directive", ['angular2/core', "index"], function(exports_8, context_8) {
+System.register("css-animator/directives/animates.directive", ['angular2/core', "css-animator/index"], function(exports_8, context_8) {
     "use strict";
     var __moduleName = context_8 && context_8.id;
     var core_2, __2;
@@ -581,7 +581,7 @@ System.register("directives/animates.directive", ['angular2/core', "index"], fun
         }
     }
 });
-System.register("index", ["services/animation.service", "directives/animates.directive", "animation_builder"], function(exports_9, context_9) {
+System.register("css-animator/index", ["css-animator/services/animation.service", "css-animator/directives/animates.directive", "css-animator/animation_builder"], function(exports_9, context_9) {
     "use strict";
     var __moduleName = context_9 && context_9.id;
     function exportStar_2(m) {
@@ -606,7 +606,7 @@ System.register("index", ["services/animation.service", "directives/animates.dir
         }
     }
 });
-System.register("modules", ["services/animation.service", "directives/animates.directive"], function(exports_10, context_10) {
+System.register("css-animator/modules", ["css-animator/services/animation.service", "css-animator/directives/animates.directive"], function(exports_10, context_10) {
     "use strict";
     var __moduleName = context_10 && context_10.id;
     function exportStar_3(m) {
