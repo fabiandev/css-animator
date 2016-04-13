@@ -481,31 +481,21 @@ System.register("css-animator/directives/animates.directive", ['angular2/core', 
                     }
                     this._animationBuilder
                         .setOptions(this._initOptions)
-                        .animate(this._elementRef.nativeElement)
-                        .then(function (element) { return element; }, function (error) {
-                        // Animation interrupted
-                    });
-                };
-                AnimatesDirective.prototype.ngOnDestroy = function () {
-                    if (!this._destroyOptions) {
-                        return;
-                    }
-                    this._animationBuilder
-                        .setOptions(this._destroyOptions)
-                        .animate(this._elementRef.nativeElement)
+                        .show(this._elementRef.nativeElement)
                         .then(function (element) { return element; }, function (error) {
                         // Animation interrupted
                     });
                 };
                 AnimatesDirective.prototype.start = function (options) {
+                    this.setOptions(options);
                     return this._animationBuilder
-                        .setOptions(options)
                         .animate(this._elementRef.nativeElement)
                         .then(function (element) { return element; }, function (error) {
                         // Animation interrupted
                     });
                 };
                 AnimatesDirective.prototype.hide = function (options) {
+                    this.setOptions(options);
                     return this._animationBuilder
                         .setOptions(options)
                         .hide(this._elementRef.nativeElement)
@@ -514,8 +504,8 @@ System.register("css-animator/directives/animates.directive", ['angular2/core', 
                     });
                 };
                 AnimatesDirective.prototype.show = function (options) {
+                    this.setOptions(options);
                     return this._animationBuilder
-                        .setOptions(options)
                         .show(this._elementRef.nativeElement)
                         .then(function (element) { return element; }, function (error) {
                         // Animation interrupted
@@ -554,6 +544,13 @@ System.register("css-animator/directives/animates.directive", ['angular2/core', 
                         // Animation interrupted
                     });
                 };
+                AnimatesDirective.prototype.setOptions = function (options) {
+                    if (options) {
+                        this._animationBuilder.setOptions(options);
+                        return;
+                    }
+                    this._animationBuilder.setOptions(this._defaultOptions);
+                };
                 __decorate([
                     core_2.Input('animates'), 
                     __metadata('design:type', Object)
@@ -562,14 +559,10 @@ System.register("css-animator/directives/animates.directive", ['angular2/core', 
                     core_2.Input('animatesOnInit'), 
                     __metadata('design:type', Object)
                 ], AnimatesDirective.prototype, "_initOptions", void 0);
-                __decorate([
-                    core_2.Input('animatesOnDestroy'), 
-                    __metadata('design:type', Object)
-                ], AnimatesDirective.prototype, "_destroyOptions", void 0);
                 AnimatesDirective = __decorate([
                     core_2.Directive({
                         selector: '[animates]',
-                        exportAs: 'animation'
+                        exportAs: 'animates'
                     }),
                     __param(0, core_2.Inject(core_2.ElementRef)),
                     __param(1, core_2.Inject(__2.AnimationService)), 

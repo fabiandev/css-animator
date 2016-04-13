@@ -12,6 +12,9 @@ $ npm install --save css-animator
 
 # Usage
 
+Use this package in combination with CSS animations.  
+A library like [animate.css](https://github.com/daneden/animate.css) already offers a lot of great animations out of the box.
+
 ## Basic Usage
 
 ```ts
@@ -63,10 +66,12 @@ export class AppComponent {
 ```
 
 ```html
-<div #animation="animation"
-[animates]="{ optional default options }"
-[animatesOnInit]="{ on init options }"
-(click)="animation.start({type: 'shake'})">
+<div
+#animation="animates"
+[animates]="{ type: 'wobble', duration: '1000' }" // default options
+[animatesOnInit]="{ type: 'fadeInUp' }"
+(click)="animation.start()"
+>
 </div>
 ```
 
@@ -113,29 +118,29 @@ setOptions(options: AnimationOptions): AnimationBuilder
 ## AnimatesDirective
 
 ```ts
-start(options: AnimationOptions): Promise<HTMLElement>
+start(options?: AnimationOptions): Promise<HTMLElement>
 ```
 
 ```ts
-show(options: AnimationOptions): Promise<HTMLElement>
+show(options?: AnimationOptions): Promise<HTMLElement>
 ```
 
 ```ts
-hide(options: AnimationOptions): Promise<HTMLElement>
+hide(options?: AnimationOptions): Promise<HTMLElement>
 ```
 
 ```ts
-stop(options: AnimationOptions): void
+stop(): void
 ```
 
 ```ts
-pause(options: AnimationOptions): void
+pause(): void
 ```
 
 ```ts
-resume(options: AnimationOptions): void
+resume(): void
 ```
 
 ```ts
-toggle(options: AnimationOptions): void
+toggle(): void
 ```

@@ -12,7 +12,7 @@ var tsConfig = assign(require('./tsconfig.json'), {
 
 gulp.task('default', ['copy', 'process', 'bundle']);
 gulp.task('clean', ['clean:process', 'clean:bundle']);
-gulp.task('copy', ['copy:readme']);
+gulp.task('copy', ['copy:readme', 'copy:license']);
 
 gulp.task('process', function() {
   var tsResult = gulp.src(['./typings/browser.d.ts', './src/**/*.ts'], {
@@ -52,7 +52,8 @@ gulp.task('clean:process', function() {
     './dist/**/*',
     '!./dist/bundles',
     '!./dist/package.json',
-    '!./dist/README.md'
+    '!./dist/README.md',
+    '!./dist/LICENSE'
   ]);
 });
 
@@ -64,5 +65,10 @@ gulp.task('clean:bundle', function() {
 
 gulp.task('copy:readme', function() {
   return gulp.src('./README.md')
+    .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('copy:license', function() {
+  return gulp.src('./LICENSE')
     .pipe(gulp.dest('./dist'));
 });

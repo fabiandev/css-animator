@@ -32,31 +32,21 @@ var AnimatesDirective = (function () {
         }
         this._animationBuilder
             .setOptions(this._initOptions)
-            .animate(this._elementRef.nativeElement)
-            .then(function (element) { return element; }, function (error) {
-            // Animation interrupted
-        });
-    };
-    AnimatesDirective.prototype.ngOnDestroy = function () {
-        if (!this._destroyOptions) {
-            return;
-        }
-        this._animationBuilder
-            .setOptions(this._destroyOptions)
-            .animate(this._elementRef.nativeElement)
+            .show(this._elementRef.nativeElement)
             .then(function (element) { return element; }, function (error) {
             // Animation interrupted
         });
     };
     AnimatesDirective.prototype.start = function (options) {
+        this.setOptions(options);
         return this._animationBuilder
-            .setOptions(options)
             .animate(this._elementRef.nativeElement)
             .then(function (element) { return element; }, function (error) {
             // Animation interrupted
         });
     };
     AnimatesDirective.prototype.hide = function (options) {
+        this.setOptions(options);
         return this._animationBuilder
             .setOptions(options)
             .hide(this._elementRef.nativeElement)
@@ -65,8 +55,8 @@ var AnimatesDirective = (function () {
         });
     };
     AnimatesDirective.prototype.show = function (options) {
+        this.setOptions(options);
         return this._animationBuilder
-            .setOptions(options)
             .show(this._elementRef.nativeElement)
             .then(function (element) { return element; }, function (error) {
             // Animation interrupted
@@ -105,6 +95,13 @@ var AnimatesDirective = (function () {
             // Animation interrupted
         });
     };
+    AnimatesDirective.prototype.setOptions = function (options) {
+        if (options) {
+            this._animationBuilder.setOptions(options);
+            return;
+        }
+        this._animationBuilder.setOptions(this._defaultOptions);
+    };
     __decorate([
         core_1.Input('animates'), 
         __metadata('design:type', Object)
@@ -113,14 +110,10 @@ var AnimatesDirective = (function () {
         core_1.Input('animatesOnInit'), 
         __metadata('design:type', Object)
     ], AnimatesDirective.prototype, "_initOptions", void 0);
-    __decorate([
-        core_1.Input('animatesOnDestroy'), 
-        __metadata('design:type', Object)
-    ], AnimatesDirective.prototype, "_destroyOptions", void 0);
     AnimatesDirective = __decorate([
         core_1.Directive({
             selector: '[animates]',
-            exportAs: 'animation'
+            exportAs: 'animates'
         }),
         __param(0, core_1.Inject(core_1.ElementRef)),
         __param(1, core_1.Inject(__1.AnimationService)), 

@@ -1,14 +1,13 @@
-import { Directive, Inject, ElementRef, Input, OnInit, OnDestroy } from 'angular2/core';
+import { Directive, Inject, ElementRef, Input, OnInit } from 'angular2/core';
 import { AnimationService, AnimationBuilder, AnimationOptions } from '..';
 
 @Directive({
   selector: '[animates]',
-  exportAs: 'animation'
+  exportAs: 'animates'
 })
-export class AnimatesDirective implements OnInit/*, OnDestroy*/ {
+export class AnimatesDirective implements OnInit {
   @Input('animates') private _defaultOptions: AnimationOptions;
   @Input('animatesOnInit') private _initOptions: AnimationOptions;
-  @Input('animatesOnDestroy') private _destroyOptions: AnimationOptions;
 
   private _animationBuilder: AnimationBuilder;
 
@@ -30,35 +29,25 @@ export class AnimatesDirective implements OnInit/*, OnDestroy*/ {
 
     this._animationBuilder
       .setOptions(this._initOptions)
-      .animate(this._elementRef.nativeElement)
+      .show(this._elementRef.nativeElement)
       .then((element: HTMLElement) => element, (error: string) => {
       // Animation interrupted
     });
   }
 
-  public ngOnDestroy() {
-    if (!this._destroyOptions) {
-      return;
-    }
+  public start(options?: AnimationOptions): Promise<HTMLElement> {
+    this.setOptions(options);
 
-    this._animationBuilder
-      .setOptions(this._destroyOptions)
-      .animate(this._elementRef.nativeElement)
-      .then((element: HTMLElement) => element, (error: string) => {
-      // Animation interrupted
-    });
-  }
-
-  public start(options: AnimationOptions): Promise<HTMLElement> {
     return this._animationBuilder
-      .setOptions(options)
       .animate(this._elementRef.nativeElement)
       .then((element: HTMLElement) => element, (error: string) => {
       // Animation interrupted
     });
   }
 
-  public hide(options: AnimationOptions): Promise<HTMLElement> {
+  public hide(options?: AnimationOptions): Promise<HTMLElement> {
+    this.setOptions(options);
+
     return this._animationBuilder
       .setOptions(options)
       .hide(this._elementRef.nativeElement)
@@ -67,9 +56,10 @@ export class AnimatesDirective implements OnInit/*, OnDestroy*/ {
     });
   }
 
-  public show(options: AnimationOptions): Promise<HTMLElement> {
+  public show(options?: AnimationOptions): Promise<HTMLElement> {
+    this.setOptions(options);
+
     return this._animationBuilder
-      .setOptions(options)
       .show(this._elementRef.nativeElement)
       .then((element: HTMLElement) => element, (error: string) => {
       // Animation interrupted
@@ -113,6 +103,15 @@ export class AnimatesDirective implements OnInit/*, OnDestroy*/ {
       .then((element) => element, (error) => {
       // Animation interrupted
     });
+  }
+
+  private setOptions(options: AnimationOptions) {
+    if (options) {
+      this._animationBuilder.setOptions(options);
+      return;
+    }
+
+    this._animationBuilder.setOptions(this._defaultOptions);
   }
 
 }
