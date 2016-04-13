@@ -1,5 +1,5 @@
 import { Injectable } from 'angular2/core';
-import { AnimationBuilder } from '../../animation';
+import { AnimationBuilder } from '../..';
 
 @Injectable()
 export class AnimationService {

@@ -1,5 +1,5 @@
 import { Directive, Inject, ElementRef, Input, OnInit, OnDestroy } from 'angular2/core';
-import { AnimationService, AnimationBuilder, AnimationOptions } from '../../animation';
+import { AnimationService, AnimationBuilder, AnimationOptions } from '../..';
 
 @Directive({
   selector: '[animates]',

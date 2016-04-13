@@ -10,48 +10,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-System.register("css-animation-builder/angular2/services/animation.service", ['angular2/core', "css-animation-builder/animation"], function(exports_1, context_1) {
+System.register("css-animation-builder/angular2/directives/animates.directive", ['angular2/core', "css-animation-builder/index"], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var core_1, animation_1;
-    var AnimationService;
+    var core_1, __1;
+    var AnimatesDirective;
     return {
         setters:[
             function (core_1_1) {
                 core_1 = core_1_1;
             },
-            function (animation_1_1) {
-                animation_1 = animation_1_1;
-            }],
-        execute: function() {
-            AnimationService = (function () {
-                function AnimationService() {
-                }
-                AnimationService.prototype.builder = function () {
-                    return new animation_1.AnimationBuilder();
-                };
-                AnimationService = __decorate([
-                    core_1.Injectable(), 
-                    __metadata('design:paramtypes', [])
-                ], AnimationService);
-                return AnimationService;
-            }());
-            exports_1("AnimationService", AnimationService);
-        }
-    }
-});
-System.register("css-animation-builder/angular2/directives/animates.directive", ['angular2/core', "css-animation-builder/animation"], function(exports_2, context_2) {
-    "use strict";
-    var __moduleName = context_2 && context_2.id;
-    var core_2, animation_2;
-    var AnimatesDirective;
-    return {
-        setters:[
-            function (core_2_1) {
-                core_2 = core_2_1;
-            },
-            function (animation_2_1) {
-                animation_2 = animation_2_1;
+            function (__1_1) {
+                __1 = __1_1;
             }],
         execute: function() {
             AnimatesDirective = (function () {
@@ -147,33 +117,42 @@ System.register("css-animation-builder/angular2/directives/animates.directive", 
                     });
                 };
                 __decorate([
-                    core_2.Input('animates'), 
+                    core_1.Input('animates'), 
                     __metadata('design:type', Object)
                 ], AnimatesDirective.prototype, "_defaultOptions", void 0);
                 __decorate([
-                    core_2.Input('animatesOnInit'), 
+                    core_1.Input('animatesOnInit'), 
                     __metadata('design:type', Object)
                 ], AnimatesDirective.prototype, "_initOptions", void 0);
                 __decorate([
-                    core_2.Input('animatesOnDestroy'), 
+                    core_1.Input('animatesOnDestroy'), 
                     __metadata('design:type', Object)
                 ], AnimatesDirective.prototype, "_destroyOptions", void 0);
                 AnimatesDirective = __decorate([
-                    core_2.Directive({
+                    core_1.Directive({
                         selector: '[animates]',
                         exportAs: 'animation'
                     }),
-                    __param(0, core_2.Inject(core_2.ElementRef)),
-                    __param(1, core_2.Inject(animation_2.AnimationService)), 
-                    __metadata('design:paramtypes', [core_2.ElementRef, animation_2.AnimationService])
+                    __param(0, core_1.Inject(core_1.ElementRef)),
+                    __param(1, core_1.Inject(__1.AnimationService)), 
+                    __metadata('design:paramtypes', [core_1.ElementRef, __1.AnimationService])
                 ], AnimatesDirective);
                 return AnimatesDirective;
             }());
-            exports_2("AnimatesDirective", AnimatesDirective);
+            exports_1("AnimatesDirective", AnimatesDirective);
         }
     }
 });
-System.register("css-animation-builder/contracts/animation_options", [], function(exports_3, context_3) {
+System.register("css-animation-builder/contracts/animation_options", [], function(exports_2, context_2) {
+    "use strict";
+    var __moduleName = context_2 && context_2.id;
+    return {
+        setters:[],
+        execute: function() {
+        }
+    }
+});
+System.register("css-animation-builder/contracts/element_props", [], function(exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
     return {
@@ -182,7 +161,7 @@ System.register("css-animation-builder/contracts/animation_options", [], functio
         }
     }
 });
-System.register("css-animation-builder/contracts/element_props", [], function(exports_4, context_4) {
+System.register("css-animation-builder/contracts/listener_ref", [], function(exports_4, context_4) {
     "use strict";
     var __moduleName = context_4 && context_4.id;
     return {
@@ -191,7 +170,7 @@ System.register("css-animation-builder/contracts/element_props", [], function(ex
         }
     }
 });
-System.register("css-animation-builder/contracts/listener_ref", [], function(exports_5, context_5) {
+System.register("css-animation-builder/contracts", [], function(exports_5, context_5) {
     "use strict";
     var __moduleName = context_5 && context_5.id;
     return {
@@ -200,18 +179,9 @@ System.register("css-animation-builder/contracts/listener_ref", [], function(exp
         }
     }
 });
-System.register("css-animation-builder/contracts", [], function(exports_6, context_6) {
+System.register("css-animation-builder/animation_builder", [], function(exports_6, context_6) {
     "use strict";
     var __moduleName = context_6 && context_6.id;
-    return {
-        setters:[],
-        execute: function() {
-        }
-    }
-});
-System.register("css-animation-builder/animation_builder", [], function(exports_7, context_7) {
-    "use strict";
-    var __moduleName = context_7 && context_7.id;
     var AnimationBuilder;
     return {
         setters:[],
@@ -558,19 +528,19 @@ System.register("css-animation-builder/animation_builder", [], function(exports_
                 };
                 return AnimationBuilder;
             }());
-            exports_7("AnimationBuilder", AnimationBuilder);
+            exports_6("AnimationBuilder", AnimationBuilder);
         }
     }
 });
-System.register("css-animation-builder/animation", ["css-animation-builder/angular2/services/animation.service", "css-animation-builder/angular2/directives/animates.directive", "css-animation-builder/animation_builder"], function(exports_8, context_8) {
+System.register("css-animation-builder/index", ["css-animation-builder/angular2/services/animation.service", "css-animation-builder/angular2/directives/animates.directive", "css-animation-builder/animation_builder"], function(exports_7, context_7) {
     "use strict";
-    var __moduleName = context_8 && context_8.id;
+    var __moduleName = context_7 && context_7.id;
     function exportStar_1(m) {
         var exports = {};
         for(var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
-        exports_8(exports);
+        exports_7(exports);
     }
     return {
         setters:[
@@ -587,7 +557,37 @@ System.register("css-animation-builder/animation", ["css-animation-builder/angul
         }
     }
 });
-System.register("index", ["css-animation-builder/animation"], function(exports_9, context_9) {
+System.register("css-animation-builder/angular2/services/animation.service", ['angular2/core', "css-animation-builder/index"], function(exports_8, context_8) {
+    "use strict";
+    var __moduleName = context_8 && context_8.id;
+    var core_2, __2;
+    var AnimationService;
+    return {
+        setters:[
+            function (core_2_1) {
+                core_2 = core_2_1;
+            },
+            function (__2_1) {
+                __2 = __2_1;
+            }],
+        execute: function() {
+            AnimationService = (function () {
+                function AnimationService() {
+                }
+                AnimationService.prototype.builder = function () {
+                    return new __2.AnimationBuilder();
+                };
+                AnimationService = __decorate([
+                    core_2.Injectable(), 
+                    __metadata('design:paramtypes', [])
+                ], AnimationService);
+                return AnimationService;
+            }());
+            exports_8("AnimationService", AnimationService);
+        }
+    }
+});
+System.register("css-animation-builder/angular", ["css-animation-builder/angular2/services/animation.service", "css-animation-builder/angular2/directives/animates.directive"], function(exports_9, context_9) {
     "use strict";
     var __moduleName = context_9 && context_9.id;
     function exportStar_2(m) {
@@ -599,8 +599,30 @@ System.register("index", ["css-animation-builder/animation"], function(exports_9
     }
     return {
         setters:[
-            function (animation_3_1) {
-                exportStar_2(animation_3_1);
+            function (animation_service_2_1) {
+                exportStar_2(animation_service_2_1);
+            },
+            function (animates_directive_2_1) {
+                exportStar_2(animates_directive_2_1);
+            }],
+        execute: function() {
+        }
+    }
+});
+System.register("css-animation-builder/builder", ["css-animation-builder/animation_builder"], function(exports_10, context_10) {
+    "use strict";
+    var __moduleName = context_10 && context_10.id;
+    function exportStar_3(m) {
+        var exports = {};
+        for(var n in m) {
+            if (n !== "default") exports[n] = m[n];
+        }
+        exports_10(exports);
+    }
+    return {
+        setters:[
+            function (animation_builder_2_1) {
+                exportStar_3(animation_builder_2_1);
             }],
         execute: function() {
         }

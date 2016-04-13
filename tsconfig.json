@@ -3,7 +3,11 @@
   "emitDecoratorMetadata": true,
   "experimentalDecorators": true,
   "moduleResolution": "node",
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules",
+    "typings/main.d.ts",
+    "typings/main"
+  ],
   "noImplicitAny": true,
   "suppressImplicitAnyIndexErrors": true
 }
