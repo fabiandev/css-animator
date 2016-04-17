@@ -28,11 +28,12 @@ animator.setType('shake').animate(element);
 ## Angular2 Service Usage
 
 ```ts
+import { Component, OnInit } from 'angular2/core';
 import { AnimationBuilder } from 'css-animator/builder';
 import { AnimationService } from 'css-animator/modules';
 
 @Component({ ... })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
   private animator: AnimationBuilder;
 
@@ -41,7 +42,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    this.animator.setType('fadeInUp').show(elementRef.nativeElement);
+    this.animator.setType('fadeInUp').show(this.elementRef.nativeElement);
   }
 
 }
@@ -52,6 +53,7 @@ export class AppComponent {
 ## Angular2 Directive Usage
 
 ```ts
+import { Component } from 'angular2/core';
 import { AnimatesDirective } from 'css-animator/modules';
 
 @Component({
