@@ -1,5 +1,5 @@
 import { ElementRef, OnInit } from 'angular2/core';
-import { AnimationService, AnimationBuilder, AnimationOptions } from '..';
+import { AnimationService, AnimationBuilder, AnimationOptions } from '../index';
 export declare class AnimatesDirective implements OnInit {
     private _elementRef;
     private _animationService;

@@ -12,7 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var core_1 = require('angular2/core');
-var __1 = require('..');
+var index_1 = require('../index');
 var AnimatesDirective = (function () {
     function AnimatesDirective(_elementRef, _animationService) {
         this._elementRef = _elementRef;
@@ -116,8 +116,8 @@ var AnimatesDirective = (function () {
             exportAs: 'animates'
         }),
         __param(0, core_1.Inject(core_1.ElementRef)),
-        __param(1, core_1.Inject(__1.AnimationService)), 
-        __metadata('design:paramtypes', [core_1.ElementRef, __1.AnimationService])
+        __param(1, core_1.Inject(index_1.AnimationService)), 
+        __metadata('design:paramtypes', [core_1.ElementRef, index_1.AnimationService])
     ], AnimatesDirective);
     return AnimatesDirective;
 }());

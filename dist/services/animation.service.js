@@ -9,12 +9,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('angular2/core');
-var __1 = require('..');
+var index_1 = require('../index');
 var AnimationService = (function () {
     function AnimationService() {
     }
     AnimationService.prototype.builder = function () {
-        return new __1.AnimationBuilder();
+        return new index_1.AnimationBuilder();
     };
     AnimationService = __decorate([
         core_1.Injectable(), 
