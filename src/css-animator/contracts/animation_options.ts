@@ -1,6 +1,6 @@
 export interface AnimationOptions {
   [key: string]: string|number;
-  type: string;
+  type?: string;
   fillMode?: string;
   timingFunction?: string;
   playState?: string;
