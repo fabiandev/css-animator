@@ -1,4 +1,4 @@
-import { AnimationOptions } from './contracts';
+import { AnimationOptions } from '../contracts';
 export declare class AnimationBuilder {
     [key: string]: any;
     private _type;
@@ -9,7 +9,6 @@ export declare class AnimationBuilder {
     private _duration;
     private _delay;
     private _iterationCount;
-    private _mode;
     private _animationClasses;
     private _classHistory;
     private _listeners;
@@ -17,6 +16,8 @@ export declare class AnimationBuilder {
     hide(element: HTMLElement): Promise<HTMLElement>;
     stop(element: HTMLElement, reset?: boolean, detach?: boolean): Promise<HTMLElement>;
     animate(element: HTMLElement, mode?: string): Promise<HTMLElement>;
+    addAnimationClass(name: string): AnimationBuilder;
+    removeAnimationClass(name: string): AnimationBuilder;
     setOptions(options: AnimationOptions): AnimationBuilder;
     setType(type: string): AnimationBuilder;
     setFillMode(fillMode: string): AnimationBuilder;
@@ -42,11 +43,11 @@ export declare class AnimationBuilder {
     delay: string | number;
     iterationCount: string | number;
     private applyStyle(element, property, value, shim?);
-    private removeCssClasses(element);
     private removeListenersForElement(element, detach?, reject?);
     private resetElement(element);
     private whichAnimationEvent(element);
     private applyCssClasses(element, add?);
+    private removeCssClasses(element);
     private getElementPosition(element);
     private getElementInitialProperties(element);
     private pinElement(element, initialProps);

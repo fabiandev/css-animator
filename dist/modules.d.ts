@@ -1,2 +1,2 @@
-export * from './services/animation.service';
-export * from './directives/animates.directive';
+export * from './modules/animation.service';
+export * from './modules/animates.directive';

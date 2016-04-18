@@ -10,163 +10,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-System.register("css-animator/services/animation.service", ['angular2/core', "css-animator/index"], function(exports_1, context_1) {
+System.register("css-animator/contracts/animation_options", [], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var core_1, index_1;
-    var AnimationService;
     return {
-        setters:[
-            function (core_1_1) {
-                core_1 = core_1_1;
-            },
-            function (index_1_1) {
-                index_1 = index_1_1;
-            }],
+        setters:[],
         execute: function() {
-            AnimationService = (function () {
-                function AnimationService() {
-                }
-                AnimationService.prototype.builder = function () {
-                    return new index_1.AnimationBuilder();
-                };
-                AnimationService = __decorate([
-                    core_1.Injectable(), 
-                    __metadata('design:paramtypes', [])
-                ], AnimationService);
-                return AnimationService;
-            }());
-            exports_1("AnimationService", AnimationService);
         }
     }
 });
-System.register("css-animator/directives/animates.directive", ['angular2/core', "css-animator/index"], function(exports_2, context_2) {
+System.register("css-animator/contracts/element_props", [], function(exports_2, context_2) {
     "use strict";
     var __moduleName = context_2 && context_2.id;
-    var core_2, index_2;
-    var AnimatesDirective;
     return {
-        setters:[
-            function (core_2_1) {
-                core_2 = core_2_1;
-            },
-            function (index_2_1) {
-                index_2 = index_2_1;
-            }],
+        setters:[],
         execute: function() {
-            AnimatesDirective = (function () {
-                function AnimatesDirective(_elementRef, _animationService) {
-                    this._elementRef = _elementRef;
-                    this._animationService = _animationService;
-                    this._animationBuilder = this._animationService.builder();
-                }
-                Object.defineProperty(AnimatesDirective.prototype, "animationBuilder", {
-                    get: function () {
-                        return this._animationBuilder;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                AnimatesDirective.prototype.ngOnInit = function () {
-                    if (!this._initOptions) {
-                        return;
-                    }
-                    this._animationBuilder
-                        .setOptions(this._initOptions)
-                        .show(this._elementRef.nativeElement)
-                        .then(function (element) { return element; }, function (error) {
-                        // Animation interrupted
-                    });
-                };
-                AnimatesDirective.prototype.start = function (options) {
-                    this.setOptions(options);
-                    return this._animationBuilder
-                        .animate(this._elementRef.nativeElement)
-                        .then(function (element) { return element; }, function (error) {
-                        // Animation interrupted
-                    });
-                };
-                AnimatesDirective.prototype.hide = function (options) {
-                    this.setOptions(options);
-                    return this._animationBuilder
-                        .setOptions(options)
-                        .hide(this._elementRef.nativeElement)
-                        .then(function (element) { return element; }, function (error) {
-                        // Animation interrupted
-                    });
-                };
-                AnimatesDirective.prototype.show = function (options) {
-                    this.setOptions(options);
-                    return this._animationBuilder
-                        .show(this._elementRef.nativeElement)
-                        .then(function (element) { return element; }, function (error) {
-                        // Animation interrupted
-                    });
-                };
-                AnimatesDirective.prototype.animate = function () {
-                    if (!this._defaultOptions) {
-                        return;
-                    }
-                    return this._animationBuilder
-                        .setOptions(this._defaultOptions)
-                        .animate(this._elementRef.nativeElement)
-                        .then(function (element) { return element; }, function (error) {
-                        // Animation interrupted
-                    });
-                };
-                AnimatesDirective.prototype.pause = function () {
-                    this._animationBuilder
-                        .setPlayState('paused')
-                        .applyPlayState(this._elementRef.nativeElement);
-                };
-                AnimatesDirective.prototype.resume = function () {
-                    this._animationBuilder
-                        .setPlayState('running')
-                        .applyPlayState(this._elementRef.nativeElement);
-                };
-                AnimatesDirective.prototype.toggle = function () {
-                    this._animationBuilder
-                        .setPlayState(this._animationBuilder.playState === 'running' ? 'paused' : 'running')
-                        .applyPlayState(this._elementRef.nativeElement);
-                };
-                AnimatesDirective.prototype.stop = function () {
-                    this._animationBuilder
-                        .stop(this._elementRef.nativeElement)
-                        .then(function (element) { return element; }, function (error) {
-                        // Animation interrupted
-                    });
-                };
-                AnimatesDirective.prototype.setOptions = function (options) {
-                    if (options) {
-                        this._animationBuilder.setOptions(options);
-                        return;
-                    }
-                    this._animationBuilder.setOptions(this._defaultOptions);
-                };
-                __decorate([
-                    core_2.Input('animates'), 
-                    __metadata('design:type', Object)
-                ], AnimatesDirective.prototype, "_defaultOptions", void 0);
-                __decorate([
-                    core_2.Input('animatesOnInit'), 
-                    __metadata('design:type', Object)
-                ], AnimatesDirective.prototype, "_initOptions", void 0);
-                AnimatesDirective = __decorate([
-                    core_2.Directive({
-                        selector: '[animates]',
-                        exportAs: 'animates'
-                    }),
-                    __param(0, core_2.Inject(core_2.ElementRef)),
-                    __param(1, core_2.Inject(index_2.AnimationService)), 
-                    __metadata('design:paramtypes', [core_2.ElementRef, index_2.AnimationService])
-                ], AnimatesDirective);
-                return AnimatesDirective;
-            }());
-            exports_2("AnimatesDirective", AnimatesDirective);
         }
     }
 });
-System.register("css-animator/contracts/animation_options", [], function(exports_3, context_3) {
+System.register("css-animator/contracts/listener_ref", [], function(exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
     return {
@@ -175,7 +37,7 @@ System.register("css-animator/contracts/animation_options", [], function(exports
         }
     }
 });
-System.register("css-animator/contracts/element_props", [], function(exports_4, context_4) {
+System.register("css-animator/contracts", [], function(exports_4, context_4) {
     "use strict";
     var __moduleName = context_4 && context_4.id;
     return {
@@ -184,27 +46,9 @@ System.register("css-animator/contracts/element_props", [], function(exports_4, 
         }
     }
 });
-System.register("css-animator/contracts/listener_ref", [], function(exports_5, context_5) {
+System.register("css-animator/builder/animation_builder", [], function(exports_5, context_5) {
     "use strict";
     var __moduleName = context_5 && context_5.id;
-    return {
-        setters:[],
-        execute: function() {
-        }
-    }
-});
-System.register("css-animator/contracts", [], function(exports_6, context_6) {
-    "use strict";
-    var __moduleName = context_6 && context_6.id;
-    return {
-        setters:[],
-        execute: function() {
-        }
-    }
-});
-System.register("css-animator/animation_builder", [], function(exports_7, context_7) {
-    "use strict";
-    var __moduleName = context_7 && context_7.id;
     var AnimationBuilder;
     return {
         setters:[],
@@ -219,7 +63,6 @@ System.register("css-animator/animation_builder", [], function(exports_7, contex
                     this._duration = 1000;
                     this._delay = 0;
                     this._iterationCount = 1;
-                    this._mode = 'default';
                     this._animationClasses = [];
                     this._classHistory = [];
                     this._listeners = [];
@@ -261,12 +104,14 @@ System.register("css-animator/animation_builder", [], function(exports_7, contex
                             // Apply all animation properties
                             _this.applyAllProperties(element);
                             _this.applyCssClasses(element);
+                            element.classList.add('animated-' + mode);
                             // Listen for animation end
                             var handler;
                             element.addEventListener(animationEventName, handler = function () {
                                 element.removeEventListener(animationEventName, handler);
                                 _this.removeListenersForElement(element, false);
                                 _this.resetElement(element);
+                                element.classList.remove('animated-' + mode);
                                 if (mode === 'hide') {
                                     element.setAttribute('hidden', '');
                                 }
@@ -282,6 +127,19 @@ System.register("css-animator/animation_builder", [], function(exports_7, contex
                             });
                         });
                     }); // promise
+                };
+                AnimationBuilder.prototype.addAnimationClass = function (name) {
+                    if (this._animationClasses.indexOf(name) === -1) {
+                        this._animationClasses.push(name);
+                    }
+                    return this;
+                };
+                AnimationBuilder.prototype.removeAnimationClass = function (name) {
+                    var index = this._animationClasses.indexOf(name);
+                    if (index !== -1) {
+                        this._animationClasses.splice(index, 1);
+                    }
+                    return this;
                 };
                 AnimationBuilder.prototype.setOptions = function (options) {
                     var method;
@@ -428,12 +286,6 @@ System.register("css-animator/animation_builder", [], function(exports_7, contex
                     element.style[property] = value;
                     return this;
                 };
-                AnimationBuilder.prototype.removeCssClasses = function (element) {
-                    this.applyCssClasses(element, false);
-                    element.classList.remove('animated-show');
-                    element.classList.remove('animated-hide');
-                    return this;
-                };
                 AnimationBuilder.prototype.removeListenersForElement = function (element, detach, reject) {
                     var _this = this;
                     if (detach === void 0) { detach = true; }
@@ -505,6 +357,8 @@ System.register("css-animator/animation_builder", [], function(exports_7, contex
                     }
                     else {
                         element.classList.remove('animated');
+                        element.classList.remove('animated-show');
+                        element.classList.remove('animated-hide');
                         element.classList.remove(this._type);
                     }
                     if (add !== true) {
@@ -512,6 +366,10 @@ System.register("css-animator/animation_builder", [], function(exports_7, contex
                             element.classList.remove(name);
                         });
                     }
+                    return this;
+                };
+                AnimationBuilder.prototype.removeCssClasses = function (element) {
+                    this.applyCssClasses(element, false);
                     return this;
                 };
                 AnimationBuilder.prototype.getElementPosition = function (element) {
@@ -551,28 +409,22 @@ System.register("css-animator/animation_builder", [], function(exports_7, contex
                 };
                 return AnimationBuilder;
             }());
-            exports_7("AnimationBuilder", AnimationBuilder);
+            exports_5("AnimationBuilder", AnimationBuilder);
         }
     }
 });
-System.register("css-animator/index", ["css-animator/services/animation.service", "css-animator/directives/animates.directive", "css-animator/animation_builder"], function(exports_8, context_8) {
+System.register("css-animator/builder", ["css-animator/builder/animation_builder"], function(exports_6, context_6) {
     "use strict";
-    var __moduleName = context_8 && context_8.id;
+    var __moduleName = context_6 && context_6.id;
     function exportStar_1(m) {
         var exports = {};
         for(var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
-        exports_8(exports);
+        exports_6(exports);
     }
     return {
         setters:[
-            function (animation_service_1_1) {
-                exportStar_1(animation_service_1_1);
-            },
-            function (animates_directive_1_1) {
-                exportStar_1(animates_directive_1_1);
-            },
             function (animation_builder_1_1) {
                 exportStar_1(animation_builder_1_1);
             }],
@@ -580,7 +432,163 @@ System.register("css-animator/index", ["css-animator/services/animation.service"
         }
     }
 });
-System.register("css-animator", ["css-animator/index"], function(exports_9, context_9) {
+System.register("css-animator/modules/animation.service", ['angular2/core', "css-animator/builder"], function(exports_7, context_7) {
+    "use strict";
+    var __moduleName = context_7 && context_7.id;
+    var core_1, builder_1;
+    var AnimationService;
+    return {
+        setters:[
+            function (core_1_1) {
+                core_1 = core_1_1;
+            },
+            function (builder_1_1) {
+                builder_1 = builder_1_1;
+            }],
+        execute: function() {
+            AnimationService = (function () {
+                function AnimationService() {
+                }
+                AnimationService.prototype.builder = function () {
+                    return new builder_1.AnimationBuilder();
+                };
+                AnimationService = __decorate([
+                    core_1.Injectable(), 
+                    __metadata('design:paramtypes', [])
+                ], AnimationService);
+                return AnimationService;
+            }());
+            exports_7("AnimationService", AnimationService);
+        }
+    }
+});
+System.register("css-animator/modules/animates.directive", ['angular2/core', "css-animator/index"], function(exports_8, context_8) {
+    "use strict";
+    var __moduleName = context_8 && context_8.id;
+    var core_2, index_1;
+    var AnimatesDirective;
+    return {
+        setters:[
+            function (core_2_1) {
+                core_2 = core_2_1;
+            },
+            function (index_1_1) {
+                index_1 = index_1_1;
+            }],
+        execute: function() {
+            AnimatesDirective = (function () {
+                function AnimatesDirective(_elementRef, _animationService) {
+                    this._elementRef = _elementRef;
+                    this._animationService = _animationService;
+                    this._animationBuilder = this._animationService.builder();
+                }
+                Object.defineProperty(AnimatesDirective.prototype, "animationBuilder", {
+                    get: function () {
+                        return this._animationBuilder;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimatesDirective.prototype.ngOnInit = function () {
+                    if (!this._initOptions) {
+                        return;
+                    }
+                    this._animationBuilder
+                        .setOptions(this._initOptions)
+                        .show(this._elementRef.nativeElement)
+                        .then(function (element) { return element; }, function (error) {
+                        // Animation interrupted
+                    });
+                };
+                AnimatesDirective.prototype.start = function (options) {
+                    this.setOptions(options);
+                    return this._animationBuilder
+                        .animate(this._elementRef.nativeElement)
+                        .then(function (element) { return element; }, function (error) {
+                        // Animation interrupted
+                    });
+                };
+                AnimatesDirective.prototype.hide = function (options) {
+                    this.setOptions(options);
+                    return this._animationBuilder
+                        .setOptions(options)
+                        .hide(this._elementRef.nativeElement)
+                        .then(function (element) { return element; }, function (error) {
+                        // Animation interrupted
+                    });
+                };
+                AnimatesDirective.prototype.show = function (options) {
+                    this.setOptions(options);
+                    return this._animationBuilder
+                        .show(this._elementRef.nativeElement)
+                        .then(function (element) { return element; }, function (error) {
+                        // Animation interrupted
+                    });
+                };
+                AnimatesDirective.prototype.animate = function () {
+                    if (!this._defaultOptions) {
+                        return;
+                    }
+                    return this._animationBuilder
+                        .setOptions(this._defaultOptions)
+                        .animate(this._elementRef.nativeElement)
+                        .then(function (element) { return element; }, function (error) {
+                        // Animation interrupted
+                    });
+                };
+                AnimatesDirective.prototype.pause = function () {
+                    this._animationBuilder
+                        .setPlayState('paused')
+                        .applyPlayState(this._elementRef.nativeElement);
+                };
+                AnimatesDirective.prototype.resume = function () {
+                    this._animationBuilder
+                        .setPlayState('running')
+                        .applyPlayState(this._elementRef.nativeElement);
+                };
+                AnimatesDirective.prototype.toggle = function () {
+                    this._animationBuilder
+                        .setPlayState(this._animationBuilder.playState === 'running' ? 'paused' : 'running')
+                        .applyPlayState(this._elementRef.nativeElement);
+                };
+                AnimatesDirective.prototype.stop = function () {
+                    this._animationBuilder
+                        .stop(this._elementRef.nativeElement)
+                        .then(function (element) { return element; }, function (error) {
+                        // Animation interrupted
+                    });
+                };
+                AnimatesDirective.prototype.setOptions = function (options) {
+                    if (options) {
+                        this._animationBuilder.setOptions(options);
+                        return;
+                    }
+                    this._animationBuilder.setOptions(this._defaultOptions);
+                };
+                __decorate([
+                    core_2.Input('animates'), 
+                    __metadata('design:type', Object)
+                ], AnimatesDirective.prototype, "_defaultOptions", void 0);
+                __decorate([
+                    core_2.Input('animatesOnInit'), 
+                    __metadata('design:type', Object)
+                ], AnimatesDirective.prototype, "_initOptions", void 0);
+                AnimatesDirective = __decorate([
+                    core_2.Directive({
+                        selector: '[animates]',
+                        exportAs: 'animates'
+                    }),
+                    __param(0, core_2.Inject(core_2.ElementRef)),
+                    __param(1, core_2.Inject(index_1.AnimationService)), 
+                    __metadata('design:paramtypes', [core_2.ElementRef, index_1.AnimationService])
+                ], AnimatesDirective);
+                return AnimatesDirective;
+            }());
+            exports_8("AnimatesDirective", AnimatesDirective);
+        }
+    }
+});
+System.register("css-animator/modules", ["css-animator/modules/animation.service", "css-animator/modules/animates.directive"], function(exports_9, context_9) {
     "use strict";
     var __moduleName = context_9 && context_9.id;
     function exportStar_2(m) {
@@ -592,14 +600,17 @@ System.register("css-animator", ["css-animator/index"], function(exports_9, cont
     }
     return {
         setters:[
-            function (index_3_1) {
-                exportStar_2(index_3_1);
+            function (animation_service_1_1) {
+                exportStar_2(animation_service_1_1);
+            },
+            function (animates_directive_1_1) {
+                exportStar_2(animates_directive_1_1);
             }],
         execute: function() {
         }
     }
 });
-System.register("index", ["css-animator/index"], function(exports_10, context_10) {
+System.register("css-animator/index", ["css-animator/builder", "css-animator/modules"], function(exports_10, context_10) {
     "use strict";
     var __moduleName = context_10 && context_10.id;
     function exportStar_3(m) {
@@ -611,14 +622,17 @@ System.register("index", ["css-animator/index"], function(exports_10, context_10
     }
     return {
         setters:[
-            function (index_4_1) {
-                exportStar_3(index_4_1);
+            function (builder_2_1) {
+                exportStar_3(builder_2_1);
+            },
+            function (modules_1_1) {
+                exportStar_3(modules_1_1);
             }],
         execute: function() {
         }
     }
 });
-System.register("css-animator/builder", ["css-animator/animation_builder"], function(exports_11, context_11) {
+System.register("css-animator", ["css-animator/index"], function(exports_11, context_11) {
     "use strict";
     var __moduleName = context_11 && context_11.id;
     function exportStar_4(m) {
@@ -630,14 +644,14 @@ System.register("css-animator/builder", ["css-animator/animation_builder"], func
     }
     return {
         setters:[
-            function (animation_builder_2_1) {
-                exportStar_4(animation_builder_2_1);
+            function (index_2_1) {
+                exportStar_4(index_2_1);
             }],
         execute: function() {
         }
     }
 });
-System.register("css-animator/modules", ["css-animator/services/animation.service", "css-animator/directives/animates.directive"], function(exports_12, context_12) {
+System.register("index", ["css-animator/index"], function(exports_12, context_12) {
     "use strict";
     var __moduleName = context_12 && context_12.id;
     function exportStar_5(m) {
@@ -649,11 +663,8 @@ System.register("css-animator/modules", ["css-animator/services/animation.servic
     }
     return {
         setters:[
-            function (animation_service_2_1) {
-                exportStar_5(animation_service_2_1);
-            },
-            function (animates_directive_2_1) {
-                exportStar_5(animates_directive_2_1);
+            function (index_3_1) {
+                exportStar_5(index_3_1);
             }],
         execute: function() {
         }

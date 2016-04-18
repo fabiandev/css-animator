@@ -9,7 +9,6 @@ var AnimationBuilder = (function () {
         this._duration = 1000;
         this._delay = 0;
         this._iterationCount = 1;
-        this._mode = 'default';
         this._animationClasses = [];
         this._classHistory = [];
         this._listeners = [];
@@ -51,12 +50,14 @@ var AnimationBuilder = (function () {
                 // Apply all animation properties
                 _this.applyAllProperties(element);
                 _this.applyCssClasses(element);
+                element.classList.add('animated-' + mode);
                 // Listen for animation end
                 var handler;
                 element.addEventListener(animationEventName, handler = function () {
                     element.removeEventListener(animationEventName, handler);
                     _this.removeListenersForElement(element, false);
                     _this.resetElement(element);
+                    element.classList.remove('animated-' + mode);
                     if (mode === 'hide') {
                         element.setAttribute('hidden', '');
                     }
@@ -72,6 +73,19 @@ var AnimationBuilder = (function () {
                 });
             });
         }); // promise
+    };
+    AnimationBuilder.prototype.addAnimationClass = function (name) {
+        if (this._animationClasses.indexOf(name) === -1) {
+            this._animationClasses.push(name);
+        }
+        return this;
+    };
+    AnimationBuilder.prototype.removeAnimationClass = function (name) {
+        var index = this._animationClasses.indexOf(name);
+        if (index !== -1) {
+            this._animationClasses.splice(index, 1);
+        }
+        return this;
     };
     AnimationBuilder.prototype.setOptions = function (options) {
         var method;
@@ -218,12 +232,6 @@ var AnimationBuilder = (function () {
         element.style[property] = value;
         return this;
     };
-    AnimationBuilder.prototype.removeCssClasses = function (element) {
-        this.applyCssClasses(element, false);
-        element.classList.remove('animated-show');
-        element.classList.remove('animated-hide');
-        return this;
-    };
     AnimationBuilder.prototype.removeListenersForElement = function (element, detach, reject) {
         var _this = this;
         if (detach === void 0) { detach = true; }
@@ -295,6 +303,8 @@ var AnimationBuilder = (function () {
         }
         else {
             element.classList.remove('animated');
+            element.classList.remove('animated-show');
+            element.classList.remove('animated-hide');
             element.classList.remove(this._type);
         }
         if (add !== true) {
@@ -302,6 +312,10 @@ var AnimationBuilder = (function () {
                 element.classList.remove(name);
             });
         }
+        return this;
+    };
+    AnimationBuilder.prototype.removeCssClasses = function (element) {
+        this.applyCssClasses(element, false);
         return this;
     };
     AnimationBuilder.prototype.getElementPosition = function (element) {

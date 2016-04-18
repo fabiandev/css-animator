@@ -1,4 +1,4 @@
-import { AnimationOptions, ElementProps, ListenerRef } from './contracts';
+import { AnimationOptions, ElementProps, ListenerRef } from '../contracts';
 
 export class AnimationBuilder {
   [key: string]: any;
@@ -11,7 +11,6 @@ export class AnimationBuilder {
   private _duration: string | number = 1000;
   private _delay: string | number = 0;
   private _iterationCount: string | number = 1;
-  private _mode = 'default';
   private _animationClasses: string[] = [];
   private _classHistory: string[] = [];
   private _listeners: ListenerRef[] = [];
@@ -61,6 +60,8 @@ export class AnimationBuilder {
         this.applyAllProperties(element);
         this.applyCssClasses(element);
 
+        element.classList.add('animated-' + mode);
+
         // Listen for animation end
         let handler: () => any;
         element.addEventListener(animationEventName, handler = () => {
@@ -68,6 +69,8 @@ export class AnimationBuilder {
           this.removeListenersForElement(element, false);
 
           this.resetElement(element);
+
+          element.classList.remove('animated-' + mode);
 
           if (mode === 'hide') {
             element.setAttribute('hidden', '');
@@ -88,6 +91,24 @@ export class AnimationBuilder {
 
       });
     }); // promise
+  }
+
+  public addAnimationClass(name: string): AnimationBuilder {
+    if (this._animationClasses.indexOf(name) === -1) {
+      this._animationClasses.push(name);
+    }
+
+    return this;
+  }
+
+  public removeAnimationClass(name: string): AnimationBuilder {
+    let index = this._animationClasses.indexOf(name);
+
+    if (index !== -1) {
+      this._animationClasses.splice(index, 1);
+    }
+
+    return this;
   }
 
   public setOptions(options: AnimationOptions): AnimationBuilder {
@@ -273,14 +294,6 @@ export class AnimationBuilder {
     return this;
   }
 
-  private removeCssClasses(element: HTMLElement): AnimationBuilder {
-    this.applyCssClasses(element, false);
-    element.classList.remove('animated-show');
-    element.classList.remove('animated-hide');
-
-    return this;
-  }
-
   private removeListenersForElement(element: HTMLElement, detach = true, reject = false) {
     let toRemove: number[] = [];
     for (let i = 0; i < this._listeners.length; i++) {
@@ -362,6 +375,8 @@ export class AnimationBuilder {
       element.classList.add(this._type);
     } else {
       element.classList.remove('animated');
+      element.classList.remove('animated-show');
+      element.classList.remove('animated-hide');
       element.classList.remove(this._type);
     }
 
@@ -370,6 +385,12 @@ export class AnimationBuilder {
         element.classList.remove(name);
       });
     }
+
+    return this;
+  }
+
+  private removeCssClasses(element: HTMLElement): AnimationBuilder {
+    this.applyCssClasses(element, false);
 
     return this;
   }

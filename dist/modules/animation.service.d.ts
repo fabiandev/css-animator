@@ -1,4 +1,4 @@
-import { AnimationBuilder } from '../index';
+import { AnimationBuilder } from '../builder';
 export declare class AnimationService {
     builder(): AnimationBuilder;
 }

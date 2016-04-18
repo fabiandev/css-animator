@@ -1,1 +1,1 @@
-export * from './animation_builder';
+export * from './builder/animation_builder';

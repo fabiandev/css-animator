@@ -29,8 +29,7 @@ animator.setType('shake').animate(element);
 
 ```ts
 import { Component, OnInit } from 'angular2/core';
-import { AnimationBuilder } from 'css-animator/builder';
-import { AnimationService } from 'css-animator/modules';
+import { AnimationService, AnimationBuilder } from 'css-animator';
 
 @Component({ ... })
 export class AppComponent implements OnInit {
@@ -54,7 +53,7 @@ export class AppComponent implements OnInit {
 
 ```ts
 import { Component } from 'angular2/core';
-import { AnimatesDirective } from 'css-animator/modules';
+import { AnimatesDirective } from 'css-animator';
 
 @Component({
   ...
