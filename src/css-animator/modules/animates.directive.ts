@@ -1,4 +1,4 @@
-import { Directive, Inject, ElementRef, Input, OnInit } from 'angular2/core';
+import { Directive, Inject, ElementRef, Input, OnInit } from '@angular/core';
 import { AnimationService, AnimationBuilder, AnimationOptions } from '../index';
 
 @Directive({

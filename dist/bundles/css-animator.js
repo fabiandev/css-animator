@@ -432,7 +432,7 @@ System.register("css-animator/builder", ["css-animator/builder/animation_builder
         }
     }
 });
-System.register("css-animator/modules/animation.service", ['angular2/core', "css-animator/builder"], function(exports_7, context_7) {
+System.register("css-animator/modules/animation.service", ['@angular/core', "css-animator/builder"], function(exports_7, context_7) {
     "use strict";
     var __moduleName = context_7 && context_7.id;
     var core_1, builder_1;
@@ -462,7 +462,7 @@ System.register("css-animator/modules/animation.service", ['angular2/core', "css
         }
     }
 });
-System.register("css-animator/modules/animates.directive", ['angular2/core', "css-animator/index"], function(exports_8, context_8) {
+System.register("css-animator/modules/animates.directive", ['@angular/core', "css-animator/index"], function(exports_8, context_8) {
     "use strict";
     var __moduleName = context_8 && context_8.id;
     var core_2, index_1;
