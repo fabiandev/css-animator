@@ -12,13 +12,26 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var core_1 = require('@angular/core');
-var index_1 = require('../index');
+var animation_service_1 = require('./animation.service');
 var AnimatesDirective = (function () {
-    function AnimatesDirective(_elementRef, _animationService) {
+    function AnimatesDirective(_elementRef, animationService) {
         this._elementRef = _elementRef;
-        this._animationService = _animationService;
-        this._animationBuilder = this._animationService.builder();
+        this._animationBuilder = animationService.builder();
     }
+    Object.defineProperty(AnimatesDirective.prototype, "animates", {
+        set: function (options) {
+            this._defaultOptions = options;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AnimatesDirective.prototype, "animatesOnInit", {
+        set: function (options) {
+            this._initOptions = options;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(AnimatesDirective.prototype, "animationBuilder", {
         get: function () {
             return this._animationBuilder;
@@ -102,22 +115,17 @@ var AnimatesDirective = (function () {
         }
         this._animationBuilder.setOptions(this._defaultOptions);
     };
-    __decorate([
-        core_1.Input('animates'), 
-        __metadata('design:type', Object)
-    ], AnimatesDirective.prototype, "_defaultOptions", void 0);
-    __decorate([
-        core_1.Input('animatesOnInit'), 
-        __metadata('design:type', Object)
-    ], AnimatesDirective.prototype, "_initOptions", void 0);
     AnimatesDirective = __decorate([
         core_1.Directive({
             selector: '[animates]',
-            exportAs: 'animates'
+            inputs: [
+                'animates',
+                'animatesOnInit'
+            ]
         }),
         __param(0, core_1.Inject(core_1.ElementRef)),
-        __param(1, core_1.Inject(index_1.AnimationService)), 
-        __metadata('design:paramtypes', [core_1.ElementRef, index_1.AnimationService])
+        __param(1, core_1.Inject(animation_service_1.AnimationService)), 
+        __metadata('design:paramtypes', [core_1.ElementRef, animation_service_1.AnimationService])
     ], AnimatesDirective);
     return AnimatesDirective;
 }());

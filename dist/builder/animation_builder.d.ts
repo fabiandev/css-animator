@@ -12,6 +12,7 @@ export declare class AnimationBuilder {
     private _animationClasses;
     private _classHistory;
     private _listeners;
+    private _timeouts;
     show(element: HTMLElement): Promise<HTMLElement>;
     hide(element: HTMLElement): Promise<HTMLElement>;
     stop(element: HTMLElement, reset?: boolean, detach?: boolean): Promise<HTMLElement>;
@@ -44,8 +45,10 @@ export declare class AnimationBuilder {
     iterationCount: string | number;
     private applyStyle(element, property, value, shim?);
     private removeListenersForElement(element, detach?, reject?);
+    private removeTimeoutsForElement(element, detach?, reject?);
     private resetElement(element);
-    private whichAnimationEvent(element);
+    private animationEndEvent(element);
+    private animationStartEvent(element);
     private applyCssClasses(element, add?);
     private removeCssClasses(element);
     private getElementPosition(element);

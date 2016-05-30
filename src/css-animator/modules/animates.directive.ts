@@ -1,25 +1,35 @@
-import { Directive, Inject, ElementRef, Input, OnInit } from '@angular/core';
-import { AnimationService, AnimationBuilder, AnimationOptions } from '../index';
+import { Directive, Inject, ElementRef, OnInit } from '@angular/core';
+import { AnimationService } from './animation.service';
+import { AnimationBuilder } from '../builder';
+import { AnimationOptions } from '../contracts';
 
 @Directive({
   selector: '[animates]',
-  exportAs: 'animates'
+  inputs: [
+    'animates',
+    'animatesOnInit'
+  ]
 })
 export class AnimatesDirective implements OnInit {
-  @Input('animates') private _defaultOptions: AnimationOptions;
-  @Input('animatesOnInit') private _initOptions: AnimationOptions;
+  private _defaultOptions: AnimationOptions;
+  private _initOptions: AnimationOptions;
 
   private _animationBuilder: AnimationBuilder;
+
+  set animates(options: AnimationOptions) {
+    this._defaultOptions = options;
+  }
+
+  set animatesOnInit(options: AnimationOptions) {
+    this._initOptions = options;
+  }
 
   get animationBuilder(): AnimationBuilder {
     return this._animationBuilder;
   }
 
-  constructor(
-    @Inject(ElementRef) private _elementRef: ElementRef,
-    @Inject(AnimationService) private _animationService: AnimationService
-    ) {
-    this._animationBuilder = this._animationService.builder();
+  constructor(@Inject(ElementRef) private _elementRef: ElementRef, @Inject(AnimationService) animationService: AnimationService) {
+    this._animationBuilder = animationService.builder();
   }
 
   public ngOnInit() {

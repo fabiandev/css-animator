@@ -4,5 +4,5 @@ export interface ListenerRef {
   element: HTMLElement;
   eventName: string;
   handler: () => any;
-  reject: Function;
+  reject?: Function;
 }

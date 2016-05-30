@@ -37,7 +37,7 @@ System.register("css-animator/contracts/listener_ref", [], function(exports_3, c
         }
     }
 });
-System.register("css-animator/contracts", [], function(exports_4, context_4) {
+System.register("css-animator/contracts/timeout_ref", [], function(exports_4, context_4) {
     "use strict";
     var __moduleName = context_4 && context_4.id;
     return {
@@ -46,9 +46,18 @@ System.register("css-animator/contracts", [], function(exports_4, context_4) {
         }
     }
 });
-System.register("css-animator/builder/animation_builder", [], function(exports_5, context_5) {
+System.register("css-animator/contracts", [], function(exports_5, context_5) {
     "use strict";
     var __moduleName = context_5 && context_5.id;
+    return {
+        setters:[],
+        execute: function() {
+        }
+    }
+});
+System.register("css-animator/builder/animation_builder", [], function(exports_6, context_6) {
+    "use strict";
+    var __moduleName = context_6 && context_6.id;
     var AnimationBuilder;
     return {
         setters:[],
@@ -66,6 +75,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                     this._animationClasses = [];
                     this._classHistory = [];
                     this._listeners = [];
+                    this._timeouts = [];
                 }
                 AnimationBuilder.prototype.show = function (element) {
                     return this.animate(element, 'show');
@@ -88,27 +98,39 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                     var _this = this;
                     if (mode === void 0) { mode = 'default'; }
                     return new Promise(function (resolve, reject) {
-                        // Remove listeners if an animation is in progress on this element
-                        // and reject promise if an animation was interrupted
-                        _this.removeListenersForElement(element, true, true);
-                        // Reset styles, remove animation classes (if currently being animated),...
-                        _this.resetElement(element);
-                        // Required to get position of element
-                        element.style.display = 'initial';
-                        var initialProps = _this.getElementInitialProperties(element);
-                        // Pick up changes (element's position)
-                        setTimeout(function () {
-                            _this.pinElement(element, initialProps);
+                        _this.removeTimeoutsForElement(element, true, true);
+                        var delayTimeout;
+                        delayTimeout = setTimeout(function () {
+                            // Remove listeners if an animation is in progress on this element
+                            // and reject promise if an animation was interrupted
+                            _this.removeListenersForElement(element, true, true);
+                            // Reset styles, remove animation classes (if currently being animated),...
+                            _this.resetElement(element);
                             // Event to listen for (animation end)
-                            var animationEventName = _this.whichAnimationEvent(element);
+                            var animationEndEvent = _this.animationEndEvent(element);
+                            var animationStartEvent = _this.animationStartEvent(element);
+                            element.removeAttribute('hidden');
+                            // Required to get position of element
+                            element.style.display = 'initial';
+                            var initialProps = _this.getElementInitialProperties(element);
+                            _this.pinElement(element, initialProps);
                             // Apply all animation properties
                             _this.applyAllProperties(element);
                             _this.applyCssClasses(element);
                             element.classList.add('animated-' + mode);
+                            // Listen for animation start
+                            var startHandler;
+                            element.addEventListener(animationStartEvent, startHandler = function () {
+                                console.log('animation start');
+                                element.removeEventListener(animationStartEvent, startHandler);
+                                // this.resetElement(element);
+                                return startHandler;
+                            }); // listener
                             // Listen for animation end
-                            var handler;
-                            element.addEventListener(animationEventName, handler = function () {
-                                element.removeEventListener(animationEventName, handler);
+                            var endHandler;
+                            element.addEventListener(animationEndEvent, endHandler = function () {
+                                console.log('animation end');
+                                element.removeEventListener(animationEndEvent, endHandler);
                                 _this.removeListenersForElement(element, false);
                                 _this.resetElement(element);
                                 element.classList.remove('animated-' + mode);
@@ -116,15 +138,25 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                                     element.setAttribute('hidden', '');
                                 }
                                 resolve(element);
-                                return handler;
+                                return endHandler;
                             }); // listener
                             // Keep a reference to the listener
                             _this._listeners.push({
                                 element: element,
-                                eventName: animationEventName,
-                                handler: handler,
+                                eventName: animationStartEvent,
+                                handler: startHandler
+                            });
+                            _this._listeners.push({
+                                element: element,
+                                eventName: animationEndEvent,
+                                handler: endHandler,
                                 reject: reject,
                             });
+                        }, _this._delay);
+                        _this._timeouts.push({
+                            element: element,
+                            timeout: delayTimeout,
+                            reject: reject,
                         });
                     }); // promise
                 };
@@ -194,7 +226,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                     this.applyPlayState(element);
                     this.applyDirection(element);
                     this.applyDuration(element);
-                    this.applyDelay(element);
+                    // this.applyDelay(element);
                     this.applyIterationCount(element);
                     return this;
                 };
@@ -299,7 +331,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                         if (detach) {
                             data.element.removeEventListener(data.eventName, data.handler);
                         }
-                        if (reject) {
+                        if (reject && data.reject) {
                             data.reject('Animation aborted.');
                         }
                         toRemove.push(i);
@@ -308,8 +340,29 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                         _this._listeners.splice(value, 1);
                     });
                 };
+                AnimationBuilder.prototype.removeTimeoutsForElement = function (element, detach, reject) {
+                    var _this = this;
+                    if (detach === void 0) { detach = true; }
+                    if (reject === void 0) { reject = false; }
+                    var toRemove = [];
+                    for (var i = 0; i < this._timeouts.length; i++) {
+                        if (this._timeouts[i].element !== element) {
+                            continue;
+                        }
+                        var data = this._timeouts[i];
+                        if (detach) {
+                            clearTimeout(data.timeout);
+                        }
+                        if (reject && data.reject) {
+                            data.reject('Animation aborted.');
+                        }
+                        toRemove.push(i);
+                    }
+                    toRemove.forEach(function (value) {
+                        _this._timeouts.splice(value, 1);
+                    });
+                };
                 AnimationBuilder.prototype.resetElement = function (element) {
-                    element.removeAttribute('hidden');
                     this.removeCssClasses(element);
                     var initialProps = JSON.parse(element.getAttribute('data-reset-styles'));
                     // Reset or remove inline styles (default could be passed as third parameter)
@@ -320,13 +373,13 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                     element.style.top = this.getValueOrDefault(initialProps, 'top');
                     element.style.width = this.getValueOrDefault(initialProps, 'width');
                     element.style.position = this.getValueOrDefault(initialProps, 'position');
-                    element.style.display = this.getValueOrDefault(initialProps, 'display');
+                    element.style.display = this.getValueOrDefault(initialProps, 'display', null);
                     element.removeAttribute('data-reset-styles');
                     return this;
                 };
                 // https://jonsuh.com/blog/detect-the-end-of-css-animations-and-transitions-with-javascript/
-                AnimationBuilder.prototype.whichAnimationEvent = function (element) {
-                    var el = document.createElement('animationDetectionElement');
+                AnimationBuilder.prototype.animationEndEvent = function (element) {
+                    var el = document.createElement("endAnimationElement");
                     var animations;
                     animations = {
                         'animation': 'animationend',
@@ -335,7 +388,23 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                         'WebkitAnimation': 'webkitAnimationEnd'
                     };
                     for (var animation in animations) {
-                        if (element.style[animation] !== undefined) {
+                        if (el.style[animation] !== undefined) {
+                            return animations[animation];
+                        }
+                    }
+                    return null;
+                };
+                AnimationBuilder.prototype.animationStartEvent = function (element) {
+                    var el = document.createElement("startAnimationElement");
+                    var animations;
+                    animations = {
+                        'animation': 'animationstart',
+                        'OAnimation': 'oAnimationStart',
+                        'MozAnimation': 'animationstart',
+                        'WebkitAnimation': 'webkitAnimationStart'
+                    };
+                    for (var animation in animations) {
+                        if (el.style[animation] !== undefined) {
                             return animations[animation];
                         }
                     }
@@ -409,19 +478,19 @@ System.register("css-animator/builder/animation_builder", [], function(exports_5
                 };
                 return AnimationBuilder;
             }());
-            exports_5("AnimationBuilder", AnimationBuilder);
+            exports_6("AnimationBuilder", AnimationBuilder);
         }
     }
 });
-System.register("css-animator/builder", ["css-animator/builder/animation_builder"], function(exports_6, context_6) {
+System.register("css-animator/builder", ["css-animator/builder/animation_builder"], function(exports_7, context_7) {
     "use strict";
-    var __moduleName = context_6 && context_6.id;
+    var __moduleName = context_7 && context_7.id;
     function exportStar_1(m) {
         var exports = {};
         for(var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
-        exports_6(exports);
+        exports_7(exports);
     }
     return {
         setters:[
@@ -432,9 +501,9 @@ System.register("css-animator/builder", ["css-animator/builder/animation_builder
         }
     }
 });
-System.register("css-animator/modules/animation.service", ['@angular/core', "css-animator/builder"], function(exports_7, context_7) {
+System.register("css-animator/modules/animation.service", ['@angular/core', "css-animator/builder"], function(exports_8, context_8) {
     "use strict";
-    var __moduleName = context_7 && context_7.id;
+    var __moduleName = context_8 && context_8.id;
     var core_1, builder_1;
     var AnimationService;
     return {
@@ -458,30 +527,43 @@ System.register("css-animator/modules/animation.service", ['@angular/core', "css
                 ], AnimationService);
                 return AnimationService;
             }());
-            exports_7("AnimationService", AnimationService);
+            exports_8("AnimationService", AnimationService);
         }
     }
 });
-System.register("css-animator/modules/animates.directive", ['@angular/core', "css-animator/index"], function(exports_8, context_8) {
+System.register("css-animator/modules/animates.directive", ['@angular/core', "css-animator/modules/animation.service"], function(exports_9, context_9) {
     "use strict";
-    var __moduleName = context_8 && context_8.id;
-    var core_2, index_1;
+    var __moduleName = context_9 && context_9.id;
+    var core_2, animation_service_1;
     var AnimatesDirective;
     return {
         setters:[
             function (core_2_1) {
                 core_2 = core_2_1;
             },
-            function (index_1_1) {
-                index_1 = index_1_1;
+            function (animation_service_1_1) {
+                animation_service_1 = animation_service_1_1;
             }],
         execute: function() {
             AnimatesDirective = (function () {
-                function AnimatesDirective(_elementRef, _animationService) {
+                function AnimatesDirective(_elementRef, animationService) {
                     this._elementRef = _elementRef;
-                    this._animationService = _animationService;
-                    this._animationBuilder = this._animationService.builder();
+                    this._animationBuilder = animationService.builder();
                 }
+                Object.defineProperty(AnimatesDirective.prototype, "animates", {
+                    set: function (options) {
+                        this._defaultOptions = options;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(AnimatesDirective.prototype, "animatesOnInit", {
+                    set: function (options) {
+                        this._initOptions = options;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 Object.defineProperty(AnimatesDirective.prototype, "animationBuilder", {
                     get: function () {
                         return this._animationBuilder;
@@ -565,43 +647,38 @@ System.register("css-animator/modules/animates.directive", ['@angular/core', "cs
                     }
                     this._animationBuilder.setOptions(this._defaultOptions);
                 };
-                __decorate([
-                    core_2.Input('animates'), 
-                    __metadata('design:type', Object)
-                ], AnimatesDirective.prototype, "_defaultOptions", void 0);
-                __decorate([
-                    core_2.Input('animatesOnInit'), 
-                    __metadata('design:type', Object)
-                ], AnimatesDirective.prototype, "_initOptions", void 0);
                 AnimatesDirective = __decorate([
                     core_2.Directive({
                         selector: '[animates]',
-                        exportAs: 'animates'
+                        inputs: [
+                            'animates',
+                            'animatesOnInit'
+                        ]
                     }),
                     __param(0, core_2.Inject(core_2.ElementRef)),
-                    __param(1, core_2.Inject(index_1.AnimationService)), 
-                    __metadata('design:paramtypes', [core_2.ElementRef, index_1.AnimationService])
+                    __param(1, core_2.Inject(animation_service_1.AnimationService)), 
+                    __metadata('design:paramtypes', [core_2.ElementRef, animation_service_1.AnimationService])
                 ], AnimatesDirective);
                 return AnimatesDirective;
             }());
-            exports_8("AnimatesDirective", AnimatesDirective);
+            exports_9("AnimatesDirective", AnimatesDirective);
         }
     }
 });
-System.register("css-animator/modules", ["css-animator/modules/animation.service", "css-animator/modules/animates.directive"], function(exports_9, context_9) {
+System.register("css-animator/modules", ["css-animator/modules/animation.service", "css-animator/modules/animates.directive"], function(exports_10, context_10) {
     "use strict";
-    var __moduleName = context_9 && context_9.id;
+    var __moduleName = context_10 && context_10.id;
     function exportStar_2(m) {
         var exports = {};
         for(var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
-        exports_9(exports);
+        exports_10(exports);
     }
     return {
         setters:[
-            function (animation_service_1_1) {
-                exportStar_2(animation_service_1_1);
+            function (animation_service_2_1) {
+                exportStar_2(animation_service_2_1);
             },
             function (animates_directive_1_1) {
                 exportStar_2(animates_directive_1_1);
@@ -610,15 +687,15 @@ System.register("css-animator/modules", ["css-animator/modules/animation.service
         }
     }
 });
-System.register("css-animator/index", ["css-animator/builder", "css-animator/modules"], function(exports_10, context_10) {
+System.register("css-animator/index", ["css-animator/builder", "css-animator/modules"], function(exports_11, context_11) {
     "use strict";
-    var __moduleName = context_10 && context_10.id;
+    var __moduleName = context_11 && context_11.id;
     function exportStar_3(m) {
         var exports = {};
         for(var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
-        exports_10(exports);
+        exports_11(exports);
     }
     return {
         setters:[
@@ -632,29 +709,10 @@ System.register("css-animator/index", ["css-animator/builder", "css-animator/mod
         }
     }
 });
-System.register("css-animator", ["css-animator/index"], function(exports_11, context_11) {
-    "use strict";
-    var __moduleName = context_11 && context_11.id;
-    function exportStar_4(m) {
-        var exports = {};
-        for(var n in m) {
-            if (n !== "default") exports[n] = m[n];
-        }
-        exports_11(exports);
-    }
-    return {
-        setters:[
-            function (index_2_1) {
-                exportStar_4(index_2_1);
-            }],
-        execute: function() {
-        }
-    }
-});
-System.register("index", ["css-animator/index"], function(exports_12, context_12) {
+System.register("css-animator", ["css-animator/index"], function(exports_12, context_12) {
     "use strict";
     var __moduleName = context_12 && context_12.id;
-    function exportStar_5(m) {
+    function exportStar_4(m) {
         var exports = {};
         for(var n in m) {
             if (n !== "default") exports[n] = m[n];
@@ -663,8 +721,27 @@ System.register("index", ["css-animator/index"], function(exports_12, context_12
     }
     return {
         setters:[
-            function (index_3_1) {
-                exportStar_5(index_3_1);
+            function (index_1_1) {
+                exportStar_4(index_1_1);
+            }],
+        execute: function() {
+        }
+    }
+});
+System.register("index", ["css-animator/index"], function(exports_13, context_13) {
+    "use strict";
+    var __moduleName = context_13 && context_13.id;
+    function exportStar_5(m) {
+        var exports = {};
+        for(var n in m) {
+            if (n !== "default") exports[n] = m[n];
+        }
+        exports_13(exports);
+    }
+    return {
+        setters:[
+            function (index_2_1) {
+                exportStar_5(index_2_1);
             }],
         execute: function() {
         }

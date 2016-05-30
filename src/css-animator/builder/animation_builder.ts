@@ -1,4 +1,4 @@
-import { AnimationOptions, ElementProps, ListenerRef } from '../contracts';
+import { AnimationOptions, ElementProps, ListenerRef, TimeoutRef } from '../contracts';
 
 export class AnimationBuilder {
   [key: string]: any;
@@ -14,6 +14,7 @@ export class AnimationBuilder {
   private _animationClasses: string[] = [];
   private _classHistory: string[] = [];
   private _listeners: ListenerRef[] = [];
+  private _timeouts: TimeoutRef[] = [];
 
   public show(element: HTMLElement): Promise<HTMLElement> {
     return this.animate(element, 'show');
@@ -38,23 +39,28 @@ export class AnimationBuilder {
   public animate(element: HTMLElement, mode = 'default'): Promise<HTMLElement> {
     return new Promise<HTMLElement>((resolve, reject) => {
 
-      // Remove listeners if an animation is in progress on this element
-      // and reject promise if an animation was interrupted
-      this.removeListenersForElement(element, true, true);
+      this.removeTimeoutsForElement(element, true, true);
 
-      // Reset styles, remove animation classes (if currently being animated),...
-      this.resetElement(element);
+      let delayTimeout: number;
+      delayTimeout = setTimeout(() => {
 
-      // Required to get position of element
-      element.style.display = 'initial';
-      let initialProps = this.getElementInitialProperties(element);
+        // Remove listeners if an animation is in progress on this element
+        // and reject promise if an animation was interrupted
+        this.removeListenersForElement(element, true, true);
 
-      // Pick up changes (element's position)
-      setTimeout(() => {
-        this.pinElement(element, initialProps);
+        // Reset styles, remove animation classes (if currently being animated),...
+        this.resetElement(element);
 
         // Event to listen for (animation end)
-        let animationEventName = this.whichAnimationEvent(element);
+        let animationEndEvent = this.animationEndEvent(element);
+        let animationStartEvent = this.animationStartEvent(element);
+
+        element.removeAttribute('hidden');
+        // Required to get position of element
+        element.style.display = 'initial';
+        let initialProps = this.getElementInitialProperties(element);
+
+        this.pinElement(element, initialProps);
 
         // Apply all animation properties
         this.applyAllProperties(element);
@@ -62,10 +68,20 @@ export class AnimationBuilder {
 
         element.classList.add('animated-' + mode);
 
+        // Listen for animation start
+        let startHandler: () => any;
+        element.addEventListener(animationStartEvent, startHandler = () => {
+          element.removeEventListener(animationStartEvent, startHandler);
+
+          // this.resetElement(element);
+
+          return startHandler;
+        }); // listener
+
         // Listen for animation end
-        let handler: () => any;
-        element.addEventListener(animationEventName, handler = () => {
-          element.removeEventListener(animationEventName, handler);
+        let endHandler: () => any;
+        element.addEventListener(animationEndEvent, endHandler = () => {
+          element.removeEventListener(animationEndEvent, endHandler);
           this.removeListenersForElement(element, false);
 
           this.resetElement(element);
@@ -78,18 +94,31 @@ export class AnimationBuilder {
 
           resolve(element);
 
-          return handler;
+          return endHandler;
         }); // listener
 
         // Keep a reference to the listener
         this._listeners.push({
           element: element,
-          eventName: animationEventName,
-          handler: handler,
+          eventName: animationStartEvent,
+          handler: startHandler
+        });
+
+        this._listeners.push({
+          element: element,
+          eventName: animationEndEvent,
+          handler: endHandler,
           reject: reject,
         });
 
+      }, this._delay);
+
+      this._timeouts.push({
+        element: element,
+        timeout: delayTimeout,
+        reject: reject,
       });
+
     }); // promise
   }
 
@@ -156,17 +185,17 @@ export class AnimationBuilder {
     return this;
   }
 
-  public setDuration(duration: string|number): AnimationBuilder {
+  public setDuration(duration: string | number): AnimationBuilder {
     this._duration = duration;
     return this;
   }
 
-  public setDelay(delay: string|number): AnimationBuilder {
+  public setDelay(delay: string | number): AnimationBuilder {
     this._delay = delay;
     return this;
   }
 
-  public setIterationCount(iterationCount: string|number): AnimationBuilder {
+  public setIterationCount(iterationCount: string | number): AnimationBuilder {
     this._iterationCount = iterationCount;
     return this;
   }
@@ -177,7 +206,7 @@ export class AnimationBuilder {
     this.applyPlayState(element);
     this.applyDirection(element);
     this.applyDuration(element);
-    this.applyDelay(element);
+    // this.applyDelay(element);
     this.applyIterationCount(element);
 
     return this;
@@ -188,7 +217,7 @@ export class AnimationBuilder {
       element,
       'animation-fill-mode',
       this._fillMode ? this._fillMode : ''
-      );
+    );
 
     return this;
   }
@@ -198,7 +227,7 @@ export class AnimationBuilder {
       element,
       'animation-timing-function',
       this._timingFunction ? this._timingFunction : ''
-      );
+    );
 
     return this;
   }
@@ -208,7 +237,7 @@ export class AnimationBuilder {
       element,
       'animation-play-state',
       this._playState ? this._playState : ''
-      );
+    );
 
     return this;
   }
@@ -218,7 +247,7 @@ export class AnimationBuilder {
       element,
       'animation-direction',
       this._direction ? this._direction : ''
-      );
+    );
 
     return this;
   }
@@ -228,7 +257,7 @@ export class AnimationBuilder {
       element,
       'animation-duration',
       this._duration ? this._duration + 'ms' : ''
-      );
+    );
 
     return this;
   }
@@ -238,7 +267,7 @@ export class AnimationBuilder {
       element,
       'animation-delay',
       this._delay ? this._delay + 'ms' : ''
-      );
+    );
 
     return this;
   }
@@ -248,7 +277,7 @@ export class AnimationBuilder {
       element,
       'animation-iteration-count',
       this._iterationCount ? this._iterationCount : ''
-      );
+    );
 
     return this;
   }
@@ -307,7 +336,7 @@ export class AnimationBuilder {
         data.element.removeEventListener(data.eventName, data.handler);
       }
 
-      if (reject) {
+      if (reject && data.reject) {
         data.reject('Animation aborted.');
       }
 
@@ -319,8 +348,32 @@ export class AnimationBuilder {
     });
   }
 
+  private removeTimeoutsForElement(element: HTMLElement, detach = true, reject = false) {
+    let toRemove: number[] = [];
+    for (let i = 0; i < this._timeouts.length; i++) {
+      if (this._timeouts[i].element !== element) {
+        continue;
+      }
+
+      let data = this._timeouts[i];
+
+      if (detach) {
+        clearTimeout(data.timeout);
+      }
+
+      if (reject && data.reject) {
+        data.reject('Animation aborted.');
+      }
+
+      toRemove.push(i);
+    }
+
+    toRemove.forEach((value) => {
+      this._timeouts.splice(value, 1);
+    });
+  }
+
   private resetElement(element: HTMLElement): AnimationBuilder {
-    element.removeAttribute('hidden');
     this.removeCssClasses(element);
 
     let initialProps = JSON.parse(element.getAttribute('data-reset-styles'));
@@ -333,7 +386,7 @@ export class AnimationBuilder {
     element.style.top = this.getValueOrDefault(initialProps, 'top');
     element.style.width = this.getValueOrDefault(initialProps, 'width');
     element.style.position = this.getValueOrDefault(initialProps, 'position');
-    element.style.display = this.getValueOrDefault(initialProps, 'display');
+    element.style.display = this.getValueOrDefault(initialProps, 'display', null);
 
     element.removeAttribute('data-reset-styles');
 
@@ -341,9 +394,8 @@ export class AnimationBuilder {
   }
 
   // https://jonsuh.com/blog/detect-the-end-of-css-animations-and-transitions-with-javascript/
-  private whichAnimationEvent(element: HTMLElement): string {
-    let el = document.createElement('animationDetectionElement');
-
+  private animationEndEvent(element: HTMLElement): string {
+    let el = document.createElement("endAnimationElement");
     let animations: { [key: string]: string };
     animations = {
       'animation': 'animationend',
@@ -353,7 +405,27 @@ export class AnimationBuilder {
     };
 
     for (let animation in animations) {
-      if (element.style[animation] !== undefined) {
+      if (el.style[animation] !== undefined) {
+        return animations[animation];
+      }
+    }
+
+    return null;
+  }
+
+  private animationStartEvent(element: HTMLElement): string {
+    let el = document.createElement("startAnimationElement");
+
+    let animations: { [key: string]: string };
+    animations = {
+      'animation': 'animationstart',
+      'OAnimation': 'oAnimationStart',
+      'MozAnimation': 'animationstart',
+      'WebkitAnimation': 'webkitAnimationStart'
+    };
+
+    for (let animation in animations) {
+      if (el.style[animation] !== undefined) {
         return animations[animation];
       }
     }

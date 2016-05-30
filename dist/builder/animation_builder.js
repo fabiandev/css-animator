@@ -12,6 +12,7 @@ var AnimationBuilder = (function () {
         this._animationClasses = [];
         this._classHistory = [];
         this._listeners = [];
+        this._timeouts = [];
     }
     AnimationBuilder.prototype.show = function (element) {
         return this.animate(element, 'show');
@@ -34,27 +35,39 @@ var AnimationBuilder = (function () {
         var _this = this;
         if (mode === void 0) { mode = 'default'; }
         return new Promise(function (resolve, reject) {
-            // Remove listeners if an animation is in progress on this element
-            // and reject promise if an animation was interrupted
-            _this.removeListenersForElement(element, true, true);
-            // Reset styles, remove animation classes (if currently being animated),...
-            _this.resetElement(element);
-            // Required to get position of element
-            element.style.display = 'initial';
-            var initialProps = _this.getElementInitialProperties(element);
-            // Pick up changes (element's position)
-            setTimeout(function () {
-                _this.pinElement(element, initialProps);
+            _this.removeTimeoutsForElement(element, true, true);
+            var delayTimeout;
+            delayTimeout = setTimeout(function () {
+                // Remove listeners if an animation is in progress on this element
+                // and reject promise if an animation was interrupted
+                _this.removeListenersForElement(element, true, true);
+                // Reset styles, remove animation classes (if currently being animated),...
+                _this.resetElement(element);
                 // Event to listen for (animation end)
-                var animationEventName = _this.whichAnimationEvent(element);
+                var animationEndEvent = _this.animationEndEvent(element);
+                var animationStartEvent = _this.animationStartEvent(element);
+                element.removeAttribute('hidden');
+                // Required to get position of element
+                element.style.display = 'initial';
+                var initialProps = _this.getElementInitialProperties(element);
+                _this.pinElement(element, initialProps);
                 // Apply all animation properties
                 _this.applyAllProperties(element);
                 _this.applyCssClasses(element);
                 element.classList.add('animated-' + mode);
+                // Listen for animation start
+                var startHandler;
+                element.addEventListener(animationStartEvent, startHandler = function () {
+                    console.log('animation start');
+                    element.removeEventListener(animationStartEvent, startHandler);
+                    // this.resetElement(element);
+                    return startHandler;
+                }); // listener
                 // Listen for animation end
-                var handler;
-                element.addEventListener(animationEventName, handler = function () {
-                    element.removeEventListener(animationEventName, handler);
+                var endHandler;
+                element.addEventListener(animationEndEvent, endHandler = function () {
+                    console.log('animation end');
+                    element.removeEventListener(animationEndEvent, endHandler);
                     _this.removeListenersForElement(element, false);
                     _this.resetElement(element);
                     element.classList.remove('animated-' + mode);
@@ -62,15 +75,25 @@ var AnimationBuilder = (function () {
                         element.setAttribute('hidden', '');
                     }
                     resolve(element);
-                    return handler;
+                    return endHandler;
                 }); // listener
                 // Keep a reference to the listener
                 _this._listeners.push({
                     element: element,
-                    eventName: animationEventName,
-                    handler: handler,
+                    eventName: animationStartEvent,
+                    handler: startHandler
+                });
+                _this._listeners.push({
+                    element: element,
+                    eventName: animationEndEvent,
+                    handler: endHandler,
                     reject: reject,
                 });
+            }, _this._delay);
+            _this._timeouts.push({
+                element: element,
+                timeout: delayTimeout,
+                reject: reject,
             });
         }); // promise
     };
@@ -140,7 +163,7 @@ var AnimationBuilder = (function () {
         this.applyPlayState(element);
         this.applyDirection(element);
         this.applyDuration(element);
-        this.applyDelay(element);
+        // this.applyDelay(element);
         this.applyIterationCount(element);
         return this;
     };
@@ -245,7 +268,7 @@ var AnimationBuilder = (function () {
             if (detach) {
                 data.element.removeEventListener(data.eventName, data.handler);
             }
-            if (reject) {
+            if (reject && data.reject) {
                 data.reject('Animation aborted.');
             }
             toRemove.push(i);
@@ -254,8 +277,29 @@ var AnimationBuilder = (function () {
             _this._listeners.splice(value, 1);
         });
     };
+    AnimationBuilder.prototype.removeTimeoutsForElement = function (element, detach, reject) {
+        var _this = this;
+        if (detach === void 0) { detach = true; }
+        if (reject === void 0) { reject = false; }
+        var toRemove = [];
+        for (var i = 0; i < this._timeouts.length; i++) {
+            if (this._timeouts[i].element !== element) {
+                continue;
+            }
+            var data = this._timeouts[i];
+            if (detach) {
+                clearTimeout(data.timeout);
+            }
+            if (reject && data.reject) {
+                data.reject('Animation aborted.');
+            }
+            toRemove.push(i);
+        }
+        toRemove.forEach(function (value) {
+            _this._timeouts.splice(value, 1);
+        });
+    };
     AnimationBuilder.prototype.resetElement = function (element) {
-        element.removeAttribute('hidden');
         this.removeCssClasses(element);
         var initialProps = JSON.parse(element.getAttribute('data-reset-styles'));
         // Reset or remove inline styles (default could be passed as third parameter)
@@ -266,13 +310,13 @@ var AnimationBuilder = (function () {
         element.style.top = this.getValueOrDefault(initialProps, 'top');
         element.style.width = this.getValueOrDefault(initialProps, 'width');
         element.style.position = this.getValueOrDefault(initialProps, 'position');
-        element.style.display = this.getValueOrDefault(initialProps, 'display');
+        element.style.display = this.getValueOrDefault(initialProps, 'display', null);
         element.removeAttribute('data-reset-styles');
         return this;
     };
     // https://jonsuh.com/blog/detect-the-end-of-css-animations-and-transitions-with-javascript/
-    AnimationBuilder.prototype.whichAnimationEvent = function (element) {
-        var el = document.createElement('animationDetectionElement');
+    AnimationBuilder.prototype.animationEndEvent = function (element) {
+        var el = document.createElement("endAnimationElement");
         var animations;
         animations = {
             'animation': 'animationend',
@@ -281,7 +325,23 @@ var AnimationBuilder = (function () {
             'WebkitAnimation': 'webkitAnimationEnd'
         };
         for (var animation in animations) {
-            if (element.style[animation] !== undefined) {
+            if (el.style[animation] !== undefined) {
+                return animations[animation];
+            }
+        }
+        return null;
+    };
+    AnimationBuilder.prototype.animationStartEvent = function (element) {
+        var el = document.createElement("startAnimationElement");
+        var animations;
+        animations = {
+            'animation': 'animationstart',
+            'OAnimation': 'oAnimationStart',
+            'MozAnimation': 'animationstart',
+            'WebkitAnimation': 'webkitAnimationStart'
+        };
+        for (var animation in animations) {
+            if (el.style[animation] !== undefined) {
                 return animations[animation];
             }
         }
