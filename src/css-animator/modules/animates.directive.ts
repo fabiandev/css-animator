@@ -5,6 +5,7 @@ import { AnimationOptions } from '../contracts';
 
 @Directive({
   selector: '[animates]',
+  exportAs: 'animates',
   inputs: [
     'animates',
     'animatesOnInit'

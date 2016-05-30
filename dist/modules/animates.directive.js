@@ -118,6 +118,7 @@ var AnimatesDirective = (function () {
     AnimatesDirective = __decorate([
         core_1.Directive({
             selector: '[animates]',
+            exportAs: 'animates',
             inputs: [
                 'animates',
                 'animatesOnInit'

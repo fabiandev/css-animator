@@ -649,6 +649,7 @@ System.register("css-animator/modules/animates.directive", ['@angular/core', "cs
                 AnimatesDirective = __decorate([
                     core_2.Directive({
                         selector: '[animates]',
+                        exportAs: 'animates',
                         inputs: [
                             'animates',
                             'animatesOnInit'
