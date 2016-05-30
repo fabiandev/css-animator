@@ -58,7 +58,6 @@ var AnimationBuilder = (function () {
                 // Listen for animation start
                 var startHandler;
                 element.addEventListener(animationStartEvent, startHandler = function () {
-                    console.log('animation start');
                     element.removeEventListener(animationStartEvent, startHandler);
                     // this.resetElement(element);
                     return startHandler;
@@ -66,7 +65,6 @@ var AnimationBuilder = (function () {
                 // Listen for animation end
                 var endHandler;
                 element.addEventListener(animationEndEvent, endHandler = function () {
-                    console.log('animation end');
                     element.removeEventListener(animationEndEvent, endHandler);
                     _this.removeListenersForElement(element, false);
                     _this.resetElement(element);

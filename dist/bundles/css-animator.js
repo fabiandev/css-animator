@@ -121,7 +121,6 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                             // Listen for animation start
                             var startHandler;
                             element.addEventListener(animationStartEvent, startHandler = function () {
-                                console.log('animation start');
                                 element.removeEventListener(animationStartEvent, startHandler);
                                 // this.resetElement(element);
                                 return startHandler;
@@ -129,7 +128,6 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                             // Listen for animation end
                             var endHandler;
                             element.addEventListener(animationEndEvent, endHandler = function () {
-                                console.log('animation end');
                                 element.removeEventListener(animationEndEvent, endHandler);
                                 _this.removeListenersForElement(element, false);
                                 _this.resetElement(element);
