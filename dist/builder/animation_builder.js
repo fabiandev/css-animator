@@ -71,6 +71,7 @@ var AnimationBuilder = (function () {
                     element.classList.remove('animated-' + mode);
                     if (mode === 'hide') {
                         element.setAttribute('hidden', '');
+                        element.style.display = null;
                     }
                     resolve(element);
                     return endHandler;

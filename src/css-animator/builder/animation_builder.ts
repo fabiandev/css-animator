@@ -90,6 +90,7 @@ export class AnimationBuilder {
 
           if (mode === 'hide') {
             element.setAttribute('hidden', '');
+            element.style.display = null;
           }
 
           resolve(element);
