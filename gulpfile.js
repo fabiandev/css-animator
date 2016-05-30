@@ -6,7 +6,7 @@ var del = require('del');
 var assign = require('lodash.assign');
 var merge = require('merge2');
 
-var tsConfig = assign(require('./tsconfig.json'), {
+var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
   declaration: true
 });
 

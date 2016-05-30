@@ -1,13 +1,15 @@
 {
-  "target": "ES5",
-  "emitDecoratorMetadata": true,
-  "experimentalDecorators": true,
-  "moduleResolution": "node",
+  "compilerOptions": {
+    "target": "ES5",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true
+  },
   "exclude": [
     "node_modules",
     "typings/main.d.ts",
     "typings/main"
-  ],
-  "noImplicitAny": true,
-  "suppressImplicitAnyIndexErrors": true
+  ]
 }

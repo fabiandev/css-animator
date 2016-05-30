@@ -12,6 +12,10 @@ The package includes ES5 compiled [Browserify](http://browserify.org) files, [Sy
 $ npm install --save css-animator
 ```
 
+```bash
+$ jspm install npm:css-animator
+```
+
 # Usage
 
 Use this package in combination with CSS animations.  
@@ -40,7 +44,7 @@ animator.setType('shake').animate(element);
 There is a little Angular2 service included, that gives you the power of dependency injection out of the box.
 
 ```ts
-import { Component, OnInit } from 'angular2/core';
+import { Component, OnInit } from '@angular/core';
 import { AnimationService, AnimationBuilder } from 'css-animator';
 
 @Component({ ... })
@@ -62,7 +66,7 @@ export class SomeComponent implements OnInit {
 `AnimationService` must be defined as provider to make it injectable. You could do so in you main app component like this:
 
 ```ts
-import { Component } from 'angular2/core';
+import { Component } from '@angular/core';
 import { AnimationService } from 'css-animator';
 
 @Component({
@@ -82,13 +86,13 @@ export class AppComponent {
 Feel free to create your own directive around css-animator. For you to get started, there is one included in this package.
 
 ```ts
-import { Component } from 'angular2/core';
+import { Component } from '@angular/core';
 import { AnimatesDirective } from 'css-animator';
 
 @Component({
   selector: 'some-component',
   template: `
-    <div [animates] #animation="animates">
+    <div animates #animation="animates">
       <span (click)="animation.start({type: 'bounce'})">Click me!</span>
     </div>
   `,
@@ -107,7 +111,7 @@ You can optionally pass all options that the interface `AnimationOptions` suppor
 ```html
 <div
 #animation="animates"
-[animates]="{ type: 'wobble', duration: '2000' }" // default options are optional
+animates="{ type: 'wobble', duration: '2000' }" // default options are optional
 [animatesOnInit]="{ type: 'fadeInUp' }" // automatically animate on init (optional)
 (click)="animation.start()"
 (mouseleave)="animation.pause()"
