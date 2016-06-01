@@ -15,8 +15,10 @@ export class AnimationBuilder {
   private _classHistory: string[] = [];
   private _listeners: ListenerRef[] = [];
   private _timeouts: TimeoutRef[] = [];
+  private _keepFlow: boolean = false;
 
   public show(element: HTMLElement): Promise<HTMLElement> {
+    element.setAttribute('hidden', '');
     return this.animate(element, 'show');
   }
 
@@ -283,6 +285,11 @@ export class AnimationBuilder {
     return this;
   }
 
+  public setKeepFlow(keepFlow: boolean): AnimationBuilder {
+    this._keepFlow = keepFlow;
+    return this;
+  }
+
   get type(): string {
     return this._type;
   }
@@ -309,6 +316,10 @@ export class AnimationBuilder {
 
   get iterationCount(): string | number {
     return this._iterationCount;
+  }
+
+  get keepFlow(): boolean {
+    return this._keepFlow;
   }
 
   private applyStyle(element: HTMLElement, property: string, value: any, shim = true): AnimationBuilder {
@@ -380,13 +391,13 @@ export class AnimationBuilder {
     let initialProps = JSON.parse(element.getAttribute('data-reset-styles'));
 
     // Reset or remove inline styles (default could be passed as third parameter)
-    element.style.bottom = this.getValueOrDefault(initialProps, 'bottom');
-    element.style.height = this.getValueOrDefault(initialProps, 'height');
-    element.style.left = this.getValueOrDefault(initialProps, 'left');
-    element.style.right = this.getValueOrDefault(initialProps, 'right');
-    element.style.top = this.getValueOrDefault(initialProps, 'top');
-    element.style.width = this.getValueOrDefault(initialProps, 'width');
-    element.style.position = this.getValueOrDefault(initialProps, 'position');
+    element.style.bottom = this.getValueOrDefault(initialProps, 'bottom', null);
+    element.style.height = this.getValueOrDefault(initialProps, 'height', null);
+    element.style.left = this.getValueOrDefault(initialProps, 'left', null);
+    element.style.right = this.getValueOrDefault(initialProps, 'right', null);
+    element.style.top = this.getValueOrDefault(initialProps, 'top', null);
+    element.style.width = this.getValueOrDefault(initialProps, 'width', null);
+    element.style.position = this.getValueOrDefault(initialProps, 'position', null);
     element.style.display = this.getValueOrDefault(initialProps, 'display', null);
 
     element.removeAttribute('data-reset-styles');
@@ -491,14 +502,16 @@ export class AnimationBuilder {
     element.setAttribute('data-reset-styles', JSON.stringify(initialProps));
 
     // Support for concurrent animations on non-fixed elements
-    element.style.bottom = position.bottom + 'px';
-    element.style.height = position.height + 'px';
-    element.style.left = position.left + 'px';
-    element.style.right = position.right + 'px';
-    element.style.top = position.top + 'px';
-    element.style.width = position.width + 'px';
-    element.style.position = 'fixed';
-    element.style.display = 'inline-block';
+    if (!this._keepFlow) {
+      element.style.bottom = position.bottom + 'px';
+      element.style.height = position.height + 'px';
+      element.style.left = position.left + 'px';
+      element.style.right = position.right + 'px';
+      element.style.top = position.top + 'px';
+      element.style.width = position.width + 'px';
+      element.style.position = 'fixed';
+      element.style.display = 'inline-block';
+    }
   }
 
   private checkValue(value: any): boolean {

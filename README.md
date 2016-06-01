@@ -126,7 +126,9 @@ animates="{ type: 'wobble', duration: '2000' }" // default options are optional
 
 ## AnimationOptions
 
-This are all options supported. You may notice, that these are all [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation), so you can look up which values are supported.
+This are all options supported. You may notice, that these are all [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation), so you can look up which values are supported.  
+
+By default, an element will be positioned absolute while animating, to enable concurrent animations. If you want to keep the position property, you may set `keepFlow: true`, or call `setKeepFlow(true)` on `AnimationBuilder`.
 
 ```ts
 export interface AnimationOptions {
@@ -139,6 +141,7 @@ export interface AnimationOptions {
   duration?: string|number;
   delay?: string|number;
   iterationCount?: string|number;
+  keepFlow?: boolean;
 }
 ```
 
