@@ -281,7 +281,7 @@ var AnimationBuilder = (function () {
                 data.element.removeEventListener(data.eventName, data.handler);
             }
             if (reject && data.reject) {
-                data.reject('Animation aborted.');
+                data.reject('animation_aborted');
             }
             toRemove.push(i);
         }
@@ -303,7 +303,7 @@ var AnimationBuilder = (function () {
                 clearTimeout(data.timeout);
             }
             if (reject && data.reject) {
-                data.reject('Animation aborted.');
+                data.reject('animation_aborted');
             }
             toRemove.push(i);
         }

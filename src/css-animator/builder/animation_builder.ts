@@ -349,7 +349,7 @@ export class AnimationBuilder {
       }
 
       if (reject && data.reject) {
-        data.reject('Animation aborted.');
+        data.reject('animation_aborted');
       }
 
       toRemove.push(i);
@@ -374,7 +374,7 @@ export class AnimationBuilder {
       }
 
       if (reject && data.reject) {
-        data.reject('Animation aborted.');
+        data.reject('animation_aborted');
       }
 
       toRemove.push(i);

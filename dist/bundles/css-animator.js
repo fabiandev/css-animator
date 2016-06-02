@@ -344,7 +344,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                             data.element.removeEventListener(data.eventName, data.handler);
                         }
                         if (reject && data.reject) {
-                            data.reject('Animation aborted.');
+                            data.reject('animation_aborted');
                         }
                         toRemove.push(i);
                     }
@@ -366,7 +366,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                             clearTimeout(data.timeout);
                         }
                         if (reject && data.reject) {
-                            data.reject('Animation aborted.');
+                            data.reject('animation_aborted');
                         }
                         toRemove.push(i);
                     }
