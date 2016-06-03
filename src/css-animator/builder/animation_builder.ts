@@ -28,6 +28,7 @@ export class AnimationBuilder {
 
   public stop(element: HTMLElement, reset = true, detach = true): Promise<HTMLElement> {
     if (detach === true) {
+      this.removeTimeoutsForElement(element, true, true);
       this.removeListenersForElement(element, true, true);
     }
 
@@ -48,6 +49,7 @@ export class AnimationBuilder {
 
         // Remove listeners if an animation is in progress on this element
         // and reject promise if an animation was interrupted
+        this.removeTimeoutsForElement(element, true, false);
         this.removeListenersForElement(element, true, true);
 
         // Reset styles, remove animation classes (if currently being animated),...

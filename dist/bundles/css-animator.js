@@ -89,6 +89,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                     if (reset === void 0) { reset = true; }
                     if (detach === void 0) { detach = true; }
                     if (detach === true) {
+                        this.removeTimeoutsForElement(element, true, true);
                         this.removeListenersForElement(element, true, true);
                     }
                     if (reset === true) {
@@ -105,6 +106,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                         delayTimeout = setTimeout(function () {
                             // Remove listeners if an animation is in progress on this element
                             // and reject promise if an animation was interrupted
+                            _this.removeTimeoutsForElement(element, true, false);
                             _this.removeListenersForElement(element, true, true);
                             // Reset styles, remove animation classes (if currently being animated),...
                             _this.resetElement(element);
