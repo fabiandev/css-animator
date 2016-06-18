@@ -4,7 +4,7 @@
   "description": "Animate elements using CSS classes with support for Angular2.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fabianweb/css-animator.git"
+    "url": "git+https://github.com/fabiandev/css-animator.git"
   },
   "keywords": [
     "angular2",
@@ -17,7 +17,7 @@
   "author": "Fabian Pirklbauer",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fabianweb/css-animator/issues"
+    "url": "https://github.com/fabiandev/css-animator/issues"
   },
-  "homepage": "https://github.com/fabianweb/css-animator#readme"
+  "homepage": "https://github.com/fabiandev/css-animator#readme"
 }
