@@ -1,6 +1,6 @@
 {
   "name": "css-animator",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Animate elements using CSS classes with support for Angular2.",
   "repository": {
     "type": "git",
