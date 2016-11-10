@@ -108,7 +108,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                             // and reject promise if an animation was interrupted
                             _this.removeTimeoutsForElement(element, true, false);
                             _this.removeListenersForElement(element, true, true);
-                            // Reset styles, remove animation classes (if currently being animated),...
+                            // Reset styles, remove animation classes (if currently being animated)
                             _this.resetElement(element);
                             // Event to listen for (animation end)
                             var animationEndEvent = _this.animationEndEvent(element);
@@ -155,7 +155,7 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                                 handler: endHandler,
                                 reject: reject,
                             });
-                        }, _this._delay);
+                        }, _this._delay); // delayTimeout
                         _this._timeouts.push({
                             element: element,
                             timeout: delayTimeout,
