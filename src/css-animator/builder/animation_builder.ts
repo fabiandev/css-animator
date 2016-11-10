@@ -52,7 +52,7 @@ export class AnimationBuilder {
         this.removeTimeoutsForElement(element, true, false);
         this.removeListenersForElement(element, true, true);
 
-        // Reset styles, remove animation classes (if currently being animated),...
+        // Reset styles, remove animation classes (if currently being animated)
         this.resetElement(element);
 
         // Event to listen for (animation end)
@@ -116,7 +116,7 @@ export class AnimationBuilder {
           reject: reject,
         });
 
-      }, this._delay);
+      }, this._delay); // delayTimeout
 
       this._timeouts.push({
         element: element,
