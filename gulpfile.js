@@ -1,10 +1,11 @@
+var assign = require('lodash.assign');
+var del = require('del');
 var gulp = require('gulp');
+var merge = require('merge2');
+var rename = require('gulp-rename');
+var runSequence = require('run-sequence');
 var ts = require('gulp-typescript');
 var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var del = require('del');
-var assign = require('lodash.assign');
-var merge = require('merge2');
 
 var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
   declaration: true
@@ -14,8 +15,20 @@ gulp.task('default', ['copy', 'process', 'bundle']);
 gulp.task('clean', ['clean:process', 'clean:bundle']);
 gulp.task('copy', ['copy:readme', 'copy:license']);
 
+gulp.task('build', function(done) {
+  runSequence('clean', 'copy', 'process', 'bundle', done);
+});
+
+gulp.task('watch-build', function(done) {
+  runSequence('process', done);
+});
+
+gulp.task('watch', function() {
+  gulp.watch('./src/**/*.ts', ['watch-build']);
+});
+
 gulp.task('process', function() {
-  var tsResult = gulp.src(['./typings/browser.d.ts', './src/**/*.ts'], {
+  var tsResult = gulp.src(['./typings/index.d.ts', './src/**/*.ts'], {
       base: './src/css-animator'
     })
     .pipe(ts(assign(tsConfig, {
@@ -29,14 +42,14 @@ gulp.task('process', function() {
 });
 
 gulp.task('bundle', function() {
-  var tsResult = gulp.src(['./typings/browser.d.ts', './src/**/*.ts'])
+  var tsResult = gulp.src(['./typings/index.d.ts', './src/**/*.ts'])
     .pipe(ts(assign(tsConfig, {
       module: 'system',
       outFile: 'css-animator.js',
       declaration: false
     })));
 
-  tsResult.js
+  return tsResult.js
     .pipe(gulp.dest('./dist/bundles'))
     .pipe(rename('css-animator.min.js'))
     .pipe(uglify({
