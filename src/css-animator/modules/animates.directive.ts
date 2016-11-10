@@ -29,7 +29,7 @@ export class AnimatesDirective implements OnInit {
     return this._animationBuilder;
   }
 
-  constructor(@Inject(ElementRef) private _elementRef: ElementRef, @Inject(AnimationService) animationService: AnimationService) {
+  constructor( @Inject(ElementRef) private _elementRef: ElementRef, @Inject(AnimationService) animationService: AnimationService) {
     this._animationBuilder = animationService.builder();
   }
 
@@ -42,8 +42,8 @@ export class AnimatesDirective implements OnInit {
       .setOptions(this._initOptions)
       .show(this._elementRef.nativeElement)
       .then((element: HTMLElement) => element, (error: string) => {
-      // Animation interrupted
-    });
+        // Animation interrupted
+      });
   }
 
   public start(options?: AnimationOptions): Promise<HTMLElement> {
@@ -52,8 +52,8 @@ export class AnimatesDirective implements OnInit {
     return this._animationBuilder
       .animate(this._elementRef.nativeElement)
       .then((element: HTMLElement) => element, (error: string) => {
-      // Animation interrupted
-    });
+        // Animation interrupted
+      });
   }
 
   public hide(options?: AnimationOptions): Promise<HTMLElement> {
@@ -63,8 +63,8 @@ export class AnimatesDirective implements OnInit {
       .setOptions(options)
       .hide(this._elementRef.nativeElement)
       .then((element: HTMLElement) => element, (error: string) => {
-      // Animation interrupted
-    });
+        // Animation interrupted
+      });
   }
 
   public show(options?: AnimationOptions): Promise<HTMLElement> {
@@ -73,8 +73,8 @@ export class AnimatesDirective implements OnInit {
     return this._animationBuilder
       .show(this._elementRef.nativeElement)
       .then((element: HTMLElement) => element, (error: string) => {
-      // Animation interrupted
-    });
+        // Animation interrupted
+      });
   }
 
   public animate() {
@@ -86,8 +86,8 @@ export class AnimatesDirective implements OnInit {
       .setOptions(this._defaultOptions)
       .animate(this._elementRef.nativeElement)
       .then((element: HTMLElement) => element, (error: string) => {
-      // Animation interrupted
-    });
+        // Animation interrupted
+      });
   }
 
   public pause() {
@@ -112,8 +112,8 @@ export class AnimatesDirective implements OnInit {
     this._animationBuilder
       .stop(this._elementRef.nativeElement)
       .then((element) => element, (error) => {
-      // Animation interrupted
-    });
+        // Animation interrupted
+      });
   }
 
   private setOptions(options: AnimationOptions) {
