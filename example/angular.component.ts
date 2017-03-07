@@ -7,8 +7,16 @@ import { AnimationService, AnimationBuilder } from 'css-animator';
     AnimationService,
   ],
   template: `
-  <nav><button #button (click)="startAnimation(button)">Start Animation</button></nav>
-  <div class="el" animates #animation="animates" animatesInitMode="hide" [animatesOnInit]="{type: 'fadeOutDown', delay: 100, duration: 1000}"></div>
+  <nav>
+    <button #button (click)="startAnimation(button)">Start Animation</button>
+  </nav>
+  <div
+    class="el"
+    animates
+    #animation="animates"
+    animatesInitMode="hide"
+    [animatesOnInit]="{type: 'fadeOutDown', delay: 100, duration: 1000}">
+  </div>
   `,
   styles: [`
     .el {
