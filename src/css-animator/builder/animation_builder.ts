@@ -15,7 +15,7 @@ export class AnimationBuilder {
 
   // Members
 
-  public static DEBUG: boolean = true;
+  public static DEBUG: boolean = false;
 
   public static defaultOptions: AnimationOptions = {
     reject: true,
@@ -97,32 +97,29 @@ export class AnimationBuilder {
       this.removeTimeouts(element);
 
       const delay = setTimeout(() => {
-        this.reset(element);
+        this.reset(element, true, false, true);
         this.registerAnimationListeners(element, mode, resolve, reject);
         this.styles.set(element, Object.assign({}, element.style));
 
         if (this.animationOptions.pin) {
-          const initialDisplay = element.style.display;
-          const computedPosition = window.getComputedStyle(element).position;
+          if (mode === AnimationMode.Show) {
+            element.style.visibility = 'hidden';
+          }
 
-          element.style.display = 'unset';
+          this.showElement(element);
 
           const position = this.getPosition(element);
-          element.style.display = initialDisplay;
 
-          element.style.position = 'absolute';
+          element.style.position = 'fixed';
           element.style.top = `${position.top}px`;
           element.style.left = `${position.left}px`;
-          element.style.marginLeft = '0px';
-
-          if (computedPosition !== 'static' && computedPosition !== 'relative') {
-            element.style.marginTop = '0px';
-          }
+          element.style.margin = '0px';
         }
 
         this.nextFrame(() => {
-          this.applyProperties(element, mode);
+          element.style.visibility = 'visible';
           this.showElement(element);
+          this.applyProperties(element, mode);
         });
       }, this.animationOptions.delay);
 
@@ -192,6 +189,26 @@ export class AnimationBuilder {
       AnimationBuilder.raf(fn);
     });
   }
+
+//   private offset(element: HTMLElement): { left: number, top: number } {
+//     var body = document.body,
+//         win = document.defaultView,
+//         docElem = document.documentElement,
+//         box = document.createElement('div') as any;
+//
+//     box.style.paddingLeft = box.style.width = "1px";
+//     body.appendChild(box);
+//     var isBoxModel = box.offsetWidth == 2;
+//     body.removeChild(box);
+//     box = element.getBoundingClientRect() as any;
+//     var clientTop  = docElem.clientTop  || body.clientTop  || 0,
+//         clientLeft = docElem.clientLeft || body.clientLeft || 0,
+//         scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
+//         scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
+//     return {
+//         top : box.top  + scrollTop  - clientTop,
+//         left: box.left + scrollLeft - clientLeft};
+// }
 
   private getPosition(element: HTMLElement): { left: number, top: number } {
     let el = element.getBoundingClientRect();
@@ -383,22 +400,29 @@ export class AnimationBuilder {
     let el = document.createElement('checkStyle');
 
     let styles: { [key: string]: string } = {
-      standard: prop,
-      webkit: `-webkit-${prop}`,
-      mozilla: `-moz-${prop}`,
-      opera: `-o-${prop}`,
-      explorer: `-ie-${prop}`,
+      standard: this.camelCase(prop),
+      webkit: this.camelCase(`-webkit-${prop}`),
+      mozilla: this.camelCase(`-moz-${prop}`),
+      opera: this.camelCase(`-o-${prop}`),
+      explorer: this.camelCase(`-ie-${prop}`),
     };
 
     for (let style in styles) {
-      if (el.style[style] !== undefined) {
-        element.style[style] = value === undefined || value === null ? null : value;
+      if (!styles.hasOwnProperty(style)) continue;
+      if (el.style[styles[style]] !== undefined) {
+        element.style[styles[style]] = value === undefined || value === null ? null : value;
         break;
       }
     }
 
     return this;
   }
+
+  private camelCase(input: string): string {
+    return input.toLowerCase().replace(/-(.)/g, (match, group1) => {
+        return group1.toUpperCase();
+    });
+}
 
   // Getters and Setters
 
@@ -589,7 +613,7 @@ export class AnimationBuilder {
     this.applyStyle(
       element,
       'animation-duration',
-      this.animationOptions.duration,
+      `${this.animationOptions.duration}ms`,
     );
 
     return this;
