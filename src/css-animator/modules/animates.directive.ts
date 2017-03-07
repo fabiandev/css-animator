@@ -8,12 +8,14 @@ import { AnimationOptions } from '../contracts';
   exportAs: 'animates',
   inputs: [
     'animates',
-    'animatesOnInit'
-  ]
+    'animatesOnInit',
+    'animatesInitMode',
+  ],
 })
 export class AnimatesDirective implements OnInit {
   private _defaultOptions: AnimationOptions;
   private _initOptions: AnimationOptions;
+  private _initMode: string;
 
   private _animationBuilder: AnimationBuilder;
 
@@ -23,6 +25,12 @@ export class AnimatesDirective implements OnInit {
 
   set animatesOnInit(options: AnimationOptions) {
     this._initOptions = options;
+  }
+
+  set animatesInitMode(mode: string) {
+    if (typeof mode === 'string') {
+      this._initMode = mode.toLowerCase();
+    }
   }
 
   get animationBuilder(): AnimationBuilder {
@@ -38,12 +46,24 @@ export class AnimatesDirective implements OnInit {
       return;
     }
 
-    this._animationBuilder
-      .setOptions(this._initOptions)
-      .show(this._elementRef.nativeElement)
-      .then((element: HTMLElement) => element, (error: string) => {
-        // Animation interrupted
-      });
+    let promise: Promise<HTMLElement>;
+    let builder = this._animationBuilder
+      .setOptions(this._initOptions);
+
+    switch (this._initMode) {
+      case 'show':
+        promise = builder.show(this._elementRef.nativeElement);
+        break;
+      case 'hide':
+        promise = builder.hide(this._elementRef.nativeElement);
+        break;
+      default:
+        promise = builder.animate(this._elementRef.nativeElement);
+    }
+
+    promise.then((element: HTMLElement) => element, (error: string) => {
+      // Animation interrupted
+    });
   }
 
   public start(options?: AnimationOptions): Promise<HTMLElement> {
