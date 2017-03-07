@@ -4,11 +4,17 @@ const animator = new AnimationBuilder();
 const element = document.getElementById('animate');
 const button = document.getElementById('button');
 
+animator
+  .setType('fadeOutDown')
+  .setDelay(100)
+  .hide(element);
+
 button.onclick = () => {
   button.setAttribute('disabled', '');
 
   animator
     .setType('fadeInUp')
+    .setDelay(0)
     .show(element)
     .then(el => {
       return animator

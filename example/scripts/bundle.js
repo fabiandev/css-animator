@@ -54060,7 +54060,7 @@
 	        providers: [
 	            css_animator_1.AnimationService,
 	        ],
-	        template: "\n  <nav><button #button (click)=\"startAnimation(button)\">Start Animation</button></nav>\n  <div class=\"el\" hidden></div>\n  ",
+	        template: "\n  <nav><button #button (click)=\"startAnimation(button)\">Start Animation</button></nav>\n  <div class=\"el\" animates #animation=\"animates\" [animatesOnInit]=\"{type: 'fadeOutDown', delay: 100, duration: 1000}\" animatesInitMode=\"hide\"></div>\n  ",
 	        styles: ["\n    .el {\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }",
 	        ],
 	    }),
@@ -54761,6 +54761,15 @@
 	        enumerable: true,
 	        configurable: true
 	    });
+	    Object.defineProperty(AnimatesDirective.prototype, "animatesInitMode", {
+	        set: function (mode) {
+	            if (typeof mode === 'string') {
+	                this._initMode = mode.toLowerCase();
+	            }
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    Object.defineProperty(AnimatesDirective.prototype, "animationBuilder", {
 	        get: function () {
 	            return this._animationBuilder;
@@ -54772,10 +54781,20 @@
 	        if (!this._initOptions) {
 	            return;
 	        }
-	        this._animationBuilder
-	            .setOptions(this._initOptions)
-	            .show(this._elementRef.nativeElement)
-	            .then(function (element) { return element; }, function (error) {
+	        var promise;
+	        var builder = this._animationBuilder
+	            .setOptions(this._initOptions);
+	        switch (this._initMode) {
+	            case 'show':
+	                promise = builder.show(this._elementRef.nativeElement);
+	                break;
+	            case 'hide':
+	                promise = builder.hide(this._elementRef.nativeElement);
+	                break;
+	            default:
+	                promise = builder.animate(this._elementRef.nativeElement);
+	        }
+	        promise.then(function (element) { return element; }, function (error) {
 	            // Animation interrupted
 	        });
 	    };
@@ -54852,8 +54871,9 @@
 	        exportAs: 'animates',
 	        inputs: [
 	            'animates',
-	            'animatesOnInit'
-	        ]
+	            'animatesOnInit',
+	            'animatesInitMode',
+	        ],
 	    }),
 	    __param(0, core_1.Inject(core_1.ElementRef)), __param(1, core_1.Inject(animation_service_1.AnimationService)),
 	    __metadata("design:paramtypes", [core_1.ElementRef, animation_service_1.AnimationService])
@@ -54871,10 +54891,15 @@
 	var animator = new builder_1.AnimationBuilder();
 	var element = document.getElementById('animate');
 	var button = document.getElementById('button');
+	animator
+	    .setType('fadeOutDown')
+	    .setDelay(100)
+	    .hide(element);
 	button.onclick = function () {
 	    button.setAttribute('disabled', '');
 	    animator
 	        .setType('fadeInUp')
+	        .setDelay(0)
 	        .show(element)
 	        .then(function (el) {
 	        return animator
