@@ -54060,7 +54060,7 @@
 	        providers: [
 	            css_animator_1.AnimationService,
 	        ],
-	        template: "\n  <nav><button #button (click)=\"startAnimation(button)\">Start Animation</button></nav>\n  <div class=\"el\" animates #animation=\"animates\" [animatesOnInit]=\"{type: 'fadeOutDown', delay: 100, duration: 1000}\" animatesInitMode=\"hide\"></div>\n  ",
+	        template: "\n  <nav>\n    <button #button (click)=\"startAnimation(button)\">Start Animation</button>\n  </nav>\n  <div\n    class=\"el\"\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"hide\"\n    [animatesOnInit]=\"{type: 'fadeOutDown', delay: 100, duration: 1000}\">\n  </div>\n  ",
 	        styles: ["\n    .el {\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }",
 	        ],
 	    }),
