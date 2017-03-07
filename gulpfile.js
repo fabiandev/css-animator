@@ -1,5 +1,6 @@
 var assign = require('lodash.assign');
 var del = require('del');
+var filter = require('gulp-filter');
 var gulp = require('gulp');
 var merge = require('merge2');
 var rename = require('gulp-rename');
@@ -28,6 +29,8 @@ gulp.task('watch', function() {
 });
 
 gulp.task('process', function() {
+  var f = filter(['**', '!src/*.*']);
+
   var tsResult = gulp.src(['./src/**/*.ts'], {
       base: './src/css-animator'
     })
@@ -36,8 +39,8 @@ gulp.task('process', function() {
     })));
 
   return merge([
-    tsResult.dts.pipe(gulp.dest('./dist')),
-    tsResult.js.pipe(gulp.dest('./dist'))
+    tsResult.dts.pipe(f).pipe(gulp.dest('./dist')),
+    tsResult.js.pipe(f).pipe(gulp.dest('./dist'))
   ]);
 });
 
