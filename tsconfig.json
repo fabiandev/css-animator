@@ -1,14 +1,19 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
     "target": "ES5",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "types": [
+      "core-js"
+    ]
   },
   "exclude": [
     "node_modules",
-    "typings"
+    "typings",
+    "dist"
   ]
 }

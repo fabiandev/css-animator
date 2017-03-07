@@ -11,12 +11,12 @@ var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
   declaration: true
 });
 
-gulp.task('default', ['copy', 'process', 'bundle']);
+gulp.task('default', ['copy', 'process', 'bundle', 'example']);
 gulp.task('clean', ['clean:process', 'clean:bundle']);
 gulp.task('copy', ['copy:readme', 'copy:license']);
 
 gulp.task('build', function(done) {
-  runSequence('clean', 'copy', 'process', 'bundle', done);
+  runSequence('clean', 'copy', 'process', 'bundle', 'example', done);
 });
 
 gulp.task('watch-build', function(done) {
@@ -28,7 +28,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('process', function() {
-  var tsResult = gulp.src(['./typings/index.d.ts', './src/**/*.ts'], {
+  var tsResult = gulp.src(['./src/**/*.ts'], {
       base: './src/css-animator'
     })
     .pipe(ts(assign(tsConfig, {
@@ -42,7 +42,7 @@ gulp.task('process', function() {
 });
 
 gulp.task('bundle', function() {
-  var tsResult = gulp.src(['./typings/index.d.ts', './src/**/*.ts'])
+  var tsResult = gulp.src(['./src/**/*.ts'])
     .pipe(ts(assign(tsConfig, {
       module: 'system',
       outFile: 'css-animator.js',
@@ -58,6 +58,11 @@ gulp.task('bundle', function() {
       }
     }))
     .pipe(gulp.dest('./dist/bundles'));
+});
+
+gulp.task('example', function() {
+  return gulp.src('./dist/bundles/**/*')
+    .pipe(gulp.dest('./example'));
 });
 
 gulp.task('clean:process', function() {

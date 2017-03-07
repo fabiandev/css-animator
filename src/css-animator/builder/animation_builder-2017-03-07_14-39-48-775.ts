@@ -15,10 +15,7 @@ export class AnimationBuilder {
 
   // Members
 
-  public static DEBUG: boolean = true;
-
   public static defaultOptions: AnimationOptions = {
-    pin: true,
     type: 'bounce',
     fillMode: 'none',
     timingFunction: 'ease',
@@ -49,7 +46,6 @@ export class AnimationBuilder {
   // Public Methods
 
   constructor() {
-    this.log('AnimationBuilder created.');
     this.classes = [];
     this.listeners = new Map<HTMLElement, ListenerRef[]>();
     this.timeouts = new Map<HTMLElement, TimeoutRef[]>();
@@ -57,7 +53,6 @@ export class AnimationBuilder {
   }
 
   public show(element: HTMLElement): Promise<HTMLElement> {
-    element.setAttribute('hidden', '');
     return this.animate(element, AnimationMode.Show);
   }
 
@@ -78,36 +73,9 @@ export class AnimationBuilder {
 
       const delay = setTimeout(() => {
         this.reset(element, true, false, true);
-        this.registerAnimationListeners(element, mode, resolve, reject);
-        this.styles.set(element, Object.assign({}, element.style));
-
-        if (this.animationOptions.pin) {
-          const initialDisplay = element.style.display;
-          const computedPosition = window.getComputedStyle(element).position;
-
-          element.style.display = 'unset';
-
-          const position = this.getPosition(element);
-          element.style.display = initialDisplay;
-
-          element.style.position = 'fixed';
-          element.style.top = `${position.top}px`;
-          element.style.left = `${position.left}px`;
-          element.style.marginLeft = '0px';
-
-          // No idea what's going on...
-          if (computedPosition !== 'relative') {
-            element.style.marginTop = '0px';
-          }
-        }
-
-        this.nextFrame(() => {
-          this.applyProperties(element, mode);
-          element.removeAttribute('hidden');
-        });
+        this.registerAnimationListeners(element, resolve, reject);
+        this.applyProperties(element);
       }, this.animationOptions.delay);
-
-      this.log(`Timeout ${delay} registered for element`, element);
 
       this.addTimeout(element, delay, reject);
     });
@@ -162,10 +130,14 @@ export class AnimationBuilder {
 
   // Private Methods
 
-  private log(...values: any[]) {
-    if (AnimationBuilder.DEBUG) {
-      console.log('css-animator:', ...values);
-    }
+  private animation(element: HTMLElement, mode: AnimationMode): Promise<HTMLElement> {
+    return new Promise<HTMLElement>((resolve: Function, reject: Function) => {
+      this.styles.set(element, Object.assign({}, element.style));
+
+      element.removeAttribute('hidden');
+
+      resolve(element);
+    });
   }
 
   private nextFrame(fn: Function): void {
@@ -174,39 +146,24 @@ export class AnimationBuilder {
     });
   }
 
-  private getPosition(element: HTMLElement): { left: number, top: number } {
-    let el = element.getBoundingClientRect();
-    return {
-      left: el.left + window.scrollX,
-      top: el.top + window.scrollY,
-    }
-  }
-
-  private registerAnimationListeners(element: HTMLElement, mode: AnimationMode, resolve: Function, reject: Function): void {
+  private registerAnimationListeners(element: HTMLElement, resolve: Function, reject: Function): void {
     const animationStartEvent = this.animationStartEvent(element);
     const animationEndEvent = this.animationEndEvent(element);
 
     let startHandler: () => any;
     element.addEventListener(animationStartEvent, startHandler = () => {
-      this.log(`Animation start handler fired for element`, element);
       element.removeEventListener(animationStartEvent, startHandler);
       return startHandler;
     });
 
-    this.log(`Registered animation start listener for element`, element);
-
     let endHandler: () => any;
     element.addEventListener(animationEndEvent, endHandler = () => {
-      this.log(`Animation end handler fired for element`, element);
       element.removeEventListener(animationEndEvent, endHandler);
-      if (mode === AnimationMode.Hide) element.setAttribute('hidden', '');
       this.removeListeners(element, false);
       this.reset(element);
       resolve(element);
       return endHandler;
     });
-
-    this.log(`Registered animation end listener for element`, element);
 
     this.addListener(element, animationStartEvent, startHandler);
     this.addListener(element, animationEndEvent, endHandler, reject);
@@ -242,10 +199,9 @@ export class AnimationBuilder {
     if (!this.listeners.has(element)) return;
 
     this.listeners.get(element)
-      .forEach(ref => {
-        element.removeEventListener(ref.eventName, ref.handler);
-        this.log(`Listener ${ref.eventName} removed for element`, element);
-        if (reject && ref.reject) ref.reject('animation_aborted');
+      .forEach(listener => {
+        listener.element.removeEventListener(listener.eventName, listener.handler);
+        if (reject && listener.reject) listener.reject('animation_aborted');
       });
 
     this.listeners.delete(element);
@@ -255,10 +211,9 @@ export class AnimationBuilder {
     if (!this.timeouts.has(element)) return;
 
     this.timeouts.get(element)
-      .forEach(ref => {
-        clearTimeout(ref.timeout);
-        this.log(`Timeout ${ref.timeout} removed for element`, element);
-        if (reject && ref.reject) ref.reject('animation_aborted');
+      .forEach(timeout => {
+        clearTimeout(timeout.timeout);
+        if (reject && timeout.reject) timeout.reject('animation_aborted');
       });
 
     this.timeouts.delete(element);
@@ -302,12 +257,12 @@ export class AnimationBuilder {
     return null;
   }
 
-  private applyProperties(element: HTMLElement, mode?: AnimationMode): void {
-    this.applyClasses(element, mode);
-    this.applyStyles(element, mode);
+  private applyProperties(element: HTMLElement): void {
+    this.applyClasses(element);
+    this.applyStyles(element);
   }
 
-  private applyStyles(element: HTMLElement, mode?: AnimationMode): void {
+  private applyStyles(element: HTMLElement): void {
     this.applyFillMode(element);
     this.applyTimingFunction(element);
     this.applyPlayState(element);
@@ -331,34 +286,23 @@ export class AnimationBuilder {
     this.styles.delete(element);
   }
 
-  private applyClasses(element: HTMLElement, mode?: AnimationMode): void {
+  private applyClasses(element: HTMLElement): void {
     element.classList.add(
       'animated',
       this.animationOptions.type,
       ...this.classes,
     );
-
-    switch (mode) {
-      case AnimationMode.Show:
-        element.classList.add('animated-show');
-        break;
-      case AnimationMode.Hide:
-        element.classList.add('animated-hide');
-        break;
-    }
   }
 
   private removeClasses(element: HTMLElement): void {
     element.classList.remove(
       'animated',
-      'animated-show',
-      'animated-hide',
       this.animationOptions.type,
       ...this.classes,
     );
   }
 
-  private applyStyle(element: HTMLElement, prop: string, value: string | number | boolean) {
+  private applyStyle(element: HTMLElement, prop: string, value: string|number|boolean) {
     let el = document.createElement('checkStyle');
 
     let styles: { [key: string]: string } = {
@@ -371,7 +315,7 @@ export class AnimationBuilder {
 
     for (let style in styles) {
       if (el.style[style] !== undefined) {
-        element.style[style] = value === undefined || value === null ? null : value;
+        element.style[style] = value === undefined || null ? null : value;
         break;
       }
     }
@@ -442,7 +386,7 @@ export class AnimationBuilder {
       element,
       'animation-fill-mode',
       this.animationOptions.fillMode ?
-        this.animationOptions.fillMode : null,
+      this.animationOptions.fillMode : null,
     );
 
     return this;

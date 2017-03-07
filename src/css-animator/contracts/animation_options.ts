@@ -1,5 +1,6 @@
 export interface AnimationOptions {
-  [key: string]: string|number;
+  [key: string]: string|number|boolean;
+  pin?: boolean;
   type?: string;
   fillMode?: string;
   timingFunction?: string;
