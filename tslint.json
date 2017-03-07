@@ -18,7 +18,8 @@
     "interface-over-type-literal": false,
     "prefer-const": false,
     "no-var-requires": false,
-    "switch-default": false
+    "switch-default": false,
+    "variable-name": false
   },
   "jsRules": {
 
