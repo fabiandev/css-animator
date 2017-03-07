@@ -140,7 +140,7 @@ this behavior set `reject: false` or call `setReject(true)` on `AnimationBuilder
 
 #### pin
 
-By default, an element will be positioned absolute while animating, to enable concurrent animations. If you want to keep the position property, you may set `pin` to `false`.
+By default, an element will be positioned fixed while animating, to enable concurrent animations. If you want to keep the position property, you may set `pin` to `false`.
 
 #### useVisibility
 
