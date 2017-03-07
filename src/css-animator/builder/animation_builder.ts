@@ -18,6 +18,8 @@ export class AnimationBuilder {
   public static DEBUG: boolean = true;
 
   public static defaultOptions: AnimationOptions = {
+    reject: true,
+    useVisibility: false,
     pin: true,
     type: 'bounce',
     fillMode: 'none',
@@ -49,15 +51,33 @@ export class AnimationBuilder {
   // Public Methods
 
   constructor() {
-    this.log('AnimationBuilder created.');
     this.classes = [];
     this.listeners = new Map<HTMLElement, ListenerRef[]>();
     this.timeouts = new Map<HTMLElement, TimeoutRef[]>();
     this.styles = new Map<HTMLElement, CSSStyleDeclaration>();
+    this.log('AnimationBuilder created.');
+  }
+
+  private hideElement(element: HTMLElement): void {
+    if (this.animationOptions.useVisibility) {
+      element.style.visibility = 'hidden';
+      return;
+    }
+
+    element.setAttribute('hidden', '');
+  }
+
+  private showElement(element: HTMLElement): void {
+    if (this.animationOptions.useVisibility) {
+      element.style.visibility = 'visible';
+      return;
+    }
+
+    element.removeAttribute('hidden');
   }
 
   public show(element: HTMLElement): Promise<HTMLElement> {
-    element.setAttribute('hidden', '');
+    this.hideElement(element);
     return this.animate(element, AnimationMode.Show);
   }
 
@@ -74,10 +94,10 @@ export class AnimationBuilder {
 
   public animate(element: HTMLElement, mode = AnimationMode.Animate): Promise<HTMLElement> {
     return new Promise<HTMLElement>((resolve: Function, reject: Function) => {
-      this.removeTimeouts(element, true);
+      this.removeTimeouts(element);
 
       const delay = setTimeout(() => {
-        this.reset(element, true, false, true);
+        this.reset(element);
         this.registerAnimationListeners(element, mode, resolve, reject);
         this.styles.set(element, Object.assign({}, element.style));
 
@@ -90,20 +110,19 @@ export class AnimationBuilder {
           const position = this.getPosition(element);
           element.style.display = initialDisplay;
 
-          element.style.position = 'fixed';
+          element.style.position = 'absolute';
           element.style.top = `${position.top}px`;
           element.style.left = `${position.left}px`;
           element.style.marginLeft = '0px';
 
-          // No idea what's going on...
-          if (computedPosition !== 'relative') {
+          if (computedPosition !== 'static' && computedPosition !== 'relative') {
             element.style.marginTop = '0px';
           }
         }
 
         this.nextFrame(() => {
           this.applyProperties(element, mode);
-          element.removeAttribute('hidden');
+          this.showElement(element);
         });
       }, this.animationOptions.delay);
 
@@ -176,10 +195,11 @@ export class AnimationBuilder {
 
   private getPosition(element: HTMLElement): { left: number, top: number } {
     let el = element.getBoundingClientRect();
+
     return {
       left: el.left + window.scrollX,
       top: el.top + window.scrollY,
-    }
+    };
   }
 
   private registerAnimationListeners(element: HTMLElement, mode: AnimationMode, resolve: Function, reject: Function): void {
@@ -199,9 +219,10 @@ export class AnimationBuilder {
     element.addEventListener(animationEndEvent, endHandler = () => {
       this.log(`Animation end handler fired for element`, element);
       element.removeEventListener(animationEndEvent, endHandler);
-      if (mode === AnimationMode.Hide) element.setAttribute('hidden', '');
       this.removeListeners(element, false);
       this.reset(element);
+      if (mode === AnimationMode.Hide) this.hideElement(element);
+      if (mode === AnimationMode.Show) this.showElement(element);
       resolve(element);
       return endHandler;
     });
@@ -245,7 +266,7 @@ export class AnimationBuilder {
       .forEach(ref => {
         element.removeEventListener(ref.eventName, ref.handler);
         this.log(`Listener ${ref.eventName} removed for element`, element);
-        if (reject && ref.reject) ref.reject('animation_aborted');
+        if (reject && this.animationOptions.reject && ref.reject) ref.reject('animation_aborted');
       });
 
     this.listeners.delete(element);
@@ -258,7 +279,7 @@ export class AnimationBuilder {
       .forEach(ref => {
         clearTimeout(ref.timeout);
         this.log(`Timeout ${ref.timeout} removed for element`, element);
-        if (reject && ref.reject) ref.reject('animation_aborted');
+        if (reject && this.animationOptions.reject && ref.reject) ref.reject('animation_aborted');
       });
 
     this.timeouts.delete(element);
@@ -404,6 +425,40 @@ export class AnimationBuilder {
 
   public setOptions(options: AnimationOptions): AnimationBuilder {
     this.options = options;
+    return this;
+  }
+
+  get reject(): boolean {
+    return this.animationOptions.reject;
+  }
+
+  set reject(reject: boolean) {
+    this.animationOptions.reject = reject;
+  }
+
+  get pin(): boolean {
+    return this.animationOptions.pin;
+  }
+
+  set pin(pin: boolean) {
+    this.animationOptions.pin = pin;
+  }
+
+  public setPin(pin: boolean): AnimationBuilder {
+    this.pin = pin;
+    return this;
+  }
+
+  get useVisibility(): boolean {
+    return this.animationOptions.useVisibility;
+  }
+
+  set useVisibility(useVisibility: boolean) {
+    this.animationOptions.useVisibility = useVisibility;
+  }
+
+  public setUseVisibility(useVisibility: boolean): AnimationBuilder {
+    this.useVisibility = useVisibility;
     return this;
   }
 
