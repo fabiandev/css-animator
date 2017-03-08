@@ -8,9 +8,9 @@ import { AnimationService, AnimationBuilder } from 'css-animator';
   ],
   template: `
   <nav>
-    <button #showButton (click)="show(toAnimate, showButton)" [disabled]="isAnimating || isVisible">Show</button>
-    <button #shakeButton (click)="shake(toAnimate, shakeButton)" [disabled]="isAnimating || !isVisible">Shake</button>
-    <button #hideButton (click)="hide(toAnimate, hideButton)" [disabled]="isAnimating || !isVisible">Hide</button>
+    <button (click)="show(toAnimate)" [disabled]="isAnimating || isVisible">Show</button>
+    <button (click)="shake(toAnimate)" [disabled]="isAnimating || !isVisible">Shake</button>
+    <button (click)="hide(toAnimate)" [disabled]="isAnimating || !isVisible">Hide</button>
   </nav>
   <div
     #toAnimate
@@ -43,7 +43,7 @@ export class AppComponent {
     this.animator = animationService.builder();
   }
 
-  public show(element: HTMLElement, button: HTMLElement) {
+  public show(element: HTMLElement) {
     this.isAnimating = true;
 
     this.animator
@@ -60,7 +60,7 @@ export class AppComponent {
       });
   }
 
-  public shake(element: HTMLElement, button: HTMLElement) {
+  public shake(element: HTMLElement) {
     this.isAnimating = true;
 
     this.animator
@@ -76,7 +76,7 @@ export class AppComponent {
       });
   }
 
-  public hide(element: HTMLElement, button: HTMLElement) {
+  public hide(element: HTMLElement) {
     this.isAnimating = true;
 
     this.animator
