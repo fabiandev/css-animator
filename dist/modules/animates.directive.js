@@ -11,8 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var core_1 = require('@angular/core');
-var animation_service_1 = require('./animation.service');
+Object.defineProperty(exports, "__esModule", { value: true });
+var core_1 = require("@angular/core");
+var animation_service_1 = require("./animation.service");
 var AnimatesDirective = (function () {
     function AnimatesDirective(_elementRef, animationService) {
         this._elementRef = _elementRef;
@@ -32,6 +33,15 @@ var AnimatesDirective = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(AnimatesDirective.prototype, "animatesInitMode", {
+        set: function (mode) {
+            if (typeof mode === 'string') {
+                this._initMode = mode.toLowerCase();
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(AnimatesDirective.prototype, "animationBuilder", {
         get: function () {
             return this._animationBuilder;
@@ -43,10 +53,20 @@ var AnimatesDirective = (function () {
         if (!this._initOptions) {
             return;
         }
-        this._animationBuilder
-            .setOptions(this._initOptions)
-            .show(this._elementRef.nativeElement)
-            .then(function (element) { return element; }, function (error) {
+        var promise;
+        var builder = this._animationBuilder
+            .setOptions(this._initOptions);
+        switch (this._initMode) {
+            case 'show':
+                promise = builder.show(this._elementRef.nativeElement);
+                break;
+            case 'hide':
+                promise = builder.hide(this._elementRef.nativeElement);
+                break;
+            default:
+                promise = builder.animate(this._elementRef.nativeElement);
+        }
+        promise.then(function (element) { return element; }, function (error) {
             // Animation interrupted
         });
     };
@@ -115,19 +135,19 @@ var AnimatesDirective = (function () {
         }
         this._animationBuilder.setOptions(this._defaultOptions);
     };
-    AnimatesDirective = __decorate([
-        core_1.Directive({
-            selector: '[animates]',
-            exportAs: 'animates',
-            inputs: [
-                'animates',
-                'animatesOnInit'
-            ]
-        }),
-        __param(0, core_1.Inject(core_1.ElementRef)),
-        __param(1, core_1.Inject(animation_service_1.AnimationService)), 
-        __metadata('design:paramtypes', [core_1.ElementRef, animation_service_1.AnimationService])
-    ], AnimatesDirective);
     return AnimatesDirective;
 }());
+AnimatesDirective = __decorate([
+    core_1.Directive({
+        selector: '[animates]',
+        exportAs: 'animates',
+        inputs: [
+            'animates',
+            'animatesOnInit',
+            'animatesInitMode'
+        ]
+    }),
+    __param(0, core_1.Inject(core_1.ElementRef)), __param(1, core_1.Inject(animation_service_1.AnimationService)),
+    __metadata("design:paramtypes", [core_1.ElementRef, animation_service_1.AnimationService])
+], AnimatesDirective);
 exports.AnimatesDirective = AnimatesDirective;

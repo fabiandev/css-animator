@@ -1,22 +1,25 @@
 var assign = require('lodash.assign');
 var del = require('del');
+var filter = require('gulp-filter');
 var gulp = require('gulp');
 var merge = require('merge2');
 var rename = require('gulp-rename');
 var runSequence = require('run-sequence');
 var ts = require('gulp-typescript');
 var uglify = require('gulp-uglify');
+var webpack = require('webpack-stream');
 
 var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
   declaration: true
 });
 
-gulp.task('default', ['copy', 'process', 'bundle']);
+gulp.task('default', ['copy', 'process', 'bundle', 'example']);
 gulp.task('clean', ['clean:process', 'clean:bundle']);
 gulp.task('copy', ['copy:readme', 'copy:license']);
+gulp.task('example', ['example:build', 'example:copy']);
 
 gulp.task('build', function(done) {
-  runSequence('clean', 'copy', 'process', 'bundle', done);
+  runSequence('clean', 'copy', 'process', 'bundle', 'example', done);
 });
 
 gulp.task('watch-build', function(done) {
@@ -28,7 +31,9 @@ gulp.task('watch', function() {
 });
 
 gulp.task('process', function() {
-  var tsResult = gulp.src(['./typings/index.d.ts', './src/**/*.ts'], {
+  var f = filter(['**', '!src/*.*']);
+
+  var tsResult = gulp.src(['./src/**/*.ts'], {
       base: './src/css-animator'
     })
     .pipe(ts(assign(tsConfig, {
@@ -36,13 +41,13 @@ gulp.task('process', function() {
     })));
 
   return merge([
-    tsResult.dts.pipe(gulp.dest('./dist')),
-    tsResult.js.pipe(gulp.dest('./dist'))
+    tsResult.dts.pipe(f).pipe(gulp.dest('./dist')),
+    tsResult.js.pipe(f).pipe(gulp.dest('./dist'))
   ]);
 });
 
 gulp.task('bundle', function() {
-  var tsResult = gulp.src(['./typings/index.d.ts', './src/**/*.ts'])
+  var tsResult = gulp.src(['./src/**/*.ts'])
     .pipe(ts(assign(tsConfig, {
       module: 'system',
       outFile: 'css-animator.js',
@@ -58,6 +63,20 @@ gulp.task('bundle', function() {
       }
     }))
     .pipe(gulp.dest('./dist/bundles'));
+});
+
+gulp.task('example:build', function() {
+  return gulp.src('example/index.ts')
+    .pipe(webpack(require('./webpack.config.js')))
+    .pipe(gulp.dest('example/scripts'));
+});
+
+gulp.task('example:copy', function() {
+  return gulp.src([
+    './node_modules/animate.css/animate.css',
+    './node_modules/normalize.css/normalize.css'
+  ])
+    .pipe(gulp.dest('example/styles'));
 });
 
 gulp.task('clean:process', function() {

@@ -128,11 +128,32 @@ animates="{ type: 'wobble', duration: '2000' }" // default options are optional
 
 This are all options supported. You may notice, that these are all [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation), so you can look up which values are supported.  
 
-By default, an element will be positioned absolute while animating, to enable concurrent animations. If you want to keep the position property, you may set `keepFlow: true`, or call `setKeepFlow(true)` on `AnimationBuilder`.
+An exception is the `delay` option, as it is handled via JavaScript timeouts. If you really want to
+use the CSS rule, you can use `applyDelayAsStyle` to apply the delay immediately on the element.
+
+### Special Options:
+
+#### reject
+
+The promise for an animation is rejected with `animation_aborted`, if it is interrupted somehow. To change
+this behavior set `reject: false` or call `setReject(true)` on `AnimationBuilder`. You may also use the setter on the `AnimationBuilder` instance: `animator.reject = false`.
+
+#### pin
+
+By default, an element will be positioned fixed while animating, to enable concurrent animations. If you want to keep the position property, you may set `pin` to `false`.
+
+#### useVisibility
+
+`AnimationBuilder` uses the `hidden` attribute on elements to hide them. If you want to use the `visibility` CSS rule,
+set `useVisibility` to `true`.
+
 
 ```ts
 export interface AnimationOptions {
   [key: string]: string|number;
+  reject?: boolean;
+  useVisibility?: boolean;
+  pin?: boolean;
   type?: string;
   fillMode?: string;
   timingFunction?: string;

@@ -10,396 +10,299 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-System.register("css-animator/contracts/animation_options", [], function(exports_1, context_1) {
+System.register("css-animator/contracts/animation_options", [], function (exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     return {
-        setters:[],
-        execute: function() {
+        setters: [],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("css-animator/contracts/element_props", [], function(exports_2, context_2) {
+System.register("css-animator/contracts/element_props", [], function (exports_2, context_2) {
     "use strict";
     var __moduleName = context_2 && context_2.id;
     return {
-        setters:[],
-        execute: function() {
+        setters: [],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("css-animator/contracts/listener_ref", [], function(exports_3, context_3) {
+System.register("css-animator/contracts/listener_ref", [], function (exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
     return {
-        setters:[],
-        execute: function() {
+        setters: [],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("css-animator/contracts/timeout_ref", [], function(exports_4, context_4) {
+System.register("css-animator/contracts/timeout_ref", [], function (exports_4, context_4) {
     "use strict";
     var __moduleName = context_4 && context_4.id;
     return {
-        setters:[],
-        execute: function() {
+        setters: [],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("css-animator/contracts", [], function(exports_5, context_5) {
+System.register("css-animator/contracts", [], function (exports_5, context_5) {
     "use strict";
     var __moduleName = context_5 && context_5.id;
     return {
-        setters:[],
-        execute: function() {
+        setters: [],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("css-animator/builder/animation_builder", [], function(exports_6, context_6) {
+System.register("css-animator/builder/animation_builder", [], function (exports_6, context_6) {
     "use strict";
     var __moduleName = context_6 && context_6.id;
-    var AnimationBuilder;
+    var AnimationMode, AnimationBuilder;
     return {
-        setters:[],
-        execute: function() {
+        setters: [],
+        execute: function () {
+            (function (AnimationMode) {
+                AnimationMode[AnimationMode["Animate"] = 0] = "Animate";
+                AnimationMode[AnimationMode["Show"] = 1] = "Show";
+                AnimationMode[AnimationMode["Hide"] = 2] = "Hide";
+            })(AnimationMode || (AnimationMode = {}));
+            exports_6("AnimationMode", AnimationMode);
+            ;
             AnimationBuilder = (function () {
+                // Public Methods
                 function AnimationBuilder() {
-                    this._type = 'bounce';
-                    this._fillMode = 'none';
-                    this._timingFunction = 'ease';
-                    this._playState = 'running';
-                    this._direction = 'normal';
-                    this._duration = 1000;
-                    this._delay = 0;
-                    this._iterationCount = 1;
-                    this._animationClasses = [];
-                    this._classHistory = [];
-                    this._listeners = [];
-                    this._timeouts = [];
-                    this._keepFlow = false;
+                    this.animationOptions = Object.assign({}, AnimationBuilder.defaultOptions);
+                    this.defaultOptions = Object.assign({}, AnimationBuilder.defaultOptions);
+                    this.classes = [];
+                    this.activeClasses = new Map();
+                    this.listeners = new Map();
+                    this.timeouts = new Map();
+                    this.styles = new Map();
+                    this.log('AnimationBuilder created.');
                 }
-                AnimationBuilder.prototype.show = function (element) {
+                AnimationBuilder.prototype.hideElement = function (element) {
+                    if (this.animationOptions.useVisibility) {
+                        element.style.visibility = 'hidden';
+                        return;
+                    }
                     element.setAttribute('hidden', '');
-                    return this.animate(element, 'show');
+                };
+                AnimationBuilder.prototype.showElement = function (element) {
+                    if (this.animationOptions.useVisibility) {
+                        element.style.visibility = 'visible';
+                        return;
+                    }
+                    element.removeAttribute('hidden');
+                };
+                AnimationBuilder.prototype.show = function (element) {
+                    this.hideElement(element);
+                    return this.animate(element, AnimationMode.Show);
                 };
                 AnimationBuilder.prototype.hide = function (element) {
-                    return this.animate(element, 'hide');
+                    return this.animate(element, AnimationMode.Hide);
                 };
-                AnimationBuilder.prototype.stop = function (element, reset, detach) {
+                AnimationBuilder.prototype.stop = function (element, reset) {
                     if (reset === void 0) { reset = true; }
-                    if (detach === void 0) { detach = true; }
-                    if (detach === true) {
-                        this.removeTimeoutsForElement(element, true, true);
-                        this.removeListenersForElement(element, true, true);
-                    }
-                    if (reset === true) {
-                        this.resetElement(element);
-                    }
+                    this.removeTimeouts(element);
+                    this.removeListeners(element);
+                    if (reset)
+                        this.reset(element);
                     return Promise.resolve(element);
                 };
                 AnimationBuilder.prototype.animate = function (element, mode) {
                     var _this = this;
-                    if (mode === void 0) { mode = 'default'; }
+                    if (mode === void 0) { mode = AnimationMode.Animate; }
                     return new Promise(function (resolve, reject) {
-                        _this.removeTimeoutsForElement(element, true, true);
-                        var delayTimeout;
-                        delayTimeout = setTimeout(function () {
-                            // Remove listeners if an animation is in progress on this element
-                            // and reject promise if an animation was interrupted
-                            _this.removeTimeoutsForElement(element, true, false);
-                            _this.removeListenersForElement(element, true, true);
-                            // Reset styles, remove animation classes (if currently being animated)
-                            _this.resetElement(element);
-                            // Event to listen for (animation end)
-                            var animationEndEvent = _this.animationEndEvent(element);
-                            var animationStartEvent = _this.animationStartEvent(element);
-                            element.removeAttribute('hidden');
-                            // Required to get position of element
-                            element.style.display = 'initial';
-                            var initialProps = _this.getElementInitialProperties(element);
-                            _this.pinElement(element, initialProps);
-                            // Apply all animation properties
-                            _this.applyAllProperties(element);
-                            _this.applyCssClasses(element);
-                            element.classList.add('animated-' + mode);
-                            // Listen for animation start
-                            var startHandler;
-                            element.addEventListener(animationStartEvent, startHandler = function () {
-                                element.removeEventListener(animationStartEvent, startHandler);
-                                // this.resetElement(element);
-                                return startHandler;
-                            }); // listener
-                            // Listen for animation end
-                            var endHandler;
-                            element.addEventListener(animationEndEvent, endHandler = function () {
-                                element.removeEventListener(animationEndEvent, endHandler);
-                                _this.removeListenersForElement(element, false);
-                                _this.resetElement(element);
-                                element.classList.remove('animated-' + mode);
-                                if (mode === 'hide') {
-                                    element.setAttribute('hidden', '');
-                                    element.style.display = null;
+                        _this.removeTimeouts(element);
+                        var delay = setTimeout(function () {
+                            _this.reset(element, true, false, true);
+                            _this.registerAnimationListeners(element, mode, resolve, reject);
+                            _this.styles.set(element, Object.assign({}, element.style));
+                            var classes = _this.classes.slice(0);
+                            switch (mode) {
+                                case AnimationMode.Show:
+                                    classes.push('animated-show');
+                                    break;
+                                case AnimationMode.Hide:
+                                    classes.push('animated-hide');
+                                    break;
+                            }
+                            classes.push('animated', _this.animationOptions.type);
+                            _this.activeClasses.set(element, classes);
+                            if (_this.animationOptions.pin) {
+                                if (mode === AnimationMode.Show) {
+                                    element.style.visibility = 'hidden';
                                 }
-                                resolve(element);
-                                return endHandler;
-                            }); // listener
-                            // Keep a reference to the listener
-                            _this._listeners.push({
-                                element: element,
-                                eventName: animationStartEvent,
-                                handler: startHandler
+                                _this.showElement(element);
+                                var position = _this.getPosition(element);
+                                element.style.position = 'fixed';
+                                element.style.top = position.top + "px";
+                                element.style.left = position.left + "px";
+                                element.style.width = position.width + "px";
+                                element.style.height = position.height + "px";
+                                element.style.margin = '0px';
+                            }
+                            _this.nextFrame(function () {
+                                element.style.visibility = 'visible';
+                                _this.showElement(element);
+                                _this.applyProperties(element, mode);
                             });
-                            _this._listeners.push({
-                                element: element,
-                                eventName: animationEndEvent,
-                                handler: endHandler,
-                                reject: reject,
-                            });
-                        }, _this._delay); // delayTimeout
-                        _this._timeouts.push({
-                            element: element,
-                            timeout: delayTimeout,
-                            reject: reject,
-                        });
-                    }); // promise
+                        }, _this.animationOptions.delay);
+                        _this.log("Timeout " + delay + " registered for element", element);
+                        _this.addTimeout(element, delay, reject);
+                    });
+                };
+                AnimationBuilder.prototype.reset = function (element, removePending, rejectTimeouts, rejectListeners) {
+                    if (removePending === void 0) { removePending = true; }
+                    if (rejectTimeouts === void 0) { rejectTimeouts = false; }
+                    if (rejectListeners === void 0) { rejectListeners = false; }
+                    if (removePending) {
+                        this.removeTimeouts(element, rejectTimeouts);
+                        this.removeListeners(element, rejectListeners);
+                    }
+                    this.removeStyles(element);
+                    this.removeClasses(element);
+                };
+                AnimationBuilder.prototype.dispose = function () {
+                    this.timeouts.forEach(function (refs) {
+                        for (var _i = 0, refs_1 = refs; _i < refs_1.length; _i++) {
+                            var t = refs_1[_i];
+                            clearTimeout(t.timeout);
+                        }
+                    });
+                    this.listeners.forEach(function (refs, el) {
+                        for (var _i = 0, refs_2 = refs; _i < refs_2.length; _i++) {
+                            var l = refs_2[_i];
+                            el.removeEventListener(l.eventName, l.handler);
+                        }
+                    });
+                    this.classes = [];
+                    this.styles = new Map();
+                    this.timeouts = new Map();
+                    this.listeners = new Map();
                 };
                 AnimationBuilder.prototype.addAnimationClass = function (name) {
-                    if (this._animationClasses.indexOf(name) === -1) {
-                        this._animationClasses.push(name);
+                    if (this.classes.indexOf(name) === -1) {
+                        this.classes.push(name);
                     }
                     return this;
                 };
                 AnimationBuilder.prototype.removeAnimationClass = function (name) {
-                    var index = this._animationClasses.indexOf(name);
+                    var index = this.classes.indexOf(name);
                     if (index !== -1) {
-                        this._animationClasses.splice(index, 1);
+                        this.classes.splice(index, 1);
                     }
                     return this;
                 };
-                AnimationBuilder.prototype.setOptions = function (options) {
-                    var method;
-                    for (var option in options) {
-                        if (this.checkValue(options[option])) {
-                            method = 'set' + option.charAt(0).toUpperCase() + option.slice(1);
-                            if (typeof this[method] === 'function') {
-                                this[method](options[option]);
-                            }
-                        }
+                // Private Methods
+                AnimationBuilder.prototype.log = function () {
+                    var values = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        values[_i] = arguments[_i];
                     }
-                    return this;
-                };
-                AnimationBuilder.prototype.setType = function (type) {
-                    if (this._classHistory.indexOf(type) === -1) {
-                        this._classHistory.push(type);
+                    if (AnimationBuilder.DEBUG) {
+                        console.log.apply(console, ['css-animator:'].concat(values));
                     }
-                    this._type = type;
-                    return this;
                 };
-                AnimationBuilder.prototype.setFillMode = function (fillMode) {
-                    this._fillMode = fillMode;
-                    return this;
-                };
-                AnimationBuilder.prototype.setTimingFunction = function (timingFunction) {
-                    this._timingFunction = timingFunction;
-                    return this;
-                };
-                AnimationBuilder.prototype.setPlayState = function (playState) {
-                    this._playState = playState;
-                    return this;
-                };
-                AnimationBuilder.prototype.setDirection = function (direction) {
-                    this._direction = direction;
-                    return this;
-                };
-                AnimationBuilder.prototype.setDuration = function (duration) {
-                    this._duration = duration;
-                    return this;
-                };
-                AnimationBuilder.prototype.setDelay = function (delay) {
-                    this._delay = delay;
-                    return this;
-                };
-                AnimationBuilder.prototype.setIterationCount = function (iterationCount) {
-                    this._iterationCount = iterationCount;
-                    return this;
-                };
-                AnimationBuilder.prototype.applyAllProperties = function (element) {
-                    this.applyFillMode(element);
-                    this.applyTimingFunction(element);
-                    this.applyPlayState(element);
-                    this.applyDirection(element);
-                    this.applyDuration(element);
-                    // this.applyDelay(element);
-                    this.applyIterationCount(element);
-                    return this;
-                };
-                AnimationBuilder.prototype.applyFillMode = function (element) {
-                    this.applyStyle(element, 'animation-fill-mode', this._fillMode ? this._fillMode : '');
-                    return this;
-                };
-                AnimationBuilder.prototype.applyTimingFunction = function (element) {
-                    this.applyStyle(element, 'animation-timing-function', this._timingFunction ? this._timingFunction : '');
-                    return this;
-                };
-                AnimationBuilder.prototype.applyPlayState = function (element) {
-                    this.applyStyle(element, 'animation-play-state', this._playState ? this._playState : '');
-                    return this;
-                };
-                AnimationBuilder.prototype.applyDirection = function (element) {
-                    this.applyStyle(element, 'animation-direction', this._direction ? this._direction : '');
-                    return this;
-                };
-                AnimationBuilder.prototype.applyDuration = function (element) {
-                    this.applyStyle(element, 'animation-duration', this._duration ? this._duration + 'ms' : '');
-                    return this;
-                };
-                AnimationBuilder.prototype.applyDelay = function (element) {
-                    this.applyStyle(element, 'animation-delay', this._delay ? this._delay + 'ms' : '');
-                    return this;
-                };
-                AnimationBuilder.prototype.applyIterationCount = function (element) {
-                    this.applyStyle(element, 'animation-iteration-count', this._iterationCount ? this._iterationCount : '');
-                    return this;
-                };
-                AnimationBuilder.prototype.setKeepFlow = function (keepFlow) {
-                    this._keepFlow = keepFlow;
-                    return this;
-                };
-                Object.defineProperty(AnimationBuilder.prototype, "type", {
-                    get: function () {
-                        return this._type;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(AnimationBuilder.prototype, "fillMode", {
-                    get: function () {
-                        return this._fillMode;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(AnimationBuilder.prototype, "timingFunction", {
-                    get: function () {
-                        return this._timingFunction;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(AnimationBuilder.prototype, "playState", {
-                    get: function () {
-                        return this._playState;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(AnimationBuilder.prototype, "direction", {
-                    get: function () {
-                        return this._direction;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(AnimationBuilder.prototype, "delay", {
-                    get: function () {
-                        return this._delay;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(AnimationBuilder.prototype, "iterationCount", {
-                    get: function () {
-                        return this._iterationCount;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(AnimationBuilder.prototype, "keepFlow", {
-                    get: function () {
-                        return this._keepFlow;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                AnimationBuilder.prototype.applyStyle = function (element, property, value, shim) {
-                    if (shim === void 0) { shim = true; }
-                    if (shim === true) {
-                        element.style['-o-' + property] = value;
-                        element.style['-ms-' + property] = value;
-                        element.style['-moz-' + property] = value;
-                        element.style['-webkit-' + property] = value;
-                    }
-                    element.style[property] = value;
-                    return this;
-                };
-                AnimationBuilder.prototype.removeListenersForElement = function (element, detach, reject) {
-                    var _this = this;
-                    if (detach === void 0) { detach = true; }
-                    if (reject === void 0) { reject = false; }
-                    var toRemove = [];
-                    for (var i = 0; i < this._listeners.length; i++) {
-                        if (this._listeners[i].element !== element) {
-                            continue;
-                        }
-                        var data = this._listeners[i];
-                        if (detach) {
-                            data.element.removeEventListener(data.eventName, data.handler);
-                        }
-                        if (reject && data.reject) {
-                            data.reject('animation_aborted');
-                        }
-                        toRemove.push(i);
-                    }
-                    toRemove.forEach(function (value) {
-                        _this._listeners.splice(value, 1);
+                AnimationBuilder.prototype.nextFrame = function (fn) {
+                    AnimationBuilder.raf(function () {
+                        AnimationBuilder.raf(fn);
                     });
                 };
-                AnimationBuilder.prototype.removeTimeoutsForElement = function (element, detach, reject) {
+                AnimationBuilder.prototype.getPosition = function (element) {
+                    var el = element.getBoundingClientRect();
+                    return {
+                        left: el.left + window.scrollX,
+                        top: el.top + window.scrollY,
+                        width: el.width,
+                        height: el.height,
+                    };
+                };
+                AnimationBuilder.prototype.registerAnimationListeners = function (element, mode, resolve, reject) {
                     var _this = this;
-                    if (detach === void 0) { detach = true; }
-                    if (reject === void 0) { reject = false; }
-                    var toRemove = [];
-                    for (var i = 0; i < this._timeouts.length; i++) {
-                        if (this._timeouts[i].element !== element) {
-                            continue;
-                        }
-                        var data = this._timeouts[i];
-                        if (detach) {
-                            clearTimeout(data.timeout);
-                        }
-                        if (reject && data.reject) {
-                            data.reject('animation_aborted');
-                        }
-                        toRemove.push(i);
+                    var animationStartEvent = this.animationStartEvent(element);
+                    var animationEndEvent = this.animationEndEvent(element);
+                    var startHandler;
+                    element.addEventListener(animationStartEvent, startHandler = function () {
+                        _this.log("Animation start handler fired for element", element);
+                        element.removeEventListener(animationStartEvent, startHandler);
+                        return startHandler;
+                    });
+                    this.log("Registered animation start listener for element", element);
+                    var endHandler;
+                    element.addEventListener(animationEndEvent, endHandler = function () {
+                        _this.log("Animation end handler fired for element", element);
+                        element.removeEventListener(animationEndEvent, endHandler);
+                        _this.removeListeners(element, false);
+                        _this.reset(element, true, false, false);
+                        if (mode === AnimationMode.Hide)
+                            _this.hideElement(element);
+                        if (mode === AnimationMode.Show)
+                            _this.showElement(element);
+                        resolve(element);
+                        return endHandler;
+                    });
+                    this.log("Registered animation end listener for element", element);
+                    this.addListener(element, animationStartEvent, startHandler);
+                    this.addListener(element, animationEndEvent, endHandler, reject);
+                };
+                AnimationBuilder.prototype.addTimeout = function (element, timeout, reject) {
+                    if (!this.timeouts.has(element)) {
+                        this.timeouts.set(element, []);
                     }
-                    toRemove.forEach(function (value) {
-                        _this._timeouts.splice(value, 1);
+                    this.timeouts.get(element).push({
+                        timeout: timeout,
+                        reject: reject,
                     });
                 };
-                AnimationBuilder.prototype.resetElement = function (element) {
-                    this.removeCssClasses(element);
-                    var initialProps = JSON.parse(element.getAttribute('data-reset-styles'));
-                    // Reset or remove inline styles (default could be passed as third parameter)
-                    element.style.bottom = this.getValueOrDefault(initialProps, 'bottom', null);
-                    element.style.height = this.getValueOrDefault(initialProps, 'height', null);
-                    element.style.left = this.getValueOrDefault(initialProps, 'left', null);
-                    element.style.right = this.getValueOrDefault(initialProps, 'right', null);
-                    element.style.top = this.getValueOrDefault(initialProps, 'top', null);
-                    element.style.width = this.getValueOrDefault(initialProps, 'width', null);
-                    element.style.position = this.getValueOrDefault(initialProps, 'position', null);
-                    element.style.display = this.getValueOrDefault(initialProps, 'display', null);
-                    element.removeAttribute('data-reset-styles');
-                    return this;
+                AnimationBuilder.prototype.addListener = function (element, eventName, handler, reject) {
+                    if (!this.listeners.has(element)) {
+                        this.listeners.set(element, []);
+                    }
+                    var classes = Object.assign({}, this.classes);
+                    this.listeners.get(element).push({
+                        eventName: eventName,
+                        handler: handler,
+                        reject: reject,
+                        classes: classes,
+                    });
                 };
-                // https://jonsuh.com/blog/detect-the-end-of-css-animations-and-transitions-with-javascript/
+                AnimationBuilder.prototype.removeListeners = function (element, reject) {
+                    var _this = this;
+                    if (reject === void 0) { reject = false; }
+                    if (!this.listeners.has(element))
+                        return;
+                    this.listeners.get(element)
+                        .forEach(function (ref) {
+                        element.removeEventListener(ref.eventName, ref.handler);
+                        _this.log("Listener " + ref.eventName + " removed for element", element);
+                        if (reject && _this.animationOptions.reject && ref.reject)
+                            ref.reject('animation_aborted');
+                    });
+                    this.listeners.delete(element);
+                };
+                AnimationBuilder.prototype.removeTimeouts = function (element, reject) {
+                    var _this = this;
+                    if (reject === void 0) { reject = false; }
+                    if (!this.timeouts.has(element))
+                        return;
+                    this.timeouts.get(element)
+                        .forEach(function (ref) {
+                        clearTimeout(ref.timeout);
+                        _this.log("Timeout " + ref.timeout + " removed for element", element);
+                        if (reject && _this.animationOptions.reject && ref.reject)
+                            ref.reject('animation_aborted');
+                    });
+                    this.timeouts.delete(element);
+                };
                 AnimationBuilder.prototype.animationEndEvent = function (element) {
-                    var el = document.createElement("endAnimationElement");
-                    var animations;
-                    animations = {
-                        'animation': 'animationend',
-                        'OAnimation': 'oAnimationEnd',
-                        'MozAnimation': 'animationend',
-                        'WebkitAnimation': 'webkitAnimationEnd'
+                    var el = document.createElement('endAnimationElement');
+                    var animations = {
+                        animation: 'animationend',
+                        OAnimation: 'oAnimationEnd',
+                        MozAnimation: 'animationend',
+                        WebkitAnimation: 'webkitAnimationEnd',
                     };
                     for (var animation in animations) {
                         if (el.style[animation] !== undefined) {
@@ -409,13 +312,12 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                     return null;
                 };
                 AnimationBuilder.prototype.animationStartEvent = function (element) {
-                    var el = document.createElement("startAnimationElement");
-                    var animations;
-                    animations = {
-                        'animation': 'animationstart',
-                        'OAnimation': 'oAnimationStart',
-                        'MozAnimation': 'animationstart',
-                        'WebkitAnimation': 'webkitAnimationStart'
+                    var el = document.createElement('startAnimationElement');
+                    var animations = {
+                        animation: 'animationstart',
+                        OAnimation: 'oAnimationStart',
+                        MozAnimation: 'animationstart',
+                        WebkitAnimation: 'webkitAnimationStart',
                     };
                     for (var animation in animations) {
                         if (el.style[animation] !== undefined) {
@@ -424,143 +326,365 @@ System.register("css-animator/builder/animation_builder", [], function(exports_6
                     }
                     return null;
                 };
-                AnimationBuilder.prototype.applyCssClasses = function (element, add) {
-                    if (add === void 0) { add = true; }
-                    this._animationClasses.forEach(function (name) {
-                        if (add === true) {
-                            element.classList.add(name);
+                AnimationBuilder.prototype.applyProperties = function (element, mode) {
+                    this.applyClasses(element, mode);
+                    this.applyStyles(element, mode);
+                };
+                AnimationBuilder.prototype.applyStyles = function (element, mode) {
+                    this.applyFillMode(element);
+                    this.applyTimingFunction(element);
+                    this.applyPlayState(element);
+                    this.applyDirection(element);
+                    this.applyDuration(element);
+                    this.applyIterationCount(element);
+                };
+                AnimationBuilder.prototype.removeStyles = function (element) {
+                    if (!this.styles.has(element))
+                        return;
+                    var styles = this.styles.get(element);
+                    element.removeAttribute('style');
+                    for (var style in styles) {
+                        if (styles.hasOwnProperty(style)) {
+                            element.style[style] = styles[style];
                         }
-                        else {
-                            element.classList.remove(name);
-                        }
-                    });
-                    if (add === true) {
-                        element.classList.add('animated');
-                        element.classList.add(this._type);
                     }
-                    else {
-                        element.classList.remove('animated');
-                        element.classList.remove('animated-show');
-                        element.classList.remove('animated-hide');
-                        element.classList.remove(this._type);
-                    }
-                    if (add !== true) {
-                        this._classHistory.forEach(function (name) {
-                            element.classList.remove(name);
-                        });
-                    }
-                    return this;
+                    this.styles.delete(element);
                 };
-                AnimationBuilder.prototype.removeCssClasses = function (element) {
-                    this.applyCssClasses(element, false);
-                    return this;
+                AnimationBuilder.prototype.applyClasses = function (element, mode) {
+                    var active = this.activeClasses.get(element) || [];
+                    (_a = element.classList).add.apply(_a, ['animated'].concat(active));
+                    var _a;
                 };
-                AnimationBuilder.prototype.getElementPosition = function (element) {
-                    return element.getBoundingClientRect();
+                AnimationBuilder.prototype.removeClasses = function (element) {
+                    var active = this.activeClasses.get(element) || [];
+                    (_a = element.classList).remove.apply(_a, ['animated',
+                        'animated-show',
+                        'animated-hide'].concat(active));
+                    this.activeClasses.delete(element);
+                    var _a;
                 };
-                AnimationBuilder.prototype.getElementInitialProperties = function (element) {
-                    return {
-                        position: element.style.position,
-                        display: element.style.display,
-                        bottom: element.style.bottom,
-                        height: element.style.height,
-                        left: element.style.left,
-                        right: element.style.right,
-                        top: element.style.top,
-                        width: element.style.width
+                AnimationBuilder.prototype.applyStyle = function (element, prop, value) {
+                    var el = document.createElement('checkStyle');
+                    var styles = {
+                        standard: this.camelCase(prop),
+                        webkit: this.camelCase("-webkit-" + prop),
+                        mozilla: this.camelCase("-moz-" + prop),
+                        opera: this.camelCase("-o-" + prop),
+                        explorer: this.camelCase("-ie-" + prop),
                     };
-                };
-                AnimationBuilder.prototype.pinElement = function (element, initialProps) {
-                    var position = this.getElementPosition(element);
-                    element.setAttribute('data-reset-styles', JSON.stringify(initialProps));
-                    // Support for concurrent animations on non-fixed elements
-                    if (!this._keepFlow) {
-                        element.style.bottom = position.bottom + 'px';
-                        element.style.height = position.height + 'px';
-                        element.style.left = position.left + 'px';
-                        element.style.right = position.right + 'px';
-                        element.style.top = position.top + 'px';
-                        element.style.width = position.width + 'px';
-                        element.style.position = 'fixed';
-                        element.style.display = 'inline-block';
+                    for (var style in styles) {
+                        if (!styles.hasOwnProperty(style))
+                            continue;
+                        if (el.style[styles[style]] !== undefined) {
+                            element.style[styles[style]] = value === undefined || value === null ? null : value;
+                            break;
+                        }
                     }
+                    return this;
                 };
-                AnimationBuilder.prototype.checkValue = function (value) {
-                    return (value === 0 || !!value);
+                AnimationBuilder.prototype.camelCase = function (input) {
+                    return input.toLowerCase().replace(/-(.)/g, function (match, group1) {
+                        return group1.toUpperCase();
+                    });
                 };
-                AnimationBuilder.prototype.getValueOrDefault = function (obj, objKey, fallback) {
-                    if (fallback === void 0) { fallback = ''; }
-                    return (obj && this.checkValue(obj[objKey]) ? obj[objKey] : fallback);
+                Object.defineProperty(AnimationBuilder.prototype, "defaults", {
+                    // Getters and Setters
+                    get: function () {
+                        return this.defaultOptions;
+                    },
+                    set: function (defaults) {
+                        this.defaultOptions = defaults;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setDefaults = function (defaults) {
+                    this.defaults = defaults;
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "options", {
+                    get: function () {
+                        return this.animationOptions;
+                    },
+                    set: function (options) {
+                        this.animationOptions = options;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setOptions = function (options) {
+                    this.options = options;
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "reject", {
+                    get: function () {
+                        return this.animationOptions.reject;
+                    },
+                    set: function (reject) {
+                        this.animationOptions.reject = reject;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(AnimationBuilder.prototype, "pin", {
+                    get: function () {
+                        return this.animationOptions.pin;
+                    },
+                    set: function (pin) {
+                        this.animationOptions.pin = pin;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setPin = function (pin) {
+                    this.pin = pin;
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "useVisibility", {
+                    get: function () {
+                        return this.animationOptions.useVisibility;
+                    },
+                    set: function (useVisibility) {
+                        this.animationOptions.useVisibility = useVisibility;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setUseVisibility = function (useVisibility) {
+                    this.useVisibility = useVisibility;
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "type", {
+                    get: function () {
+                        return this.animationOptions.type;
+                    },
+                    set: function (type) {
+                        this.animationOptions.type = type;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setType = function (type) {
+                    this.type = type;
+                    return this;
+                };
+                AnimationBuilder.prototype.applyType = function (element) {
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "fillMode", {
+                    get: function () {
+                        return this.animationOptions.fillMode;
+                    },
+                    set: function (fillMode) {
+                        this.animationOptions.fillMode = fillMode;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setFillMode = function (fillMode) {
+                    this.fillMode = fillMode;
+                    return this;
+                };
+                AnimationBuilder.prototype.applyFillMode = function (element) {
+                    this.applyStyle(element, 'animation-fill-mode', this.animationOptions.fillMode ?
+                        this.animationOptions.fillMode : null);
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "timingFunction", {
+                    get: function () {
+                        return this.animationOptions.timingFunction;
+                    },
+                    set: function (timingFunction) {
+                        this.animationOptions.timingFunction = timingFunction;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setTimingFunction = function (timingFunction) {
+                    this.timingFunction = timingFunction;
+                    return this;
+                };
+                AnimationBuilder.prototype.applyTimingFunction = function (element) {
+                    this.applyStyle(element, 'animation-timing-function', this.animationOptions.timingFunction);
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "playState", {
+                    get: function () {
+                        return this.animationOptions.playState;
+                    },
+                    set: function (playState) {
+                        this.animationOptions.playState = playState;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setPlayState = function (playState) {
+                    this.playState = playState;
+                    return this;
+                };
+                AnimationBuilder.prototype.applyPlayState = function (element) {
+                    this.applyStyle(element, 'animation-play-state', this.animationOptions.playState);
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "direction", {
+                    get: function () {
+                        return this.animationOptions.direction;
+                    },
+                    set: function (direction) {
+                        this.animationOptions.direction = direction;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setDirection = function (direction) {
+                    this.direction = direction;
+                    return this;
+                };
+                AnimationBuilder.prototype.applyDirection = function (element) {
+                    this.applyStyle(element, 'animation-direction', this.animationOptions.direction);
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "duration", {
+                    get: function () {
+                        return this.animationOptions.duration;
+                    },
+                    set: function (duration) {
+                        this.animationOptions.duration = duration;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setDuration = function (duration) {
+                    this.duration = duration;
+                    return this;
+                };
+                AnimationBuilder.prototype.applyDuration = function (element) {
+                    this.applyStyle(element, 'animation-duration', this.animationOptions.duration + "ms");
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "delay", {
+                    get: function () {
+                        return this.animationOptions.delay;
+                    },
+                    set: function (delay) {
+                        this.animationOptions.delay = delay;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setDelay = function (delay) {
+                    this.delay = delay;
+                    return this;
+                };
+                AnimationBuilder.prototype.applyDelayAsStyle = function (element) {
+                    this.applyStyle(element, 'animation-delay', this.animationOptions.delay);
+                    return this;
+                };
+                Object.defineProperty(AnimationBuilder.prototype, "iterationCount", {
+                    get: function () {
+                        return this.animationOptions.iterationCount;
+                    },
+                    set: function (iterationCount) {
+                        this.animationOptions.iterationCount = iterationCount;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                AnimationBuilder.prototype.setIterationCount = function (iterationCount) {
+                    this.iterationCount = iterationCount;
+                    return this;
+                };
+                AnimationBuilder.prototype.applyIterationCount = function (element) {
+                    this.applyStyle(element, 'animation-iteration-count', this.animationOptions.iterationCount);
+                    return this;
                 };
                 return AnimationBuilder;
             }());
+            // Members
+            AnimationBuilder.DEBUG = false;
+            AnimationBuilder.defaultOptions = {
+                reject: true,
+                useVisibility: false,
+                pin: true,
+                type: 'bounce',
+                fillMode: 'none',
+                timingFunction: 'ease',
+                playState: 'running',
+                direction: 'normal',
+                duration: 1000,
+                delay: 0,
+                iterationCount: 1,
+            };
+            AnimationBuilder.raf = window.requestAnimationFrame
+                ? window.requestAnimationFrame.bind(window)
+                : setTimeout;
             exports_6("AnimationBuilder", AnimationBuilder);
         }
-    }
+    };
 });
-System.register("css-animator/builder", ["css-animator/builder/animation_builder"], function(exports_7, context_7) {
+System.register("css-animator/builder", ["css-animator/builder/animation_builder"], function (exports_7, context_7) {
     "use strict";
     var __moduleName = context_7 && context_7.id;
     function exportStar_1(m) {
         var exports = {};
-        for(var n in m) {
+        for (var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
         exports_7(exports);
     }
     return {
-        setters:[
+        setters: [
             function (animation_builder_1_1) {
                 exportStar_1(animation_builder_1_1);
-            }],
-        execute: function() {
+            }
+        ],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("css-animator/modules/animation.service", ['@angular/core', "css-animator/builder"], function(exports_8, context_8) {
+System.register("css-animator/modules/animation.service", ["@angular/core", "css-animator/builder"], function (exports_8, context_8) {
     "use strict";
     var __moduleName = context_8 && context_8.id;
-    var core_1, builder_1;
-    var AnimationService;
+    var core_1, builder_1, AnimationService;
     return {
-        setters:[
+        setters: [
             function (core_1_1) {
                 core_1 = core_1_1;
             },
             function (builder_1_1) {
                 builder_1 = builder_1_1;
-            }],
-        execute: function() {
+            }
+        ],
+        execute: function () {
             AnimationService = (function () {
                 function AnimationService() {
                 }
                 AnimationService.prototype.builder = function () {
                     return new builder_1.AnimationBuilder();
                 };
-                AnimationService = __decorate([
-                    core_1.Injectable(), 
-                    __metadata('design:paramtypes', [])
-                ], AnimationService);
                 return AnimationService;
             }());
+            AnimationService = __decorate([
+                core_1.Injectable()
+            ], AnimationService);
             exports_8("AnimationService", AnimationService);
         }
-    }
+    };
 });
-System.register("css-animator/modules/animates.directive", ['@angular/core', "css-animator/modules/animation.service"], function(exports_9, context_9) {
+System.register("css-animator/modules/animates.directive", ["@angular/core", "css-animator/modules/animation.service"], function (exports_9, context_9) {
     "use strict";
     var __moduleName = context_9 && context_9.id;
-    var core_2, animation_service_1;
-    var AnimatesDirective;
+    var core_2, animation_service_1, AnimatesDirective;
     return {
-        setters:[
+        setters: [
             function (core_2_1) {
                 core_2 = core_2_1;
             },
             function (animation_service_1_1) {
                 animation_service_1 = animation_service_1_1;
-            }],
-        execute: function() {
+            }
+        ],
+        execute: function () {
             AnimatesDirective = (function () {
                 function AnimatesDirective(_elementRef, animationService) {
                     this._elementRef = _elementRef;
@@ -580,6 +704,15 @@ System.register("css-animator/modules/animates.directive", ['@angular/core', "cs
                     enumerable: true,
                     configurable: true
                 });
+                Object.defineProperty(AnimatesDirective.prototype, "animatesInitMode", {
+                    set: function (mode) {
+                        if (typeof mode === 'string') {
+                            this._initMode = mode.toLowerCase();
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 Object.defineProperty(AnimatesDirective.prototype, "animationBuilder", {
                     get: function () {
                         return this._animationBuilder;
@@ -591,10 +724,20 @@ System.register("css-animator/modules/animates.directive", ['@angular/core', "cs
                     if (!this._initOptions) {
                         return;
                     }
-                    this._animationBuilder
-                        .setOptions(this._initOptions)
-                        .show(this._elementRef.nativeElement)
-                        .then(function (element) { return element; }, function (error) {
+                    var promise;
+                    var builder = this._animationBuilder
+                        .setOptions(this._initOptions);
+                    switch (this._initMode) {
+                        case 'show':
+                            promise = builder.show(this._elementRef.nativeElement);
+                            break;
+                        case 'hide':
+                            promise = builder.hide(this._elementRef.nativeElement);
+                            break;
+                        default:
+                            promise = builder.animate(this._elementRef.nativeElement);
+                    }
+                    promise.then(function (element) { return element; }, function (error) {
                         // Animation interrupted
                     });
                 };
@@ -663,104 +806,108 @@ System.register("css-animator/modules/animates.directive", ['@angular/core', "cs
                     }
                     this._animationBuilder.setOptions(this._defaultOptions);
                 };
-                AnimatesDirective = __decorate([
-                    core_2.Directive({
-                        selector: '[animates]',
-                        exportAs: 'animates',
-                        inputs: [
-                            'animates',
-                            'animatesOnInit'
-                        ]
-                    }),
-                    __param(0, core_2.Inject(core_2.ElementRef)),
-                    __param(1, core_2.Inject(animation_service_1.AnimationService)), 
-                    __metadata('design:paramtypes', [core_2.ElementRef, animation_service_1.AnimationService])
-                ], AnimatesDirective);
                 return AnimatesDirective;
             }());
+            AnimatesDirective = __decorate([
+                core_2.Directive({
+                    selector: '[animates]',
+                    exportAs: 'animates',
+                    inputs: [
+                        'animates',
+                        'animatesOnInit',
+                        'animatesInitMode'
+                    ]
+                }),
+                __param(0, core_2.Inject(core_2.ElementRef)), __param(1, core_2.Inject(animation_service_1.AnimationService)),
+                __metadata("design:paramtypes", [core_2.ElementRef, animation_service_1.AnimationService])
+            ], AnimatesDirective);
             exports_9("AnimatesDirective", AnimatesDirective);
         }
-    }
+    };
 });
-System.register("css-animator/modules", ["css-animator/modules/animation.service", "css-animator/modules/animates.directive"], function(exports_10, context_10) {
+System.register("css-animator/modules", ["css-animator/modules/animation.service", "css-animator/modules/animates.directive"], function (exports_10, context_10) {
     "use strict";
     var __moduleName = context_10 && context_10.id;
     function exportStar_2(m) {
         var exports = {};
-        for(var n in m) {
+        for (var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
         exports_10(exports);
     }
     return {
-        setters:[
+        setters: [
             function (animation_service_2_1) {
                 exportStar_2(animation_service_2_1);
             },
             function (animates_directive_1_1) {
                 exportStar_2(animates_directive_1_1);
-            }],
-        execute: function() {
+            }
+        ],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("css-animator/index", ["css-animator/builder", "css-animator/modules"], function(exports_11, context_11) {
+System.register("css-animator/index", ["css-animator/builder", "css-animator/modules"], function (exports_11, context_11) {
     "use strict";
     var __moduleName = context_11 && context_11.id;
     function exportStar_3(m) {
         var exports = {};
-        for(var n in m) {
+        for (var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
         exports_11(exports);
     }
     return {
-        setters:[
+        setters: [
             function (builder_2_1) {
                 exportStar_3(builder_2_1);
             },
             function (modules_1_1) {
                 exportStar_3(modules_1_1);
-            }],
-        execute: function() {
+            }
+        ],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("css-animator", ["css-animator/index"], function(exports_12, context_12) {
+System.register("css-animator", ["css-animator/index"], function (exports_12, context_12) {
     "use strict";
     var __moduleName = context_12 && context_12.id;
     function exportStar_4(m) {
         var exports = {};
-        for(var n in m) {
+        for (var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
         exports_12(exports);
     }
     return {
-        setters:[
+        setters: [
             function (index_1_1) {
                 exportStar_4(index_1_1);
-            }],
-        execute: function() {
+            }
+        ],
+        execute: function () {
         }
-    }
+    };
 });
-System.register("index", ["css-animator/index"], function(exports_13, context_13) {
+System.register("index", ["css-animator/index"], function (exports_13, context_13) {
     "use strict";
     var __moduleName = context_13 && context_13.id;
     function exportStar_5(m) {
         var exports = {};
-        for(var n in m) {
+        for (var n in m) {
             if (n !== "default") exports[n] = m[n];
         }
         exports_13(exports);
     }
     return {
-        setters:[
+        setters: [
             function (index_2_1) {
                 exportStar_5(index_2_1);
-            }],
-        execute: function() {
+            }
+        ],
+        execute: function () {
         }
-    }
+    };
 });

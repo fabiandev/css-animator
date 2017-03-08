@@ -1,0 +1,61 @@
+body, html {
+    background-color: #f4f1ee;
+}
+
+header {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: 600;
+    margin-bottom: 45px;
+}
+
+nav {
+  text-align: center;
+}
+
+button {
+  margin-bottom: 40px
+}
+
+a {
+  color: #333;
+  text-decoration: none;
+}
+
+#github {
+  position: fixed;
+  bottom: 5px;
+  right: 10px;
+  font-size: 13px;
+}
+
+.ghlogo {
+  vertical-align: bottom;
+  display: inline-block;
+  padding-bottom: 1px;
+  height: 16px;
+}
+
+#builder {
+    position: absolute;
+    display: inline-block;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    border-right: 1px solid black;
+}
+
+#angular {
+    position: absolute;
+    display: inline-block;
+    right: 0;
+    width: 50%;
+    height: 100%;
+}
+
+#animate {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    background-color: magenta;
+}

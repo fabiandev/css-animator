@@ -6,10 +6,12 @@ export declare class AnimatesDirective implements OnInit {
     private _elementRef;
     private _defaultOptions;
     private _initOptions;
+    private _initMode;
     private _animationBuilder;
     animates: AnimationOptions;
     animatesOnInit: AnimationOptions;
-    animationBuilder: AnimationBuilder;
+    animatesInitMode: string;
+    readonly animationBuilder: AnimationBuilder;
     constructor(_elementRef: ElementRef, animationService: AnimationService);
     ngOnInit(): void;
     start(options?: AnimationOptions): Promise<HTMLElement>;

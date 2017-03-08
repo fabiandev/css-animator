@@ -1,421 +1,316 @@
-import { AnimationOptions, ElementProps, ListenerRef, TimeoutRef } from '../contracts';
+import {
+  AnimationOptions,
+  ElementProps,
+  ListenerRef,
+  TimeoutRef,
+} from '../contracts';
+
+export enum AnimationMode {
+  Animate,
+  Show,
+  Hide,
+};
 
 export class AnimationBuilder {
-  [key: string]: any;
 
-  private _type: string = 'bounce';
-  private _fillMode: string = 'none';
-  private _timingFunction: string = 'ease';
-  private _playState: string = 'running';
-  private _direction: string = 'normal';
-  private _duration: string | number = 1000;
-  private _delay: string | number = 0;
-  private _iterationCount: string | number = 1;
-  private _animationClasses: string[] = [];
-  private _classHistory: string[] = [];
-  private _listeners: ListenerRef[] = [];
-  private _timeouts: TimeoutRef[] = [];
-  private _keepFlow: boolean = false;
+  // Members
+
+  public static DEBUG: boolean = false;
+
+  public static defaultOptions: AnimationOptions = {
+    reject: true,
+    useVisibility: false,
+    pin: true,
+    type: 'bounce',
+    fillMode: 'none',
+    timingFunction: 'ease',
+    playState: 'running',
+    direction: 'normal',
+    duration: 1000,
+    delay: 0,
+    iterationCount: 1,
+  };
+
+  private static raf: Function = window.requestAnimationFrame
+    ? window.requestAnimationFrame.bind(window)
+    : setTimeout;
+
+  private animationOptions: AnimationOptions = Object.assign(
+    {}, AnimationBuilder.defaultOptions,
+  );
+
+  private defaultOptions: AnimationOptions = Object.assign(
+    {}, AnimationBuilder.defaultOptions,
+  );
+
+  private classes: string[];
+  private activeClasses: Map<HTMLElement, string[]>;
+  private listeners: Map<HTMLElement, ListenerRef[]>;
+  private timeouts: Map<HTMLElement, TimeoutRef[]>;
+  private styles: Map<HTMLElement, CSSStyleDeclaration>;
+
+  // Public Methods
+
+  constructor() {
+    this.classes = [];
+    this.activeClasses = new Map<HTMLElement, string[]>();
+    this.listeners = new Map<HTMLElement, ListenerRef[]>();
+    this.timeouts = new Map<HTMLElement, TimeoutRef[]>();
+    this.styles = new Map<HTMLElement, CSSStyleDeclaration>();
+    this.log('AnimationBuilder created.');
+  }
+
+  private hideElement(element: HTMLElement): void {
+    if (this.animationOptions.useVisibility) {
+      element.style.visibility = 'hidden';
+      return;
+    }
+
+    element.setAttribute('hidden', '');
+  }
+
+  private showElement(element: HTMLElement): void {
+    if (this.animationOptions.useVisibility) {
+      element.style.visibility = 'visible';
+      return;
+    }
+
+    element.removeAttribute('hidden');
+  }
 
   public show(element: HTMLElement): Promise<HTMLElement> {
-    element.setAttribute('hidden', '');
-    return this.animate(element, 'show');
+    this.hideElement(element);
+    return this.animate(element, AnimationMode.Show);
   }
 
   public hide(element: HTMLElement): Promise<HTMLElement> {
-    return this.animate(element, 'hide');
+    return this.animate(element, AnimationMode.Hide);
   }
 
-  public stop(element: HTMLElement, reset = true, detach = true): Promise<HTMLElement> {
-    if (detach === true) {
-      this.removeTimeoutsForElement(element, true, true);
-      this.removeListenersForElement(element, true, true);
-    }
-
-    if (reset === true) {
-      this.resetElement(element);
-    }
-
+  public stop(element: HTMLElement, reset = true): Promise<HTMLElement> {
+    this.removeTimeouts(element);
+    this.removeListeners(element);
+    if (reset) this.reset(element);
     return Promise.resolve(element);
   }
 
-  public animate(element: HTMLElement, mode = 'default'): Promise<HTMLElement> {
-    return new Promise<HTMLElement>((resolve, reject) => {
+  public animate(element: HTMLElement, mode = AnimationMode.Animate): Promise<HTMLElement> {
+    return new Promise<HTMLElement>((resolve: Function, reject: Function) => {
+      this.removeTimeouts(element);
 
-      this.removeTimeoutsForElement(element, true, true);
+      const delay = setTimeout(() => {
+        this.reset(element, true, false, true);
+        this.registerAnimationListeners(element, mode, resolve, reject);
+        this.styles.set(element, Object.assign({}, element.style));
 
-      let delayTimeout: number;
-      delayTimeout = setTimeout(() => {
+        const classes = this.classes.slice(0);
 
-        // Remove listeners if an animation is in progress on this element
-        // and reject promise if an animation was interrupted
-        this.removeTimeoutsForElement(element, true, false);
-        this.removeListenersForElement(element, true, true);
+        switch (mode) {
+          case AnimationMode.Show:
+            classes.push('animated-show');
+            break;
+          case AnimationMode.Hide:
+            classes.push('animated-hide');
+            break;
+        }
 
-        // Reset styles, remove animation classes (if currently being animated)
-        this.resetElement(element);
+        classes.push('animated', this.animationOptions.type);
 
-        // Event to listen for (animation end)
-        let animationEndEvent = this.animationEndEvent(element);
-        let animationStartEvent = this.animationStartEvent(element);
+        this.activeClasses.set(element, classes);
 
-        element.removeAttribute('hidden');
-        // Required to get position of element
-        element.style.display = 'initial';
-        let initialProps = this.getElementInitialProperties(element);
-
-        this.pinElement(element, initialProps);
-
-        // Apply all animation properties
-        this.applyAllProperties(element);
-        this.applyCssClasses(element);
-
-        element.classList.add('animated-' + mode);
-
-        // Listen for animation start
-        let startHandler: () => any;
-        element.addEventListener(animationStartEvent, startHandler = () => {
-          element.removeEventListener(animationStartEvent, startHandler);
-
-          // this.resetElement(element);
-
-          return startHandler;
-        }); // listener
-
-        // Listen for animation end
-        let endHandler: () => any;
-        element.addEventListener(animationEndEvent, endHandler = () => {
-          element.removeEventListener(animationEndEvent, endHandler);
-          this.removeListenersForElement(element, false);
-
-          this.resetElement(element);
-
-          element.classList.remove('animated-' + mode);
-
-          if (mode === 'hide') {
-            element.setAttribute('hidden', '');
-            element.style.display = null;
+        if (this.animationOptions.pin) {
+          if (mode === AnimationMode.Show) {
+            element.style.visibility = 'hidden';
           }
 
-          resolve(element);
+          this.showElement(element);
 
-          return endHandler;
-        }); // listener
+          const position = this.getPosition(element);
 
-        // Keep a reference to the listener
-        this._listeners.push({
-          element: element,
-          eventName: animationStartEvent,
-          handler: startHandler
+          element.style.position = 'fixed';
+          element.style.top = `${position.top}px`;
+          element.style.left = `${position.left}px`;
+          element.style.width = `${position.width}px`;
+          element.style.height = `${position.height}px`;
+          element.style.margin = '0px';
+        }
+
+        this.nextFrame(() => {
+          element.style.visibility = 'visible';
+          this.showElement(element);
+          this.applyProperties(element, mode);
         });
+      }, this.animationOptions.delay);
 
-        this._listeners.push({
-          element: element,
-          eventName: animationEndEvent,
-          handler: endHandler,
-          reject: reject,
-        });
+      this.log(`Timeout ${delay} registered for element`, element);
 
-      }, this._delay); // delayTimeout
+      this.addTimeout(element, delay, reject);
+    });
+  }
 
-      this._timeouts.push({
-        element: element,
-        timeout: delayTimeout,
-        reject: reject,
-      });
+  public reset(element: HTMLElement, removePending = true, rejectTimeouts = false, rejectListeners = false): void {
+    if (removePending) {
+      this.removeTimeouts(element, rejectTimeouts);
+      this.removeListeners(element, rejectListeners);
+    }
 
-    }); // promise
+    this.removeStyles(element);
+    this.removeClasses(element);
+  }
+
+  public dispose(): void {
+    this.timeouts.forEach(refs => {
+      for (let t of refs) {
+        clearTimeout(t.timeout);
+      }
+    });
+
+    this.listeners.forEach((refs, el) => {
+      for (let l of refs) {
+        el.removeEventListener(l.eventName, l.handler);
+      }
+    });
+
+    this.classes = [];
+    this.styles = new Map<HTMLElement, CSSStyleDeclaration>();
+    this.timeouts = new Map<HTMLElement, TimeoutRef[]>();
+    this.listeners = new Map<HTMLElement, ListenerRef[]>();
   }
 
   public addAnimationClass(name: string): AnimationBuilder {
-    if (this._animationClasses.indexOf(name) === -1) {
-      this._animationClasses.push(name);
+    if (this.classes.indexOf(name) === -1) {
+      this.classes.push(name);
     }
 
     return this;
   }
 
   public removeAnimationClass(name: string): AnimationBuilder {
-    let index = this._animationClasses.indexOf(name);
+    let index = this.classes.indexOf(name);
 
     if (index !== -1) {
-      this._animationClasses.splice(index, 1);
+      this.classes.splice(index, 1);
     }
 
     return this;
   }
 
-  public setOptions(options: AnimationOptions): AnimationBuilder {
-    let method: string;
+  // Private Methods
 
-    for (let option in options) {
-      if (this.checkValue(options[option])) {
-        method = 'set' + option.charAt(0).toUpperCase() + option.slice(1);
-
-        if (typeof this[method] === 'function') {
-          this[method](options[option]);
-        }
-      }
+  private log(...values: any[]) {
+    if (AnimationBuilder.DEBUG) {
+      console.log('css-animator:', ...values);
     }
-
-    return this;
   }
 
-  public setType(type: string): AnimationBuilder {
-    if (this._classHistory.indexOf(type) === -1) {
-      this._classHistory.push(type);
-    }
-
-    this._type = type;
-    return this;
-  }
-
-  public setFillMode(fillMode: string): AnimationBuilder {
-    this._fillMode = fillMode;
-    return this;
-  }
-
-  public setTimingFunction(timingFunction: string): AnimationBuilder {
-    this._timingFunction = timingFunction;
-    return this;
-  }
-
-  public setPlayState(playState: string): AnimationBuilder {
-    this._playState = playState;
-    return this;
-  }
-
-  public setDirection(direction: string): AnimationBuilder {
-    this._direction = direction;
-    return this;
-  }
-
-  public setDuration(duration: string | number): AnimationBuilder {
-    this._duration = duration;
-    return this;
-  }
-
-  public setDelay(delay: string | number): AnimationBuilder {
-    this._delay = delay;
-    return this;
-  }
-
-  public setIterationCount(iterationCount: string | number): AnimationBuilder {
-    this._iterationCount = iterationCount;
-    return this;
-  }
-
-  public applyAllProperties(element: HTMLElement): AnimationBuilder {
-    this.applyFillMode(element);
-    this.applyTimingFunction(element);
-    this.applyPlayState(element);
-    this.applyDirection(element);
-    this.applyDuration(element);
-    // this.applyDelay(element);
-    this.applyIterationCount(element);
-
-    return this;
-  }
-
-  public applyFillMode(element: HTMLElement): AnimationBuilder {
-    this.applyStyle(
-      element,
-      'animation-fill-mode',
-      this._fillMode ? this._fillMode : ''
-    );
-
-    return this;
-  }
-
-  public applyTimingFunction(element: HTMLElement): AnimationBuilder {
-    this.applyStyle(
-      element,
-      'animation-timing-function',
-      this._timingFunction ? this._timingFunction : ''
-    );
-
-    return this;
-  }
-
-  public applyPlayState(element: HTMLElement): AnimationBuilder {
-    this.applyStyle(
-      element,
-      'animation-play-state',
-      this._playState ? this._playState : ''
-    );
-
-    return this;
-  }
-
-  public applyDirection(element: HTMLElement): AnimationBuilder {
-    this.applyStyle(
-      element,
-      'animation-direction',
-      this._direction ? this._direction : ''
-    );
-
-    return this;
-  }
-
-  public applyDuration(element: HTMLElement): AnimationBuilder {
-    this.applyStyle(
-      element,
-      'animation-duration',
-      this._duration ? this._duration + 'ms' : ''
-    );
-
-    return this;
-  }
-
-  public applyDelay(element: HTMLElement): AnimationBuilder {
-    this.applyStyle(
-      element,
-      'animation-delay',
-      this._delay ? this._delay + 'ms' : ''
-    );
-
-    return this;
-  }
-
-  public applyIterationCount(element: HTMLElement): AnimationBuilder {
-    this.applyStyle(
-      element,
-      'animation-iteration-count',
-      this._iterationCount ? this._iterationCount : ''
-    );
-
-    return this;
-  }
-
-  public setKeepFlow(keepFlow: boolean): AnimationBuilder {
-    this._keepFlow = keepFlow;
-    return this;
-  }
-
-  get type(): string {
-    return this._type;
-  }
-
-  get fillMode(): string {
-    return this._fillMode;
-  }
-
-  get timingFunction(): string {
-    return this._timingFunction;
-  }
-
-  get playState(): string {
-    return this._playState;
-  }
-
-  get direction(): string | number {
-    return this._direction;
-  }
-
-  get delay(): string | number {
-    return this._delay;
-  }
-
-  get iterationCount(): string | number {
-    return this._iterationCount;
-  }
-
-  get keepFlow(): boolean {
-    return this._keepFlow;
-  }
-
-  private applyStyle(element: HTMLElement, property: string, value: any, shim = true): AnimationBuilder {
-    if (shim === true) {
-      element.style['-o-' + property] = value;
-      element.style['-ms-' + property] = value;
-      element.style['-moz-' + property] = value;
-      element.style['-webkit-' + property] = value;
-    }
-
-    element.style[property] = value;
-
-    return this;
-  }
-
-  private removeListenersForElement(element: HTMLElement, detach = true, reject = false) {
-    let toRemove: number[] = [];
-    for (let i = 0; i < this._listeners.length; i++) {
-      if (this._listeners[i].element !== element) {
-        continue;
-      }
-
-      let data = this._listeners[i];
-
-      if (detach) {
-        data.element.removeEventListener(data.eventName, data.handler);
-      }
-
-      if (reject && data.reject) {
-        data.reject('animation_aborted');
-      }
-
-      toRemove.push(i);
-    }
-
-    toRemove.forEach((value) => {
-      this._listeners.splice(value, 1);
+  private nextFrame(fn: Function): void {
+    AnimationBuilder.raf(() => {
+      AnimationBuilder.raf(fn);
     });
   }
 
-  private removeTimeoutsForElement(element: HTMLElement, detach = true, reject = false) {
-    let toRemove: number[] = [];
-    for (let i = 0; i < this._timeouts.length; i++) {
-      if (this._timeouts[i].element !== element) {
-        continue;
-      }
+  private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
+    let el = element.getBoundingClientRect();
 
-      let data = this._timeouts[i];
+    return {
+      left: el.left + window.scrollX,
+      top: el.top + window.scrollY,
+      width: el.width,
+      height: el.height,
+    };
+  }
 
-      if (detach) {
-        clearTimeout(data.timeout);
-      }
+  private registerAnimationListeners(element: HTMLElement, mode: AnimationMode, resolve: Function, reject: Function): void {
+    const animationStartEvent = this.animationStartEvent(element);
+    const animationEndEvent = this.animationEndEvent(element);
 
-      if (reject && data.reject) {
-        data.reject('animation_aborted');
-      }
+    let startHandler: () => any;
+    element.addEventListener(animationStartEvent, startHandler = () => {
+      this.log(`Animation start handler fired for element`, element);
+      element.removeEventListener(animationStartEvent, startHandler);
+      return startHandler;
+    });
 
-      toRemove.push(i);
+    this.log(`Registered animation start listener for element`, element);
+
+    let endHandler: () => any;
+    element.addEventListener(animationEndEvent, endHandler = () => {
+      this.log(`Animation end handler fired for element`, element);
+      element.removeEventListener(animationEndEvent, endHandler);
+      this.removeListeners(element, false);
+      this.reset(element, true, false, false);
+      if (mode === AnimationMode.Hide) this.hideElement(element);
+      if (mode === AnimationMode.Show) this.showElement(element);
+      resolve(element);
+      return endHandler;
+    });
+
+    this.log(`Registered animation end listener for element`, element);
+
+    this.addListener(element, animationStartEvent, startHandler);
+    this.addListener(element, animationEndEvent, endHandler, reject);
+  }
+
+  private addTimeout(element: HTMLElement, timeout: number, reject?: Function): void {
+    if (!this.timeouts.has(element)) {
+      this.timeouts.set(element, []);
     }
 
-    toRemove.forEach((value) => {
-      this._timeouts.splice(value, 1);
+    this.timeouts.get(element).push({
+      timeout,
+      reject,
     });
   }
 
-  private resetElement(element: HTMLElement): AnimationBuilder {
-    this.removeCssClasses(element);
+  private addListener(element: HTMLElement, eventName: string, handler: () => any, reject?: Function): void {
+    if (!this.listeners.has(element)) {
+      this.listeners.set(element, []);
+    }
 
-    let initialProps = JSON.parse(element.getAttribute('data-reset-styles'));
+    const classes = Object.assign({}, this.classes);
 
-    // Reset or remove inline styles (default could be passed as third parameter)
-    element.style.bottom = this.getValueOrDefault(initialProps, 'bottom', null);
-    element.style.height = this.getValueOrDefault(initialProps, 'height', null);
-    element.style.left = this.getValueOrDefault(initialProps, 'left', null);
-    element.style.right = this.getValueOrDefault(initialProps, 'right', null);
-    element.style.top = this.getValueOrDefault(initialProps, 'top', null);
-    element.style.width = this.getValueOrDefault(initialProps, 'width', null);
-    element.style.position = this.getValueOrDefault(initialProps, 'position', null);
-    element.style.display = this.getValueOrDefault(initialProps, 'display', null);
-
-    element.removeAttribute('data-reset-styles');
-
-    return this;
+    this.listeners.get(element).push({
+      eventName,
+      handler,
+      reject,
+      classes,
+    });
   }
 
-  // https://jonsuh.com/blog/detect-the-end-of-css-animations-and-transitions-with-javascript/
+  private removeListeners(element: HTMLElement, reject = false): void {
+    if (!this.listeners.has(element)) return;
+
+    this.listeners.get(element)
+      .forEach(ref => {
+        element.removeEventListener(ref.eventName, ref.handler);
+        this.log(`Listener ${ref.eventName} removed for element`, element);
+        if (reject && this.animationOptions.reject && ref.reject) ref.reject('animation_aborted');
+      });
+
+    this.listeners.delete(element);
+  }
+
+  private removeTimeouts(element: HTMLElement, reject = false): void {
+    if (!this.timeouts.has(element)) return;
+
+    this.timeouts.get(element)
+      .forEach(ref => {
+        clearTimeout(ref.timeout);
+        this.log(`Timeout ${ref.timeout} removed for element`, element);
+        if (reject && this.animationOptions.reject && ref.reject) ref.reject('animation_aborted');
+      });
+
+    this.timeouts.delete(element);
+  }
+
   private animationEndEvent(element: HTMLElement): string {
-    let el = document.createElement("endAnimationElement");
-    let animations: { [key: string]: string };
-    animations = {
-      'animation': 'animationend',
-      'OAnimation': 'oAnimationEnd',
-      'MozAnimation': 'animationend',
-      'WebkitAnimation': 'webkitAnimationEnd'
+    let el = document.createElement('endAnimationElement');
+
+    let animations: { [key: string]: string } = {
+      animation: 'animationend',
+      OAnimation: 'oAnimationEnd',
+      MozAnimation: 'animationend',
+      WebkitAnimation: 'webkitAnimationEnd',
     };
 
     for (let animation in animations) {
@@ -428,14 +323,13 @@ export class AnimationBuilder {
   }
 
   private animationStartEvent(element: HTMLElement): string {
-    let el = document.createElement("startAnimationElement");
+    let el = document.createElement('startAnimationElement');
 
-    let animations: { [key: string]: string };
-    animations = {
-      'animation': 'animationstart',
-      'OAnimation': 'oAnimationStart',
-      'MozAnimation': 'animationstart',
-      'WebkitAnimation': 'webkitAnimationStart'
+    let animations: { [key: string]: string } = {
+      animation: 'animationstart',
+      OAnimation: 'oAnimationStart',
+      MozAnimation: 'animationstart',
+      WebkitAnimation: 'webkitAnimationStart',
     };
 
     for (let animation in animations) {
@@ -447,81 +341,324 @@ export class AnimationBuilder {
     return null;
   }
 
-  private applyCssClasses(element: HTMLElement, add = true): AnimationBuilder {
-    this._animationClasses.forEach((name) => {
-      if (add === true) {
-        element.classList.add(name);
-      } else {
-        element.classList.remove(name);
+  private applyProperties(element: HTMLElement, mode?: AnimationMode): void {
+    this.applyClasses(element, mode);
+    this.applyStyles(element, mode);
+  }
+
+  private applyStyles(element: HTMLElement, mode?: AnimationMode): void {
+    this.applyFillMode(element);
+    this.applyTimingFunction(element);
+    this.applyPlayState(element);
+    this.applyDirection(element);
+    this.applyDuration(element);
+    this.applyIterationCount(element);
+  }
+
+  private removeStyles(element: HTMLElement): void {
+    if (!this.styles.has(element)) return;
+
+    const styles = this.styles.get(element);
+    element.removeAttribute('style');
+
+    for (let style in styles) {
+      if (styles.hasOwnProperty(style)) {
+        element.style[style] = styles[style];
       }
-    });
-
-    if (add === true) {
-      element.classList.add('animated');
-      element.classList.add(this._type);
-    } else {
-      element.classList.remove('animated');
-      element.classList.remove('animated-show');
-      element.classList.remove('animated-hide');
-      element.classList.remove(this._type);
     }
 
-    if (add !== true) {
-      this._classHistory.forEach((name) => {
-        element.classList.remove(name);
-      });
-    }
-
-    return this;
+    this.styles.delete(element);
   }
 
-  private removeCssClasses(element: HTMLElement): AnimationBuilder {
-    this.applyCssClasses(element, false);
+  private applyClasses(element: HTMLElement, mode?: AnimationMode): void {
+    const active = this.activeClasses.get(element) || [];
 
-    return this;
+    element.classList.add(
+      'animated',
+      ...active,
+    );
   }
 
-  private getElementPosition(element: HTMLElement): ClientRect {
-    return element.getBoundingClientRect();
+  private removeClasses(element: HTMLElement): void {
+    const active = this.activeClasses.get(element) || [];
+
+    element.classList.remove(
+      'animated',
+      'animated-show',
+      'animated-hide',
+      ...active,
+    );
+
+    this.activeClasses.delete(element);
   }
 
-  private getElementInitialProperties(element: HTMLElement): ElementProps {
-    return {
-      position: element.style.position,
-      display: element.style.display,
-      bottom: element.style.bottom,
-      height: element.style.height,
-      left: element.style.left,
-      right: element.style.right,
-      top: element.style.top,
-      width: element.style.width
+  private applyStyle(element: HTMLElement, prop: string, value: string | number | boolean) {
+    let el = document.createElement('checkStyle');
+
+    let styles: { [key: string]: string } = {
+      standard: this.camelCase(prop),
+      webkit: this.camelCase(`-webkit-${prop}`),
+      mozilla: this.camelCase(`-moz-${prop}`),
+      opera: this.camelCase(`-o-${prop}`),
+      explorer: this.camelCase(`-ie-${prop}`),
     };
-  }
 
-  private pinElement(element: HTMLElement, initialProps: ElementProps) {
-    let position = this.getElementPosition(element);
-
-    element.setAttribute('data-reset-styles', JSON.stringify(initialProps));
-
-    // Support for concurrent animations on non-fixed elements
-    if (!this._keepFlow) {
-      element.style.bottom = position.bottom + 'px';
-      element.style.height = position.height + 'px';
-      element.style.left = position.left + 'px';
-      element.style.right = position.right + 'px';
-      element.style.top = position.top + 'px';
-      element.style.width = position.width + 'px';
-      element.style.position = 'fixed';
-      element.style.display = 'inline-block';
+    for (let style in styles) {
+      if (!styles.hasOwnProperty(style)) continue;
+      if (el.style[styles[style]] !== undefined) {
+        element.style[styles[style]] = value === undefined || value === null ? null : value;
+        break;
+      }
     }
+
+    return this;
   }
 
-  private checkValue(value: any): boolean {
-    return (value === 0 || !!value);
+  private camelCase(input: string): string {
+    return input.toLowerCase().replace(/-(.)/g, (match, group1) => {
+      return group1.toUpperCase();
+    });
   }
 
-  private getValueOrDefault(obj: any, objKey: string, fallback = '') {
-    return (obj && this.checkValue(obj[objKey]) ? obj[objKey] : fallback);
+  // Getters and Setters
+
+  get defaults(): AnimationOptions {
+    return this.defaultOptions;
+  }
+
+  set defaults(defaults: AnimationOptions) {
+    this.defaultOptions = defaults;
+  }
+
+  public setDefaults(defaults: AnimationOptions): AnimationBuilder {
+    this.defaults = defaults;
+    return this;
+  }
+
+  get options(): AnimationOptions {
+    return this.animationOptions;
+  }
+
+  set options(options: AnimationOptions) {
+    this.animationOptions = options;
+  }
+
+  public setOptions(options: AnimationOptions): AnimationBuilder {
+    this.options = options;
+    return this;
+  }
+
+  get reject(): boolean {
+    return this.animationOptions.reject;
+  }
+
+  set reject(reject: boolean) {
+    this.animationOptions.reject = reject;
+  }
+
+  get pin(): boolean {
+    return this.animationOptions.pin;
+  }
+
+  set pin(pin: boolean) {
+    this.animationOptions.pin = pin;
+  }
+
+  public setPin(pin: boolean): AnimationBuilder {
+    this.pin = pin;
+    return this;
+  }
+
+  get useVisibility(): boolean {
+    return this.animationOptions.useVisibility;
+  }
+
+  set useVisibility(useVisibility: boolean) {
+    this.animationOptions.useVisibility = useVisibility;
+  }
+
+  public setUseVisibility(useVisibility: boolean): AnimationBuilder {
+    this.useVisibility = useVisibility;
+    return this;
+  }
+
+  get type(): string {
+    return this.animationOptions.type;
+  }
+
+  set type(type: string) {
+    this.animationOptions.type = type;
+  }
+
+  public setType(type: string): AnimationBuilder {
+    this.type = type;
+    return this;
+  }
+
+  public applyType(element: HTMLElement): AnimationBuilder {
+    return this;
+  }
+
+  get fillMode(): string {
+    return this.animationOptions.fillMode;
+  }
+
+  set fillMode(fillMode: string) {
+    this.animationOptions.fillMode = fillMode;
+  }
+
+  public setFillMode(fillMode: string): AnimationBuilder {
+    this.fillMode = fillMode;
+    return this;
+  }
+
+  public applyFillMode(element: HTMLElement): AnimationBuilder {
+    this.applyStyle(
+      element,
+      'animation-fill-mode',
+      this.animationOptions.fillMode ?
+        this.animationOptions.fillMode : null,
+    );
+
+    return this;
+  }
+
+  get timingFunction(): string {
+    return this.animationOptions.timingFunction;
+  }
+
+  set timingFunction(timingFunction: string) {
+    this.animationOptions.timingFunction = timingFunction;
+  }
+
+  public setTimingFunction(timingFunction: string): AnimationBuilder {
+    this.timingFunction = timingFunction;
+    return this;
+  }
+
+  public applyTimingFunction(element: HTMLElement): AnimationBuilder {
+    this.applyStyle(
+      element,
+      'animation-timing-function',
+      this.animationOptions.timingFunction,
+    );
+
+    return this;
+  }
+
+  get playState(): string {
+    return this.animationOptions.playState;
+  }
+
+  set playState(playState: string) {
+    this.animationOptions.playState = playState;
+  }
+
+  public setPlayState(playState: string): AnimationBuilder {
+    this.playState = playState;
+    return this;
+  }
+
+  public applyPlayState(element: HTMLElement): AnimationBuilder {
+    this.applyStyle(
+      element,
+      'animation-play-state',
+      this.animationOptions.playState,
+    );
+
+    return this;
+  }
+
+  get direction(): string {
+    return this.animationOptions.direction;
+  }
+
+  set direction(direction: string) {
+    this.animationOptions.direction = direction;
+  }
+
+  public setDirection(direction: string): AnimationBuilder {
+    this.direction = direction;
+    return this;
+  }
+
+  public applyDirection(element: HTMLElement): AnimationBuilder {
+    this.applyStyle(
+      element,
+      'animation-direction',
+      this.animationOptions.direction,
+    );
+
+    return this;
+  }
+
+  get duration(): string | number {
+    return this.animationOptions.duration;
+  }
+
+  set duration(duration: string | number) {
+    this.animationOptions.duration = duration;
+  }
+
+  public setDuration(duration: string | number): AnimationBuilder {
+    this.duration = duration;
+    return this;
+  }
+
+  public applyDuration(element: HTMLElement): AnimationBuilder {
+    this.applyStyle(
+      element,
+      'animation-duration',
+      `${this.animationOptions.duration}ms`,
+    );
+
+    return this;
+  }
+
+  get delay(): string | number {
+    return this.animationOptions.delay;
+  }
+
+  set delay(delay: string | number) {
+    this.animationOptions.delay = delay;
+  }
+
+  public setDelay(delay: string | number): AnimationBuilder {
+    this.delay = delay;
+    return this;
+  }
+
+  public applyDelayAsStyle(element: HTMLElement): AnimationBuilder {
+    this.applyStyle(
+      element,
+      'animation-delay',
+      this.animationOptions.delay,
+    );
+
+    return this;
+  }
+
+  get iterationCount(): string | number {
+    return this.animationOptions.iterationCount;
+  }
+
+  set iterationCount(iterationCount: string | number) {
+    this.animationOptions.iterationCount = iterationCount;
+  }
+
+  public setIterationCount(iterationCount: string | number): AnimationBuilder {
+    this.iterationCount = iterationCount;
+    return this;
+  }
+
+  public applyIterationCount(element: HTMLElement): AnimationBuilder {
+    this.applyStyle(
+      element,
+      'animation-iteration-count',
+      this.animationOptions.iterationCount,
+    );
+
+    return this;
   }
 
 }
