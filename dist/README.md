@@ -4,9 +4,14 @@ This package was created out of the need for using CSS animations with a library
 
 Feel free to [open an issue](https://github.com/fabianweb/css-animator/issues/new) if you're experiencing issues, or if you have any suggestions or comments.  
 
-The package includes ES5 compiled [Browserify](http://browserify.org) files, [SystemJS](https://github.com/systemjs/systemjs) bundle files and all TypeScript typings. Source files will also be added soon (both SystemJS and TypeScript). Please leave a comment if there's something missing for you.
+The package includes ES5 compiled [Browserify](http://browserify.org) files, [SystemJS](https://github.com/systemjs/systemjs) bundle files and all TypeScript typings.
+Please leave a comment if there's something missing for you.
 
 # Installation
+
+```bash
+$ yarn add css-animator
+```
 
 ```bash
 $ npm install --save css-animator
@@ -16,6 +21,12 @@ $ npm install --save css-animator
 $ jspm install npm:css-animator
 ```
 
+# Example
+
+`css-animator` is being used in the project [angular2-quiz-app](https://github.com/fabiandev/angular2-quiz-app).  
+
+A very basic example can be found in the `docs/` folder, which is also hosted on GitHub Pages: https://fabiandev.github.io/css-animator/
+
 # Usage
 
 Use this package in combination with CSS animations.  
@@ -24,7 +35,7 @@ A library like [animate.css](https://github.com/daneden/animate.css) already off
 You can install both packages by running:
 
 ```bash
-$ npm install --save css-animator animate.css
+$ yarn add css-animator animate.css
 ```
 
 ## Basic Usage
@@ -37,6 +48,20 @@ import { AnimationBuilder } from 'css-animator/builder';
 let animator = new AnimationBuilder();
 
 animator.setType('shake').animate(element);
+```
+
+Want to know when an animation has finished? The AnimationBuilder instance returns a promise:
+
+```ts
+animator
+  .setType('shake')
+  .animate(element)
+  .then(() => {
+    // Animation finished
+  })
+  .catch(() => {
+    // Animation interrupted
+  });
 ```
 
 ## Angular2 Service Usage
@@ -90,19 +115,39 @@ import { Component } from '@angular/core';
 import { AnimatesDirective } from 'css-animator';
 
 @Component({
-  selector: 'some-component',
+  selector: 'my-app',
   template: `
     <div animates #animation="animates">
       <span (click)="animation.start({type: 'bounce'})">Click me!</span>
     </div>
-  `,
-  directives: [
-    AnimatesDirective
-  ]
+  `
 })
-export class SomeComponent {
+export class AppComponent {
 
 }
+```
+
+To make use of the directive within an Angular2 module, you have to declare it:
+
+```ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { AnimatesDirective } from 'css-animator';
+
+@NgModule({
+  imports: [
+    BrowserModule,
+  ],
+  declarations: [
+    AnimatesDirective,
+    AppComponent,
+  ],
+  bootstrap: [
+    AppComponent,
+  ],
+})
+export class AppModule { }
 ```
 
 Set default options for the animates directive. Those will be used if you use `animation.start()`.
@@ -110,8 +155,10 @@ You can optionally pass all options that the interface `AnimationOptions` suppor
 
 ```html
 <div
+animates
 #animation="animates"
 animates="{ type: 'wobble', duration: '2000' }" // default options are optional
+animatesInitMode="show" // Can be used with [animatesOnInit] for "show" or "hide"
 [animatesOnInit]="{ type: 'fadeInUp' }" // automatically animate on init (optional)
 (click)="animation.start()"
 (mouseleave)="animation.pause()"
@@ -131,22 +178,26 @@ This are all options supported. You may notice, that these are all [CSS animatio
 An exception is the `delay` option, as it is handled via JavaScript timeouts. If you really want to
 use the CSS rule, you can use `applyDelayAsStyle` to apply the delay immediately on the element.
 
-### Special Options:
+### Special Options
 
 #### reject
 
 The promise for an animation is rejected with `animation_aborted`, if it is interrupted somehow. To change
-this behavior set `reject: false` or call `setReject(true)` on `AnimationBuilder`. You may also use the setter on the `AnimationBuilder` instance: `animator.reject = false`.
+this behavior, set `reject: false` or call `setReject(true)` on an `AnimationBuilder` instance. You may also use the setter on the `AnimationBuilder` instance: `animator.reject = false`.
 
 #### pin
 
-By default, an element will be positioned fixed while animating, to enable concurrent animations. If you want to keep the position property, you may set `pin` to `false`.
+By default, an element will be positioned `absolute` while animating, to enable concurrent animations.
+Also the relative position (`top` and `left`) will be calculated and set on the element and the `margin` is set to `0px`.
+Furthermore the element's calculated `width` and `height` will be set explicitly.
+If you wan't css-animator to only apply the animation, without changing the element's style temporarily, set `pin` to `false`.
 
 #### useVisibility
 
 `AnimationBuilder` uses the `hidden` attribute on elements to hide them. If you want to use the `visibility` CSS rule,
 set `useVisibility` to `true`.
 
+### All Options
 
 ```ts
 export interface AnimationOptions {
@@ -197,7 +248,7 @@ Stop the current animation on an element, reset it's position, reject the promis
 setOptions(options: AnimationOptions): AnimationBuilder
 ```
 
-Set multiple options at once.
+Set multiple options via method chaining.
 
 ```ts
 set{Option}(option: string|number): AnimationBuilder
@@ -218,7 +269,7 @@ removeAnimationClass(name: string): AnimationBuilder
 Won't add classes for future animations, previously added with `addAnimationClass`.
 
 > You can also directly apply options without saving it to the animation builder by using `apply{Option}(options: string|number)`  
-> Also there are getters for each option, you can access with `animator.{option}`.
+> Also there are getters and setters for each option, you can access with `animator.{option}`.
 
 ## AnimatesDirective
 
