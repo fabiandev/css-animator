@@ -13,8 +13,8 @@ import { AnimationService, AnimationBuilder } from 'css-animator';
     <button (click)="hide(toAnimate)" [disabled]="isAnimating || !isVisible">Hide</button>
   </nav>
   <div
-    #toAnimate
     class="el"
+    #toAnimate
     animates
     #animation="animates"
     animatesInitMode="show"

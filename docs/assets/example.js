@@ -54079,7 +54079,7 @@
 	        providers: [
 	            css_animator_1.AnimationService
 	        ],
-	        template: "\n  <nav>\n    <button (click)=\"show(toAnimate)\" [disabled]=\"isAnimating ||\u00A0isVisible\">Show</button>\n    <button (click)=\"shake(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Shake</button>\n    <button (click)=\"hide(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Hide</button>\n  </nav>\n  <div\n    #toAnimate\n    class=\"el\"\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{type: 'fadeInUp', delay: 100, duration: 1000}\"\n    hidden\n  >\n  </div>\n  ",
+	        template: "\n  <nav>\n    <button (click)=\"show(toAnimate)\" [disabled]=\"isAnimating ||\u00A0isVisible\">Show</button>\n    <button (click)=\"shake(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Shake</button>\n    <button (click)=\"hide(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Hide</button>\n  </nav>\n  <div\n    class=\"el\"\n    #toAnimate\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{type: 'fadeInUp', delay: 100, duration: 1000}\"\n    hidden\n  >\n  </div>\n  ",
 	        styles: ["\n    .el {\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }"
 	        ]
 	    }),

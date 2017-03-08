@@ -68,7 +68,7 @@ gulp.task('bundle', function() {
 gulp.task('example:build', function() {
   return gulp.src('./docs/index.ts')
     .pipe(webpack(require('./webpack.config.js')))
-    .pipe(gulp.dest('./docs/scripts'));
+    .pipe(gulp.dest('./docs/assets'));
 });
 
 gulp.task('example:copy', function() {
@@ -76,7 +76,7 @@ gulp.task('example:copy', function() {
     './node_modules/animate.css/animate.css',
     './node_modules/normalize.css/normalize.css'
   ])
-    .pipe(gulp.dest('docs/styles'));
+    .pipe(gulp.dest('docs/assets'));
 });
 
 gulp.task('clean:process', function() {

@@ -3,7 +3,7 @@ var path = require('path');
 module.exports = {
   entry: './docs/index.ts',
   output: {
-    filename: 'bundle.js'
+    filename: 'example.js'
   },
   resolve: {
     alias: {
