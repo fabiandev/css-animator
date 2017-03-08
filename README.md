@@ -66,7 +66,7 @@ animator
 
 You may also change the default options for every instance that is created once changed:
 
-```
+```ts
 import { AnimationBuilder } from 'css-animator/builder';
 
 AnimationBuilder.defaults.fixed = true;
