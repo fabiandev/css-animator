@@ -187,8 +187,8 @@ this behavior, set `reject: false` or call `setReject(true)` on an `AnimationBui
 
 #### pin
 
-By default, an element will be positioned `fixed` while animating, to enable concurrent animations.
-Also the position (`top` and `left`) will be calculated and set on the element and the `margin` is set to `0px`.
+By default, an element will be positioned `absolute` while animating, to enable concurrent animations.
+Also the relative position (`top` and `left`) will be calculated and set on the element and the `margin` is set to `0px`.
 Furthermore the element's calculated `width` and `height` will be set explicitly.
 If you wan't css-animator to only apply the animation, without changing the element's style temporarily, set `pin` to `false`.
 
