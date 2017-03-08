@@ -127,7 +127,7 @@ export class AnimationBuilder {
 
           const position = this.getPosition(element);
 
-          element.style.position = 'fixed';
+          element.style.position = 'absolute';
           element.style.top = `${position.top}px`;
           element.style.left = `${position.left}px`;
           element.style.width = `${position.width}px`;
@@ -209,14 +209,25 @@ export class AnimationBuilder {
     });
   }
 
+  // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
+  //   let el = element.getBoundingClientRect();
+  //
+  //   return {
+  //     left: el.left + window.scrollX,
+  //     top: el.top + window.scrollY,
+  //     width: el.width,
+  //     height: el.height,
+  //   };
+  // }
+
   private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-    let el = element.getBoundingClientRect();
+    const computed = window.getComputedStyle(element);
 
     return {
-      left: el.left + window.scrollX,
-      top: el.top + window.scrollY,
-      width: el.width,
-      height: el.height,
+      left: element.offsetLeft,
+      top: element.offsetTop,
+      width: parseFloat(computed.width),
+      height: parseFloat(computed.height),
     };
   }
 
