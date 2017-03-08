@@ -54141,8 +54141,8 @@
 	var AnimationBuilder = (function () {
 	    // Public Methods
 	    function AnimationBuilder() {
-	        this.animationOptions = Object.assign({}, AnimationBuilder.defaultOptions);
-	        this.defaultOptions = Object.assign({}, AnimationBuilder.defaultOptions);
+	        this.animationOptions = Object.assign({}, AnimationBuilder.defaults);
+	        this.defaultOptions = Object.assign({}, AnimationBuilder.defaults);
 	        this.classes = [];
 	        this.activeClasses = new Map();
 	        this.listeners = new Map();
@@ -54205,7 +54205,7 @@
 	                    }
 	                    _this.showElement(element);
 	                    var position = _this.getPosition(element);
-	                    element.style.position = 'absolute';
+	                    element.style.position = _this.animationOptions.fixed ? 'fixed' : 'absolute';
 	                    element.style.top = position.top + "px";
 	                    element.style.left = position.left + "px";
 	                    element.style.width = position.width + "px";
@@ -54315,9 +54315,15 @@
 	    AnimationBuilder.prototype.getPosition = function (element) {
 	        var rect = element.getBoundingClientRect();
 	        var cs = window.getComputedStyle(element);
+	        var left = element.offsetLeft;
+	        var top = element.offsetTop;
+	        if (this.animationOptions.fixed) {
+	            left = rect.left + window.scrollX;
+	            top = rect.top + window.scrollY;
+	        }
 	        return {
-	            left: element.offsetLeft,
-	            top: element.offsetTop,
+	            left: left,
+	            top: top,
 	            width: rect.width -
 	                parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
 	                parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth),
@@ -54709,7 +54715,8 @@
 	}());
 	// Members
 	AnimationBuilder.DEBUG = false;
-	AnimationBuilder.defaultOptions = {
+	AnimationBuilder.defaults = {
+	    fixed: false,
 	    reject: true,
 	    useVisibility: false,
 	    pin: true,

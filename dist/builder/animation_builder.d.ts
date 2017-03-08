@@ -6,7 +6,7 @@ export declare enum AnimationMode {
 }
 export declare class AnimationBuilder {
     static DEBUG: boolean;
-    static defaultOptions: AnimationOptions;
+    static defaults: AnimationOptions;
     private static raf;
     private animationOptions;
     private defaultOptions;
