@@ -11,6 +11,7 @@ export declare class AnimationBuilder {
     private animationOptions;
     private defaultOptions;
     private classes;
+    private activeClasses;
     private listeners;
     private timeouts;
     private styles;

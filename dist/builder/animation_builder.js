@@ -13,6 +13,7 @@ var AnimationBuilder = (function () {
         this.animationOptions = Object.assign({}, AnimationBuilder.defaultOptions);
         this.defaultOptions = Object.assign({}, AnimationBuilder.defaultOptions);
         this.classes = [];
+        this.activeClasses = new Map();
         this.listeners = new Map();
         this.timeouts = new Map();
         this.styles = new Map();
@@ -56,6 +57,17 @@ var AnimationBuilder = (function () {
                 _this.reset(element, true, false, true);
                 _this.registerAnimationListeners(element, mode, resolve, reject);
                 _this.styles.set(element, Object.assign({}, element.style));
+                var classes = _this.classes.slice(0);
+                switch (mode) {
+                    case AnimationMode.Show:
+                        classes.push('animated-show');
+                        break;
+                    case AnimationMode.Hide:
+                        classes.push('animated-hide');
+                        break;
+                }
+                classes.push('animated', _this.animationOptions.type);
+                _this.activeClasses.set(element, classes);
                 if (_this.animationOptions.pin) {
                     if (mode === AnimationMode.Show) {
                         element.style.visibility = 'hidden';
@@ -81,12 +93,12 @@ var AnimationBuilder = (function () {
         if (removePending === void 0) { removePending = true; }
         if (rejectTimeouts === void 0) { rejectTimeouts = false; }
         if (rejectListeners === void 0) { rejectListeners = false; }
-        this.removeStyles(element);
-        this.removeClasses(element);
         if (removePending) {
             this.removeTimeouts(element, rejectTimeouts);
             this.removeListeners(element, rejectListeners);
         }
+        this.removeStyles(element);
+        this.removeClasses(element);
     };
     AnimationBuilder.prototype.dispose = function () {
         this.timeouts.forEach(function (refs) {
@@ -134,25 +146,6 @@ var AnimationBuilder = (function () {
             AnimationBuilder.raf(fn);
         });
     };
-    //   private offset(element: HTMLElement): { left: number, top: number } {
-    //     var body = document.body,
-    //         win = document.defaultView,
-    //         docElem = document.documentElement,
-    //         box = document.createElement('div') as any;
-    //
-    //     box.style.paddingLeft = box.style.width = "1px";
-    //     body.appendChild(box);
-    //     var isBoxModel = box.offsetWidth == 2;
-    //     body.removeChild(box);
-    //     box = element.getBoundingClientRect() as any;
-    //     var clientTop  = docElem.clientTop  || body.clientTop  || 0,
-    //         clientLeft = docElem.clientLeft || body.clientLeft || 0,
-    //         scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
-    //         scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
-    //     return {
-    //         top : box.top  + scrollTop  - clientTop,
-    //         left: box.left + scrollLeft - clientLeft};
-    // }
     AnimationBuilder.prototype.getPosition = function (element) {
         var el = element.getBoundingClientRect();
         return {
@@ -176,7 +169,7 @@ var AnimationBuilder = (function () {
             _this.log("Animation end handler fired for element", element);
             element.removeEventListener(animationEndEvent, endHandler);
             _this.removeListeners(element, false);
-            _this.reset(element);
+            _this.reset(element, true, false, false);
             if (mode === AnimationMode.Hide)
                 _this.hideElement(element);
             if (mode === AnimationMode.Show)
@@ -292,23 +285,16 @@ var AnimationBuilder = (function () {
         this.styles.delete(element);
     };
     AnimationBuilder.prototype.applyClasses = function (element, mode) {
-        (_a = element.classList).add.apply(_a, ['animated',
-            this.animationOptions.type].concat(this.classes));
-        switch (mode) {
-            case AnimationMode.Show:
-                element.classList.add('animated-show');
-                break;
-            case AnimationMode.Hide:
-                element.classList.add('animated-hide');
-                break;
-        }
+        var active = this.activeClasses.get(element) || [];
+        (_a = element.classList).add.apply(_a, ['animated'].concat(active));
         var _a;
     };
     AnimationBuilder.prototype.removeClasses = function (element) {
+        var active = this.activeClasses.get(element) || [];
         (_a = element.classList).remove.apply(_a, ['animated',
             'animated-show',
-            'animated-hide',
-            this.animationOptions.type].concat(this.classes));
+            'animated-hide'].concat(active));
+        this.activeClasses.delete(element);
         var _a;
     };
     AnimationBuilder.prototype.applyStyle = function (element, prop, value) {

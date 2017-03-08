@@ -144,8 +144,8 @@ AnimatesDirective = __decorate([
         inputs: [
             'animates',
             'animatesOnInit',
-            'animatesInitMode',
-        ],
+            'animatesInitMode'
+        ]
     }),
     __param(0, core_1.Inject(core_1.ElementRef)), __param(1, core_1.Inject(animation_service_1.AnimationService)),
     __metadata("design:paramtypes", [core_1.ElementRef, animation_service_1.AnimationService])
