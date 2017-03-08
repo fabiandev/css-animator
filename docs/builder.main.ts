@@ -1,10 +1,11 @@
 import { AnimationBuilder } from 'css-animator/builder';
 
-const animator = new AnimationBuilder();
 const element = document.getElementById('animate');
 const showButton = document.getElementById('showButton');
 const shakeButton = document.getElementById('shakeButton');
 const hideButton = document.getElementById('hideButton');
+
+const animator = new AnimationBuilder();
 
 animator
   .setType('fadeInUp')

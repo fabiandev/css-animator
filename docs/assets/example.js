@@ -54897,11 +54897,11 @@
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var builder_1 = __webpack_require__(31);
-	var animator = new builder_1.AnimationBuilder();
 	var element = document.getElementById('animate');
 	var showButton = document.getElementById('showButton');
 	var shakeButton = document.getElementById('shakeButton');
 	var hideButton = document.getElementById('hideButton');
+	var animator = new builder_1.AnimationBuilder();
 	animator
 	    .setType('fadeInUp')
 	    .setDelay(100)
