@@ -64,6 +64,15 @@ animator
   });
 ```
 
+You may also change the default options for every instance that is created once changed:
+
+```
+import { AnimationBuilder } from 'css-animator/builder';
+
+AnimationBuilder.defaults.fixed = true;
+AnimationBuilder.defaults.duration = 1500;
+```
+
 ## Angular2 Service Usage
 
 There is a little Angular2 service included, that gives you the power of dependency injection out of the box.
@@ -180,17 +189,22 @@ use the CSS rule, you can use `applyDelayAsStyle` to apply the delay immediately
 
 ### Special Options
 
-#### reject
+#### reject (default: true)
 
 The promise for an animation is rejected with `animation_aborted`, if it is interrupted somehow. To change
 this behavior, set `reject: false` or call `setReject(true)` on an `AnimationBuilder` instance. You may also use the setter on the `AnimationBuilder` instance: `animator.reject = false`.
 
-#### pin
+#### pin (default: true)
 
 By default, an element will be positioned `absolute` while animating, to enable concurrent animations.
 Also the relative position (`top` and `left`) will be calculated and set on the element and the `margin` is set to `0px`.
 Furthermore the element's calculated `width` and `height` will be set explicitly.
-If you wan't css-animator to only apply the animation, without changing the element's style temporarily, set `pin` to `false`.
+If you want css-animator to only apply the animation, without changing the element's style temporarily, set `pin` to `false`.
+
+#### fixed (default: false)
+
+As mentioned above, elements being animated are positioned `absolute`. If you want to change
+the position mode to `fixed`, set the fixed option to `true`.
 
 #### useVisibility
 

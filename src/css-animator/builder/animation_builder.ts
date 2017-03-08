@@ -17,7 +17,8 @@ export class AnimationBuilder {
 
   public static DEBUG: boolean = false;
 
-  public static defaultOptions: AnimationOptions = {
+  public static defaults: AnimationOptions = {
+    fixed: false,
     reject: true,
     useVisibility: false,
     pin: true,
@@ -35,13 +36,8 @@ export class AnimationBuilder {
     ? window.requestAnimationFrame.bind(window)
     : setTimeout;
 
-  private animationOptions: AnimationOptions = Object.assign(
-    {}, AnimationBuilder.defaultOptions,
-  );
-
-  private defaultOptions: AnimationOptions = Object.assign(
-    {}, AnimationBuilder.defaultOptions,
-  );
+  private animationOptions: AnimationOptions;
+  private defaultOptions: AnimationOptions;
 
   private classes: string[];
   private activeClasses: Map<HTMLElement, string[]>;
@@ -52,6 +48,14 @@ export class AnimationBuilder {
   // Public Methods
 
   constructor() {
+    this.animationOptions = Object.assign(
+      {}, AnimationBuilder.defaults,
+    );
+
+    this.defaultOptions = Object.assign(
+      {}, AnimationBuilder.defaults,
+    );
+
     this.classes = [];
     this.activeClasses = new Map<HTMLElement, string[]>();
     this.listeners = new Map<HTMLElement, ListenerRef[]>();
@@ -127,7 +131,7 @@ export class AnimationBuilder {
 
           const position = this.getPosition(element);
 
-          element.style.position = 'absolute';
+          element.style.position = this.animationOptions.fixed ? 'fixed' : 'absolute';
           element.style.top = `${position.top}px`;
           element.style.left = `${position.left}px`;
           element.style.width = `${position.width}px`;
@@ -249,9 +253,17 @@ export class AnimationBuilder {
     let rect = element.getBoundingClientRect();
     let cs = window.getComputedStyle(element);
 
+    let left = element.offsetLeft;
+    let top = element.offsetTop;
+
+    if (this.animationOptions.fixed) {
+      left = rect.left + window.scrollX;
+      top = rect.top + window.scrollY;
+    }
+
     return {
-      left: element.offsetLeft,
-      top: element.offsetTop,
+      left,
+      top,
       width: rect.width -
         parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
         parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth), // scrollbar?
