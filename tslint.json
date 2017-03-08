@@ -19,7 +19,8 @@
     "prefer-const": false,
     "no-var-requires": false,
     "switch-default": false,
-    "variable-name": false
+    "variable-name": false,
+    "trailing-comma": false
   },
   "jsRules": {
 
