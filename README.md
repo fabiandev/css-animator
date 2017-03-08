@@ -50,6 +50,19 @@ let animator = new AnimationBuilder();
 animator.setType('shake').animate(element);
 ```
 
+Want to know when an animation has finished? The AnimationBuilder instance returns a promise:
+
+```ts
+animator.setType('shake')
+  .animate(element)
+  .then(() => {
+    // Animation finished
+  })
+  .catch(() => {
+    // Animation interrupted
+  });
+```
+
 ## Angular2 Service Usage
 
 There is a little Angular2 service included, that gives you the power of dependency injection out of the box.
