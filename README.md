@@ -21,6 +21,12 @@ $ npm install --save css-animator
 $ jspm install npm:css-animator
 ```
 
+# Example
+
+`css-animator` is being used in the project [angular2-quiz-app](https://github.com/fabiandev/angular2-quiz-app).  
+
+A very basic example can be found in the `docs/` folder, which is also hosted on GitHub Pages: https://fabiandev.github.io/css-animator/
+
 # Usage
 
 Use this package in combination with CSS animations.  
