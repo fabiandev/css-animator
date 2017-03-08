@@ -53,7 +53,8 @@ animator.setType('shake').animate(element);
 Want to know when an animation has finished? The AnimationBuilder instance returns a promise:
 
 ```ts
-animator.setType('shake')
+animator
+  .setType('shake')
   .animate(element)
   .then(() => {
     // Animation finished
