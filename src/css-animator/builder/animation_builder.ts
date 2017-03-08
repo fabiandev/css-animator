@@ -44,6 +44,7 @@ export class AnimationBuilder {
   );
 
   private classes: string[];
+  private activeClasses: Map<HTMLElement, string[]>;
   private listeners: Map<HTMLElement, ListenerRef[]>;
   private timeouts: Map<HTMLElement, TimeoutRef[]>;
   private styles: Map<HTMLElement, CSSStyleDeclaration>;
@@ -52,6 +53,7 @@ export class AnimationBuilder {
 
   constructor() {
     this.classes = [];
+    this.activeClasses = new Map<HTMLElement, string[]>();
     this.listeners = new Map<HTMLElement, ListenerRef[]>();
     this.timeouts = new Map<HTMLElement, TimeoutRef[]>();
     this.styles = new Map<HTMLElement, CSSStyleDeclaration>();
@@ -101,6 +103,21 @@ export class AnimationBuilder {
         this.registerAnimationListeners(element, mode, resolve, reject);
         this.styles.set(element, Object.assign({}, element.style));
 
+        const classes = this.classes.slice(0);
+
+        switch (mode) {
+          case AnimationMode.Show:
+            classes.push('animated-show');
+            break;
+          case AnimationMode.Hide:
+            classes.push('animated-hide');
+            break;
+        }
+
+        classes.push('animated', this.animationOptions.type);
+
+        this.activeClasses.set(element, classes);
+
         if (this.animationOptions.pin) {
           if (mode === AnimationMode.Show) {
             element.style.visibility = 'hidden';
@@ -130,13 +147,13 @@ export class AnimationBuilder {
   }
 
   public reset(element: HTMLElement, removePending = true, rejectTimeouts = false, rejectListeners = false): void {
-    this.removeStyles(element);
-    this.removeClasses(element);
-
     if (removePending) {
       this.removeTimeouts(element, rejectTimeouts);
       this.removeListeners(element, rejectListeners);
     }
+
+    this.removeStyles(element);
+    this.removeClasses(element);
   }
 
   public dispose(): void {
@@ -190,26 +207,6 @@ export class AnimationBuilder {
     });
   }
 
-//   private offset(element: HTMLElement): { left: number, top: number } {
-//     var body = document.body,
-//         win = document.defaultView,
-//         docElem = document.documentElement,
-//         box = document.createElement('div') as any;
-//
-//     box.style.paddingLeft = box.style.width = "1px";
-//     body.appendChild(box);
-//     var isBoxModel = box.offsetWidth == 2;
-//     body.removeChild(box);
-//     box = element.getBoundingClientRect() as any;
-//     var clientTop  = docElem.clientTop  || body.clientTop  || 0,
-//         clientLeft = docElem.clientLeft || body.clientLeft || 0,
-//         scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
-//         scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
-//     return {
-//         top : box.top  + scrollTop  - clientTop,
-//         left: box.left + scrollLeft - clientLeft};
-// }
-
   private getPosition(element: HTMLElement): { left: number, top: number } {
     let el = element.getBoundingClientRect();
 
@@ -237,7 +234,7 @@ export class AnimationBuilder {
       this.log(`Animation end handler fired for element`, element);
       element.removeEventListener(animationEndEvent, endHandler);
       this.removeListeners(element, false);
-      this.reset(element);
+      this.reset(element, true, false, false);
       if (mode === AnimationMode.Hide) this.hideElement(element);
       if (mode === AnimationMode.Show) this.showElement(element);
       resolve(element);
@@ -370,30 +367,25 @@ export class AnimationBuilder {
   }
 
   private applyClasses(element: HTMLElement, mode?: AnimationMode): void {
+    const active = this.activeClasses.get(element) || [];
+
     element.classList.add(
       'animated',
-      this.animationOptions.type,
-      ...this.classes,
+      ...active,
     );
-
-    switch (mode) {
-      case AnimationMode.Show:
-        element.classList.add('animated-show');
-        break;
-      case AnimationMode.Hide:
-        element.classList.add('animated-hide');
-        break;
-    }
   }
 
   private removeClasses(element: HTMLElement): void {
+    const active = this.activeClasses.get(element) || [];
+
     element.classList.remove(
       'animated',
       'animated-show',
       'animated-hide',
-      this.animationOptions.type,
-      ...this.classes,
+      ...active,
     );
+
+    this.activeClasses.delete(element);
   }
 
   private applyStyle(element: HTMLElement, prop: string, value: string | number | boolean) {
@@ -420,9 +412,9 @@ export class AnimationBuilder {
 
   private camelCase(input: string): string {
     return input.toLowerCase().replace(/-(.)/g, (match, group1) => {
-        return group1.toUpperCase();
+      return group1.toUpperCase();
     });
-}
+  }
 
   // Getters and Setters
 

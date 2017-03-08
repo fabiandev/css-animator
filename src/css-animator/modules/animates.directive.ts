@@ -9,8 +9,8 @@ import { AnimationOptions } from '../contracts';
   inputs: [
     'animates',
     'animatesOnInit',
-    'animatesInitMode',
-  ],
+    'animatesInitMode'
+  ]
 })
 export class AnimatesDirective implements OnInit {
   private _defaultOptions: AnimationOptions;
