@@ -2,39 +2,67 @@ import { AnimationBuilder } from 'css-animator/builder';
 
 const animator = new AnimationBuilder();
 const element = document.getElementById('animate');
-const button = document.getElementById('button');
+const showButton = document.getElementById('showButton');
+const shakeButton = document.getElementById('shakeButton');
+const hideButton = document.getElementById('hideButton');
 
 animator
-  .setType('fadeOutDown')
+  .setType('fadeInUp')
   .setDelay(100)
-  .hide(element);
+  .show(element);
 
-button.onclick = () => {
-  button.setAttribute('disabled', '');
+showButton.onclick = () => {
+  showButton.setAttribute('disabled', '');
 
   animator
     .setType('fadeInUp')
-    .setDelay(0)
+    .setDuration(1000)
     .show(element)
-    .then(el => {
-      return animator
-        .setDelay(500)
-        .setDuration(1500)
-        .setType('shake')
-        .animate(el);
-    })
-    .then(el => {
-      return animator
-        .setDelay(1000)
-        .setDuration(1000)
-        .setType('fadeOutDown')
-        .hide(el);
-    })
     .then(() => {
-      animator.setDelay(0);
-      button.removeAttribute('disabled');
+      hideButton.removeAttribute('disabled');
+      shakeButton.removeAttribute('disabled');
     })
-    .catch(() => {
-      button.removeAttribute('disabled');
+    .catch(e => {
+      console.log('css-animator: Animation aborted', e);
+      hideButton.removeAttribute('disabled');
+      shakeButton.removeAttribute('disabled');
+    });
+};
+
+shakeButton.onclick = () => {
+  shakeButton.setAttribute('disabled', '');
+  hideButton.setAttribute('disabled', '');
+
+  animator
+    .setType('shake')
+    .setDuration(1500)
+    .animate(element)
+    .then(() => {
+      shakeButton.removeAttribute('disabled');
+      hideButton.removeAttribute('disabled');
+    })
+    .catch(e => {
+      console.log('css-animator: Animation aborted', e);
+      shakeButton.removeAttribute('disabled');
+      hideButton.removeAttribute('disabled');
+    });
+};
+
+hideButton.onclick = () => {
+  hideButton.setAttribute('disabled', '');
+  shakeButton.setAttribute('disabled', '');
+
+  animator
+    .setType('fadeOutDown')
+    .setDuration(1000)
+    .hide(element)
+    .then(() => {
+      showButton.removeAttribute('disabled');
+      shakeButton.setAttribute('disabled', '');
+    })
+    .catch(e => {
+      console.log('css-animator: Animation aborted', e);
+      showButton.removeAttribute('disabled');
+      shakeButton.setAttribute('disabled', '');
     });
 };

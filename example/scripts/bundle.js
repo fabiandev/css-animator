@@ -54019,37 +54019,56 @@
 	var core_1 = __webpack_require__(7);
 	var css_animator_1 = __webpack_require__(29);
 	var AppComponent = (function () {
-	    function AppComponent(elementRef, animationService) {
-	        this.elementRef = elementRef;
+	    function AppComponent(animationService) {
+	        this.isVisible = true;
+	        this.isAnimating = false;
 	        this.animator = animationService.builder();
 	    }
-	    AppComponent.prototype.startAnimation = function (button) {
+	    AppComponent.prototype.show = function (element, button) {
 	        var _this = this;
-	        button.setAttribute('disabled', '');
-	        var element = this.elementRef.nativeElement.querySelector('.el');
+	        this.isAnimating = true;
 	        this.animator
 	            .setType('fadeInUp')
+	            .setDuration(1000)
 	            .show(element)
-	            .then(function (el) {
-	            return _this.animator
-	                .setDelay(500)
-	                .setDuration(1500)
-	                .setType('shake')
-	                .animate(el);
-	        })
-	            .then(function (el) {
-	            return _this.animator
-	                .setDelay(1000)
-	                .setDuration(1000)
-	                .setType('fadeOutDown')
-	                .hide(el);
-	        })
 	            .then(function () {
-	            _this.animator.setDelay(0);
-	            button.removeAttribute('disabled');
+	            _this.isVisible = true;
+	            _this.isAnimating = false;
 	        })
-	            .catch(function () {
-	            button.removeAttribute('disabled');
+	            .catch(function (e) {
+	            _this.isAnimating = false;
+	            console.log('css-animator: Animation aborted', e);
+	        });
+	    };
+	    AppComponent.prototype.shake = function (element, button) {
+	        var _this = this;
+	        this.isAnimating = true;
+	        this.animator
+	            .setType('shake')
+	            .setDuration(1500)
+	            .animate(element)
+	            .then(function () {
+	            _this.isAnimating = false;
+	        })
+	            .catch(function (e) {
+	            _this.isAnimating = false;
+	            console.log('css-animator: Animation aborted', e);
+	        });
+	    };
+	    AppComponent.prototype.hide = function (element, button) {
+	        var _this = this;
+	        this.isAnimating = true;
+	        this.animator
+	            .setType('fadeOutDown')
+	            .setDuration(1000)
+	            .hide(element)
+	            .then(function () {
+	            _this.isVisible = false;
+	            _this.isAnimating = false;
+	        })
+	            .catch(function (e) {
+	            _this.isAnimating = false;
+	            console.log('css-animator: Animation aborted', e);
 	        });
 	    };
 	    return AppComponent;
@@ -54058,13 +54077,13 @@
 	    core_1.Component({
 	        selector: 'angular-app',
 	        providers: [
-	            css_animator_1.AnimationService,
+	            css_animator_1.AnimationService
 	        ],
-	        template: "\n  <nav>\n    <button #button (click)=\"startAnimation(button)\">Start Animation</button>\n  </nav>\n  <div\n    class=\"el\"\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"hide\"\n    [animatesOnInit]=\"{type: 'fadeOutDown', delay: 100, duration: 1000}\">\n  </div>\n  ",
-	        styles: ["\n    .el {\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }",
-	        ],
+	        template: "\n  <nav>\n    <button #showButton (click)=\"show(toAnimate, showButton)\" [disabled]=\"isAnimating ||\u00A0isVisible\">Show</button>\n    <button #shakeButton (click)=\"shake(toAnimate, shakeButton)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Shake</button>\n    <button #hideButton (click)=\"hide(toAnimate, hideButton)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Hide</button>\n  </nav>\n  <div\n    #toAnimate\n    class=\"el\"\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{type: 'fadeInUp', delay: 100, duration: 1000}\"\n    hidden\n  >\n  </div>\n  ",
+	        styles: ["\n    .el {\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }"
+	        ]
 	    }),
-	    __metadata("design:paramtypes", [core_1.ElementRef, css_animator_1.AnimationService])
+	    __metadata("design:paramtypes", [css_animator_1.AnimationService])
 	], AppComponent);
 	exports.AppComponent = AppComponent;
 
@@ -54125,6 +54144,7 @@
 	        this.animationOptions = Object.assign({}, AnimationBuilder.defaultOptions);
 	        this.defaultOptions = Object.assign({}, AnimationBuilder.defaultOptions);
 	        this.classes = [];
+	        this.activeClasses = new Map();
 	        this.listeners = new Map();
 	        this.timeouts = new Map();
 	        this.styles = new Map();
@@ -54168,6 +54188,17 @@
 	                _this.reset(element, true, false, true);
 	                _this.registerAnimationListeners(element, mode, resolve, reject);
 	                _this.styles.set(element, Object.assign({}, element.style));
+	                var classes = _this.classes.slice(0);
+	                switch (mode) {
+	                    case AnimationMode.Show:
+	                        classes.push('animated-show');
+	                        break;
+	                    case AnimationMode.Hide:
+	                        classes.push('animated-hide');
+	                        break;
+	                }
+	                classes.push('animated', _this.animationOptions.type);
+	                _this.activeClasses.set(element, classes);
 	                if (_this.animationOptions.pin) {
 	                    if (mode === AnimationMode.Show) {
 	                        element.style.visibility = 'hidden';
@@ -54193,12 +54224,12 @@
 	        if (removePending === void 0) { removePending = true; }
 	        if (rejectTimeouts === void 0) { rejectTimeouts = false; }
 	        if (rejectListeners === void 0) { rejectListeners = false; }
-	        this.removeStyles(element);
-	        this.removeClasses(element);
 	        if (removePending) {
 	            this.removeTimeouts(element, rejectTimeouts);
 	            this.removeListeners(element, rejectListeners);
 	        }
+	        this.removeStyles(element);
+	        this.removeClasses(element);
 	    };
 	    AnimationBuilder.prototype.dispose = function () {
 	        this.timeouts.forEach(function (refs) {
@@ -54246,25 +54277,6 @@
 	            AnimationBuilder.raf(fn);
 	        });
 	    };
-	    //   private offset(element: HTMLElement): { left: number, top: number } {
-	    //     var body = document.body,
-	    //         win = document.defaultView,
-	    //         docElem = document.documentElement,
-	    //         box = document.createElement('div') as any;
-	    //
-	    //     box.style.paddingLeft = box.style.width = "1px";
-	    //     body.appendChild(box);
-	    //     var isBoxModel = box.offsetWidth == 2;
-	    //     body.removeChild(box);
-	    //     box = element.getBoundingClientRect() as any;
-	    //     var clientTop  = docElem.clientTop  || body.clientTop  || 0,
-	    //         clientLeft = docElem.clientLeft || body.clientLeft || 0,
-	    //         scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
-	    //         scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
-	    //     return {
-	    //         top : box.top  + scrollTop  - clientTop,
-	    //         left: box.left + scrollLeft - clientLeft};
-	    // }
 	    AnimationBuilder.prototype.getPosition = function (element) {
 	        var el = element.getBoundingClientRect();
 	        return {
@@ -54288,7 +54300,7 @@
 	            _this.log("Animation end handler fired for element", element);
 	            element.removeEventListener(animationEndEvent, endHandler);
 	            _this.removeListeners(element, false);
-	            _this.reset(element);
+	            _this.reset(element, true, false, false);
 	            if (mode === AnimationMode.Hide)
 	                _this.hideElement(element);
 	            if (mode === AnimationMode.Show)
@@ -54404,23 +54416,16 @@
 	        this.styles.delete(element);
 	    };
 	    AnimationBuilder.prototype.applyClasses = function (element, mode) {
-	        (_a = element.classList).add.apply(_a, ['animated',
-	            this.animationOptions.type].concat(this.classes));
-	        switch (mode) {
-	            case AnimationMode.Show:
-	                element.classList.add('animated-show');
-	                break;
-	            case AnimationMode.Hide:
-	                element.classList.add('animated-hide');
-	                break;
-	        }
+	        var active = this.activeClasses.get(element) || [];
+	        (_a = element.classList).add.apply(_a, ['animated'].concat(active));
 	        var _a;
 	    };
 	    AnimationBuilder.prototype.removeClasses = function (element) {
+	        var active = this.activeClasses.get(element) || [];
 	        (_a = element.classList).remove.apply(_a, ['animated',
 	            'animated-show',
-	            'animated-hide',
-	            this.animationOptions.type].concat(this.classes));
+	            'animated-hide'].concat(active));
+	        this.activeClasses.delete(element);
 	        var _a;
 	    };
 	    AnimationBuilder.prototype.applyStyle = function (element, prop, value) {
@@ -54872,8 +54877,8 @@
 	        inputs: [
 	            'animates',
 	            'animatesOnInit',
-	            'animatesInitMode',
-	        ],
+	            'animatesInitMode'
+	        ]
 	    }),
 	    __param(0, core_1.Inject(core_1.ElementRef)), __param(1, core_1.Inject(animation_service_1.AnimationService)),
 	    __metadata("design:paramtypes", [core_1.ElementRef, animation_service_1.AnimationService])
@@ -54890,37 +54895,61 @@
 	var builder_1 = __webpack_require__(31);
 	var animator = new builder_1.AnimationBuilder();
 	var element = document.getElementById('animate');
-	var button = document.getElementById('button');
+	var showButton = document.getElementById('showButton');
+	var shakeButton = document.getElementById('shakeButton');
+	var hideButton = document.getElementById('hideButton');
 	animator
-	    .setType('fadeOutDown')
+	    .setType('fadeInUp')
 	    .setDelay(100)
-	    .hide(element);
-	button.onclick = function () {
-	    button.setAttribute('disabled', '');
+	    .show(element);
+	showButton.onclick = function () {
+	    showButton.setAttribute('disabled', '');
 	    animator
 	        .setType('fadeInUp')
-	        .setDelay(0)
+	        .setDuration(1000)
 	        .show(element)
-	        .then(function (el) {
-	        return animator
-	            .setDelay(500)
-	            .setDuration(1500)
-	            .setType('shake')
-	            .animate(el);
-	    })
-	        .then(function (el) {
-	        return animator
-	            .setDelay(1000)
-	            .setDuration(1000)
-	            .setType('fadeOutDown')
-	            .hide(el);
-	    })
 	        .then(function () {
-	        animator.setDelay(0);
-	        button.removeAttribute('disabled');
+	        hideButton.removeAttribute('disabled');
+	        shakeButton.removeAttribute('disabled');
 	    })
-	        .catch(function () {
-	        button.removeAttribute('disabled');
+	        .catch(function (e) {
+	        console.log('css-animator: Animation aborted', e);
+	        hideButton.removeAttribute('disabled');
+	        shakeButton.removeAttribute('disabled');
+	    });
+	};
+	shakeButton.onclick = function () {
+	    shakeButton.setAttribute('disabled', '');
+	    hideButton.setAttribute('disabled', '');
+	    animator
+	        .setType('shake')
+	        .setDuration(1500)
+	        .animate(element)
+	        .then(function () {
+	        shakeButton.removeAttribute('disabled');
+	        hideButton.removeAttribute('disabled');
+	    })
+	        .catch(function (e) {
+	        console.log('css-animator: Animation aborted', e);
+	        shakeButton.removeAttribute('disabled');
+	        hideButton.removeAttribute('disabled');
+	    });
+	};
+	hideButton.onclick = function () {
+	    hideButton.setAttribute('disabled', '');
+	    shakeButton.setAttribute('disabled', '');
+	    animator
+	        .setType('fadeOutDown')
+	        .setDuration(1000)
+	        .hide(element)
+	        .then(function () {
+	        showButton.removeAttribute('disabled');
+	        shakeButton.setAttribute('disabled', '');
+	    })
+	        .catch(function (e) {
+	        console.log('css-animator: Animation aborted', e);
+	        showButton.removeAttribute('disabled');
+	        shakeButton.setAttribute('disabled', '');
 	    });
 	};
 

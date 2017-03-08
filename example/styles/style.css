@@ -17,6 +17,25 @@ button {
   margin-bottom: 40px
 }
 
+a {
+  color: #333;
+  text-decoration: none;
+}
+
+#github {
+  position: fixed;
+  bottom: 5px;
+  right: 10px;
+  font-size: 13px;
+}
+
+.ghlogo {
+  vertical-align: bottom;
+  display: inline-block;
+  padding-bottom: 1px;
+  height: 16px;
+}
+
 #builder {
     position: absolute;
     display: inline-block;
