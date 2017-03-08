@@ -77,6 +77,8 @@ var AnimationBuilder = (function () {
                     element.style.position = 'fixed';
                     element.style.top = position.top + "px";
                     element.style.left = position.left + "px";
+                    element.style.width = position.width + "px";
+                    element.style.height = position.height + "px";
                     element.style.margin = '0px';
                 }
                 _this.nextFrame(function () {
@@ -151,6 +153,8 @@ var AnimationBuilder = (function () {
         return {
             left: el.left + window.scrollX,
             top: el.top + window.scrollY,
+            width: el.width,
+            height: el.height,
         };
     };
     AnimationBuilder.prototype.registerAnimationListeners = function (element, mode, resolve, reject) {
