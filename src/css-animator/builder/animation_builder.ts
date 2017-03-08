@@ -210,24 +210,54 @@ export class AnimationBuilder {
   }
 
   // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-  //   let el = element.getBoundingClientRect();
+  //   return {
+  //     left: element.offsetLeft,
+  //     top: element.offsetTop,
+  //     width: element.clientWidth,
+  //     height: element.clientWidth,
+  //   };
+  // }
+
+  // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
+  //   let rect = element.getBoundingClientRect();
+  //   let cs = window.getComputedStyle(element);
   //
   //   return {
-  //     left: el.left + window.scrollX,
-  //     top: el.top + window.scrollY,
-  //     width: el.width,
-  //     height: el.height,
+  //     left: rect.left + window.scrollX,
+  //     top: rect.top + window.scrollY,
+  //     width: rect.width -
+  //       parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
+  //       parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth), // scrollbar?
+  //     height: rect.height -
+  //       parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
+  //       parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth), // scrollbar?
+  //   };
+  // }
+
+  // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
+  //   const computed = window.getComputedStyle(element);
+  //
+  //   return {
+  //     left: element.offsetLeft,
+  //     top: element.offsetTop,
+  //     width: parseFloat(computed.width),
+  //     height: parseFloat(computed.height),
   //   };
   // }
 
   private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-    const computed = window.getComputedStyle(element);
+    let rect = element.getBoundingClientRect();
+    let cs = window.getComputedStyle(element);
 
     return {
       left: element.offsetLeft,
       top: element.offsetTop,
-      width: parseFloat(computed.width),
-      height: parseFloat(computed.height),
+      width: rect.width -
+        parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
+        parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth), // scrollbar?
+      height: rect.height -
+        parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
+        parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth), // scrollbar?
     };
   }
 
@@ -455,7 +485,7 @@ export class AnimationBuilder {
   }
 
   public setOptions(options: AnimationOptions): AnimationBuilder {
-    this.options = options;
+    Object.assign(this.options, options);
     return this;
   }
 
