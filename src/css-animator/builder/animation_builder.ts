@@ -645,15 +645,15 @@ export class AnimationBuilder {
     return this;
   }
 
-  get duration(): string | number {
+  get duration(): number {
     return this.animationOptions.duration;
   }
 
-  set duration(duration: string | number) {
+  set duration(duration: number) {
     this.animationOptions.duration = duration;
   }
 
-  public setDuration(duration: string | number): AnimationBuilder {
+  public setDuration(duration: number): AnimationBuilder {
     this.duration = duration;
     return this;
   }
@@ -668,15 +668,15 @@ export class AnimationBuilder {
     return this;
   }
 
-  get delay(): string | number {
+  get delay(): number {
     return this.animationOptions.delay;
   }
 
-  set delay(delay: string | number) {
+  set delay(delay: number) {
     this.animationOptions.delay = delay;
   }
 
-  public setDelay(delay: string | number): AnimationBuilder {
+  public setDelay(delay: number): AnimationBuilder {
     this.delay = delay;
     return this;
   }
@@ -691,15 +691,15 @@ export class AnimationBuilder {
     return this;
   }
 
-  get iterationCount(): string | number {
+  get iterationCount(): number {
     return this.animationOptions.iterationCount;
   }
 
-  set iterationCount(iterationCount: string | number) {
+  set iterationCount(iterationCount: number) {
     this.animationOptions.iterationCount = iterationCount;
   }
 
-  public setIterationCount(iterationCount: string | number): AnimationBuilder {
+  public setIterationCount(iterationCount: number): AnimationBuilder {
     this.iterationCount = iterationCount;
     return this;
   }

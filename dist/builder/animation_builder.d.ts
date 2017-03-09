@@ -67,13 +67,13 @@ export declare class AnimationBuilder {
     direction: string;
     setDirection(direction: string): AnimationBuilder;
     applyDirection(element: HTMLElement): AnimationBuilder;
-    duration: string | number;
-    setDuration(duration: string | number): AnimationBuilder;
+    duration: number;
+    setDuration(duration: number): AnimationBuilder;
     applyDuration(element: HTMLElement): AnimationBuilder;
-    delay: string | number;
-    setDelay(delay: string | number): AnimationBuilder;
+    delay: number;
+    setDelay(delay: number): AnimationBuilder;
     applyDelayAsStyle(element: HTMLElement): AnimationBuilder;
-    iterationCount: string | number;
-    setIterationCount(iterationCount: string | number): AnimationBuilder;
+    iterationCount: number;
+    setIterationCount(iterationCount: number): AnimationBuilder;
     applyIterationCount(element: HTMLElement): AnimationBuilder;
 }

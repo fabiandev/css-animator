@@ -9,7 +9,7 @@ export interface AnimationOptions {
     timingFunction?: string;
     playState?: string;
     direction?: string;
-    duration?: string | number;
-    delay?: string | number;
-    iterationCount?: string | number;
+    duration?: number;
+    delay?: number;
+    iterationCount?: number;
 }
