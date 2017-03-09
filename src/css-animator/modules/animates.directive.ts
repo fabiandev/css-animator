@@ -18,6 +18,7 @@ export class AnimatesDirective implements OnInit {
   private _initMode: string;
 
   private _animationBuilder: AnimationBuilder;
+  private _started: boolean;
 
   set animates(options: AnimationOptions) {
     this._defaultOptions = options;
@@ -67,6 +68,7 @@ export class AnimatesDirective implements OnInit {
   }
 
   public start(options?: AnimationOptions): Promise<HTMLElement> {
+    this._started = true;
     this.setOptions(options);
 
     return this._animationBuilder
@@ -97,10 +99,8 @@ export class AnimatesDirective implements OnInit {
       });
   }
 
-  public animate() {
-    if (!this._defaultOptions) {
-      return;
-    }
+  public animate(options?: AnimationOptions) {
+    this.setOptions(options);
 
     return this._animationBuilder
       .setOptions(this._defaultOptions)
@@ -111,29 +111,45 @@ export class AnimatesDirective implements OnInit {
   }
 
   public pause() {
+    if (!this._started) return;
+
     this._animationBuilder
       .setPlayState('paused')
       .applyPlayState(this._elementRef.nativeElement);
   }
 
   public resume() {
+    if (!this._started) return;
+
     this._animationBuilder
       .setPlayState('running')
       .applyPlayState(this._elementRef.nativeElement);
   }
 
   public toggle() {
+    if (!this._started) return;
+
     this._animationBuilder
       .setPlayState(this._animationBuilder.playState === 'running' ? 'paused' : 'running')
       .applyPlayState(this._elementRef.nativeElement);
   }
 
   public stop() {
+    this._started = false;
     this._animationBuilder
       .stop(this._elementRef.nativeElement)
       .then((element) => element, (error) => {
         // Animation interrupted
       });
+  }
+
+  public startOrStop(options?: AnimationOptions) {
+    if (!this._started) {
+      this.start(options);
+      return;
+    }
+
+    this.stop();
   }
 
   private setOptions(options: AnimationOptions) {

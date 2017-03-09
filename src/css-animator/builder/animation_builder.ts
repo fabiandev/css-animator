@@ -13,11 +13,9 @@ export enum AnimationMode {
 
 export class AnimationBuilder {
 
-  // Members
-
   public static DEBUG: boolean = false;
 
-  public static defaults: AnimationOptions = {
+  public static readonly defaults: AnimationOptions = {
     fixed: false,
     reject: true,
     useVisibility: false,
@@ -53,7 +51,7 @@ export class AnimationBuilder {
     );
 
     this.defaultOptions = Object.assign(
-      {}, AnimationBuilder.defaults,
+      {}, this.animationOptions,
     );
 
     this.classes = [];
@@ -62,24 +60,6 @@ export class AnimationBuilder {
     this.timeouts = new Map<HTMLElement, TimeoutRef[]>();
     this.styles = new Map<HTMLElement, CSSStyleDeclaration>();
     this.log('AnimationBuilder created.');
-  }
-
-  private hideElement(element: HTMLElement): void {
-    if (this.animationOptions.useVisibility) {
-      element.style.visibility = 'hidden';
-      return;
-    }
-
-    element.setAttribute('hidden', '');
-  }
-
-  private showElement(element: HTMLElement): void {
-    if (this.animationOptions.useVisibility) {
-      element.style.visibility = 'visible';
-      return;
-    }
-
-    element.removeAttribute('hidden');
   }
 
   public show(element: HTMLElement): Promise<HTMLElement> {
@@ -94,7 +74,7 @@ export class AnimationBuilder {
   public stop(element: HTMLElement, reset = true): Promise<HTMLElement> {
     this.removeTimeouts(element);
     this.removeListeners(element);
-    if (reset) this.reset(element);
+    if (reset) this.reset(element, false);
     return Promise.resolve(element);
   }
 
@@ -201,7 +181,7 @@ export class AnimationBuilder {
 
   // Private Methods
 
-  private log(...values: any[]) {
+  private log(...values: any[]): void {
     if (AnimationBuilder.DEBUG) {
       console.log('css-animator:', ...values);
     }
@@ -213,64 +193,51 @@ export class AnimationBuilder {
     });
   }
 
-  // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-  //   return {
-  //     left: element.offsetLeft,
-  //     top: element.offsetTop,
-  //     width: element.clientWidth,
-  //     height: element.clientWidth,
-  //   };
-  // }
+  private camelCase(input: string): string {
+    return input.toLowerCase().replace(/-(.)/g, (match, group) => {
+      return group.toUpperCase();
+    });
+  }
 
-  // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-  //   let rect = element.getBoundingClientRect();
-  //   let cs = window.getComputedStyle(element);
-  //
-  //   return {
-  //     left: rect.left + window.scrollX,
-  //     top: rect.top + window.scrollY,
-  //     width: rect.width -
-  //       parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
-  //       parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth), // scrollbar?
-  //     height: rect.height -
-  //       parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
-  //       parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth), // scrollbar?
-  //   };
-  // }
+  private hideElement(element: HTMLElement): void {
+    if (this.animationOptions.useVisibility) {
+      element.style.visibility = 'hidden';
+      return;
+    }
 
-  // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-  //   const computed = window.getComputedStyle(element);
-  //
-  //   return {
-  //     left: element.offsetLeft,
-  //     top: element.offsetTop,
-  //     width: parseFloat(computed.width),
-  //     height: parseFloat(computed.height),
-  //   };
-  // }
+    element.setAttribute('hidden', '');
+  }
+
+  private showElement(element: HTMLElement): void {
+    if (this.animationOptions.useVisibility) {
+      element.style.visibility = 'visible';
+      return;
+    }
+
+    element.removeAttribute('hidden');
+  }
 
   private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-    let rect = element.getBoundingClientRect();
-    let cs = window.getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    const cs = window.getComputedStyle(element);
 
     let left = element.offsetLeft;
     let top = element.offsetTop;
+
+    let width = rect.width -
+      parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
+      parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+
+    let height = rect.height -
+      parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
+      parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
 
     if (this.animationOptions.fixed) {
       left = rect.left + window.scrollX;
       top = rect.top + window.scrollY;
     }
 
-    return {
-      left,
-      top,
-      width: rect.width -
-        parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
-        parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth), // scrollbar?
-      height: rect.height -
-        parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
-        parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth), // scrollbar?
-    };
+    return { left, top, width, height };
   }
 
   private registerAnimationListeners(element: HTMLElement, mode: AnimationMode, resolve: Function, reject: Function): void {
@@ -467,12 +434,6 @@ export class AnimationBuilder {
     return this;
   }
 
-  private camelCase(input: string): string {
-    return input.toLowerCase().replace(/-(.)/g, (match, group1) => {
-      return group1.toUpperCase();
-    });
-  }
-
   // Getters and Setters
 
   get defaults(): AnimationOptions {
@@ -545,10 +506,6 @@ export class AnimationBuilder {
 
   public setType(type: string): AnimationBuilder {
     this.type = type;
-    return this;
-  }
-
-  public applyType(element: HTMLElement): AnimationBuilder {
     return this;
   }
 
@@ -691,15 +648,22 @@ export class AnimationBuilder {
     return this;
   }
 
-  get iterationCount(): number {
+  /**
+   * @deprecated Use applyDelayAsStyle instead.
+   */
+  public applyDelay(element: HTMLElement): AnimationBuilder {
+    return this;
+  }
+
+  get iterationCount(): number|string {
     return this.animationOptions.iterationCount;
   }
 
-  set iterationCount(iterationCount: number) {
+  set iterationCount(iterationCount: number|string) {
     this.animationOptions.iterationCount = iterationCount;
   }
 
-  public setIterationCount(iterationCount: number): AnimationBuilder {
+  public setIterationCount(iterationCount: number|string): AnimationBuilder {
     this.iterationCount = iterationCount;
     return this;
   }
