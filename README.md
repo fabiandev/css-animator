@@ -187,14 +187,21 @@ animatesInitMode="show" // Can be used with [animatesOnInit] for "show" or "hide
 
 Below are all options supported by css-animator. You may notice, that all [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation) are included, so you can look up which values are supported, where the options `delay` and `duration` have to be set as numbers in `ms` (e.g. `1000` for one second).  
 
+The `animation-name` is currently not supported, as `type` is as set as class.
+
 ```ts
 export interface AnimationOptions {
+
+  // General settings:
   fixed?: boolean;
   reject?: boolean;
   useVisibility?: boolean;
   pin?: boolean;
 
+  // Animation type set as class:
   type?: string;
+
+  // Animation settings:
   fillMode?: string;
   timingFunction?: string;
   playState?: string;
@@ -202,12 +209,76 @@ export interface AnimationOptions {
   duration?: number;
   delay?: number;
   iterationCount?: number;
+
 }
 ```
 
 > The `delay` option is an exception and won't be set as CSS animation property,
 > as delays are handled via JavaScript timeouts. If you really want to
 > use the CSS rule, you can call `applyDelayAsStyle` to apply the delay immediately on the element.  
+
+### Change Options
+
+You can change the options on an `AnimationBuilder` instance in three different ways.
+You can also change the defaults for future instances.
+
+#### Change defaults for future instances
+
+```ts
+import { AnimationBuilder } from 'css-animator/builder';
+
+AnimationBuilder.defaults.type = 'bounce';
+AnimationBuilder.defaults.duration = '1500';
+
+let animator = new AnimationBuilder();
+```
+
+Changing the defaults won't affect instances, that have already been created.
+
+#### Using chainable set functions
+
+```ts
+animator
+  .setType('bounce')
+  .setDuration(1500);
+```
+
+#### Using setters
+
+```ts
+animator.type = 'bounce';
+
+if (animator.duration < 1500) {
+  animator.duration = 1500;
+}
+```
+
+#### Using setOptions
+
+```ts
+animator.setOptions({
+  type: 'bounce',
+  duration: 1500
+});
+```
+
+#### Apply an option
+
+You can apply options, that are related to the animation itself.
+Supported options are: `fillMode`, `timingFunction`, `playState`,
+`direction`, `duration` and `iterationCount`.  
+
+Settings that are applied are immediately set on the element, without the need for starting an animation. css-animator can't take care of resetting the element though, so be careful with this feature.
+
+```ts
+animator
+  .setType('shake')
+  .applyType(element)
+  .setIterationCount(3)
+  .applyIterationCount(element);
+```
+
+### Options
 
 #### fixed (default: false)
 
@@ -221,7 +292,7 @@ the position mode to `fixed`, set the fixed option to `true`.
 #### reject (default: true)
 
 The promise for an animation is rejected with `animation_aborted`, if it is interrupted somehow. To change
-this behavior, set `reject: false` or call `setReject(true)` on an `AnimationBuilder` instance. You may also use the setter on the `AnimationBuilder` instance: `animator.reject = false`.
+this behavior, set the `reject` option to `false`.
 
 #### useVisibility
 
@@ -237,7 +308,7 @@ If you want css-animator to only apply the animation, without changing the eleme
 
 #### type (default: 'shake')
 
-The class that will be applied to the element alongside `animated` and `animated-show`, if the element will be shown, or `animated-hide`, if the element will be hidden.
+The class that will be applied to the element alongside `animated` and `animated-show`, if the element is being shown, or `animated-hide`, if the element is being hidden.
 
 #### fillMode (default: 'none')
 
@@ -269,17 +340,23 @@ See [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/ani
 
 ## AnimationBuilder
 
+#### animate
+
 ```ts
 animate(element: HTMLElement, mode = 'default'): Promise<HTMLElement>
 ```
 
 Simply animate an element.
 
+#### show
+
 ```ts
 show(element: HTMLElement): Promise<HTMLElement>
 ```
 
 Animate an element, that was previously hidden.
+
+#### hide
 
 ```ts
 hide(element: HTMLElement): Promise<HTMLElement>
@@ -288,9 +365,13 @@ hide(element: HTMLElement): Promise<HTMLElement>
 Adds the attribute `hidden` to the element after the animation has finished.
 You may need to add something like `[hidden] { display: none; }` to your CSS.
 
+#### stop
+
 ```ts
 stop(element: HTMLElement, reset = true, detach = true): Promise<HTMLElement>
 ```
+
+#### setOptions
 
 Stop the current animation on an element, reset it's position, reject the promise and remove the event listener that listens for animation end.
 
@@ -300,17 +381,23 @@ setOptions(options: AnimationOptions): AnimationBuilder
 
 Set multiple options at once.
 
+#### set{Option}
+
 ```ts
-set{Option}(option: string|number): AnimationBuilder
+set{Option}(option: string|number|boolean): AnimationBuilder
 ```
 
-You may set options individually like `setDuration(500)` and make use of method chaining.
+You may set options individually like `setDuration(500)`
+
+#### addAnimationClass
 
 ```ts
 addAnimationClass(name: string): AnimationBuilder
 ```
 
-Adds your custom classes while animating alongside the classes `animated` and `animated-{mode}` (where mode can be `show` or `hide`).
+Adds your custom classes while animating alongside the classes `animated` `animated-{mode}` (where mode is `show`, `hide` or `default`, unless you pass another string to the `animate` method).
+
+#### removeAnimationClass
 
 ```ts
 removeAnimationClass(name: string): AnimationBuilder
@@ -320,6 +407,12 @@ Won't add classes for future animations, previously added with `addAnimationClas
 
 > You can also directly apply options without saving it to the animation builder by using `apply{Option}(options: string|number)`  
 > Also there are getters and setters for each option, you can access with `animator.{option}`.
+
+#### reset
+
+```ts
+reset(element: HTMLElement, ): void
+```
 
 ## AnimatesDirective
 
