@@ -11,7 +11,7 @@ var AnimationBuilder = (function () {
     // Public Methods
     function AnimationBuilder() {
         this.animationOptions = Object.assign({}, AnimationBuilder.defaults);
-        this.defaultOptions = Object.assign({}, AnimationBuilder.defaults);
+        this.defaultOptions = Object.assign({}, this.animationOptions);
         this.classes = [];
         this.activeClasses = new Map();
         this.listeners = new Map();
@@ -19,20 +19,6 @@ var AnimationBuilder = (function () {
         this.styles = new Map();
         this.log('AnimationBuilder created.');
     }
-    AnimationBuilder.prototype.hideElement = function (element) {
-        if (this.animationOptions.useVisibility) {
-            element.style.visibility = 'hidden';
-            return;
-        }
-        element.setAttribute('hidden', '');
-    };
-    AnimationBuilder.prototype.showElement = function (element) {
-        if (this.animationOptions.useVisibility) {
-            element.style.visibility = 'visible';
-            return;
-        }
-        element.removeAttribute('hidden');
-    };
     AnimationBuilder.prototype.show = function (element) {
         this.hideElement(element);
         return this.animate(element, AnimationMode.Show);
@@ -45,7 +31,7 @@ var AnimationBuilder = (function () {
         this.removeTimeouts(element);
         this.removeListeners(element);
         if (reset)
-            this.reset(element);
+            this.reset(element, false);
         return Promise.resolve(element);
     };
     AnimationBuilder.prototype.animate = function (element, mode) {
@@ -148,58 +134,41 @@ var AnimationBuilder = (function () {
             AnimationBuilder.raf(fn);
         });
     };
-    // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-    //   return {
-    //     left: element.offsetLeft,
-    //     top: element.offsetTop,
-    //     width: element.clientWidth,
-    //     height: element.clientWidth,
-    //   };
-    // }
-    // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-    //   let rect = element.getBoundingClientRect();
-    //   let cs = window.getComputedStyle(element);
-    //
-    //   return {
-    //     left: rect.left + window.scrollX,
-    //     top: rect.top + window.scrollY,
-    //     width: rect.width -
-    //       parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
-    //       parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth), // scrollbar?
-    //     height: rect.height -
-    //       parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
-    //       parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth), // scrollbar?
-    //   };
-    // }
-    // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-    //   const computed = window.getComputedStyle(element);
-    //
-    //   return {
-    //     left: element.offsetLeft,
-    //     top: element.offsetTop,
-    //     width: parseFloat(computed.width),
-    //     height: parseFloat(computed.height),
-    //   };
-    // }
+    AnimationBuilder.prototype.camelCase = function (input) {
+        return input.toLowerCase().replace(/-(.)/g, function (match, group) {
+            return group.toUpperCase();
+        });
+    };
+    AnimationBuilder.prototype.hideElement = function (element) {
+        if (this.animationOptions.useVisibility) {
+            element.style.visibility = 'hidden';
+            return;
+        }
+        element.setAttribute('hidden', '');
+    };
+    AnimationBuilder.prototype.showElement = function (element) {
+        if (this.animationOptions.useVisibility) {
+            element.style.visibility = 'visible';
+            return;
+        }
+        element.removeAttribute('hidden');
+    };
     AnimationBuilder.prototype.getPosition = function (element) {
         var rect = element.getBoundingClientRect();
         var cs = window.getComputedStyle(element);
         var left = element.offsetLeft;
         var top = element.offsetTop;
+        var width = rect.width -
+            parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
+            parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+        var height = rect.height -
+            parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
+            parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
         if (this.animationOptions.fixed) {
             left = rect.left + window.scrollX;
             top = rect.top + window.scrollY;
         }
-        return {
-            left: left,
-            top: top,
-            width: rect.width -
-                parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
-                parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth),
-            height: rect.height -
-                parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
-                parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth),
-        };
+        return { left: left, top: top, width: width, height: height };
     };
     AnimationBuilder.prototype.registerAnimationListeners = function (element, mode, resolve, reject) {
         var _this = this;
@@ -364,11 +333,6 @@ var AnimationBuilder = (function () {
         }
         return this;
     };
-    AnimationBuilder.prototype.camelCase = function (input) {
-        return input.toLowerCase().replace(/-(.)/g, function (match, group1) {
-            return group1.toUpperCase();
-        });
-    };
     Object.defineProperty(AnimationBuilder.prototype, "defaults", {
         // Getters and Setters
         get: function () {
@@ -448,9 +412,6 @@ var AnimationBuilder = (function () {
     });
     AnimationBuilder.prototype.setType = function (type) {
         this.type = type;
-        return this;
-    };
-    AnimationBuilder.prototype.applyType = function (element) {
         return this;
     };
     Object.defineProperty(AnimationBuilder.prototype, "fillMode", {
@@ -562,6 +523,12 @@ var AnimationBuilder = (function () {
         this.applyStyle(element, 'animation-delay', this.animationOptions.delay);
         return this;
     };
+    /**
+     * @deprecated Use applyDelayAsStyle instead.
+     */
+    AnimationBuilder.prototype.applyDelay = function (element) {
+        return this;
+    };
     Object.defineProperty(AnimationBuilder.prototype, "iterationCount", {
         get: function () {
             return this.animationOptions.iterationCount;
@@ -582,7 +549,6 @@ var AnimationBuilder = (function () {
     };
     return AnimationBuilder;
 }());
-// Members
 AnimationBuilder.DEBUG = false;
 AnimationBuilder.defaults = {
     fixed: false,

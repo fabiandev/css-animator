@@ -71,6 +71,7 @@ var AnimatesDirective = (function () {
         });
     };
     AnimatesDirective.prototype.start = function (options) {
+        this._started = true;
         this.setOptions(options);
         return this._animationBuilder
             .animate(this._elementRef.nativeElement)
@@ -95,10 +96,8 @@ var AnimatesDirective = (function () {
             // Animation interrupted
         });
     };
-    AnimatesDirective.prototype.animate = function () {
-        if (!this._defaultOptions) {
-            return;
-        }
+    AnimatesDirective.prototype.animate = function (options) {
+        this.setOptions(options);
         return this._animationBuilder
             .setOptions(this._defaultOptions)
             .animate(this._elementRef.nativeElement)
@@ -107,26 +106,40 @@ var AnimatesDirective = (function () {
         });
     };
     AnimatesDirective.prototype.pause = function () {
+        if (!this._started)
+            return;
         this._animationBuilder
             .setPlayState('paused')
             .applyPlayState(this._elementRef.nativeElement);
     };
     AnimatesDirective.prototype.resume = function () {
+        if (!this._started)
+            return;
         this._animationBuilder
             .setPlayState('running')
             .applyPlayState(this._elementRef.nativeElement);
     };
     AnimatesDirective.prototype.toggle = function () {
+        if (!this._started)
+            return;
         this._animationBuilder
             .setPlayState(this._animationBuilder.playState === 'running' ? 'paused' : 'running')
             .applyPlayState(this._elementRef.nativeElement);
     };
     AnimatesDirective.prototype.stop = function () {
+        this._started = false;
         this._animationBuilder
             .stop(this._elementRef.nativeElement)
             .then(function (element) { return element; }, function (error) {
             // Animation interrupted
         });
+    };
+    AnimatesDirective.prototype.startOrStop = function (options) {
+        if (!this._started) {
+            this.start(options);
+            return;
+        }
+        this.stop();
     };
     AnimatesDirective.prototype.setOptions = function (options) {
         if (options) {

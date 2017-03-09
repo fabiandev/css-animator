@@ -6,7 +6,7 @@ export declare enum AnimationMode {
 }
 export declare class AnimationBuilder {
     static DEBUG: boolean;
-    static defaults: AnimationOptions;
+    static readonly defaults: AnimationOptions;
     private static raf;
     private animationOptions;
     private defaultOptions;
@@ -16,8 +16,6 @@ export declare class AnimationBuilder {
     private timeouts;
     private styles;
     constructor();
-    private hideElement(element);
-    private showElement(element);
     show(element: HTMLElement): Promise<HTMLElement>;
     hide(element: HTMLElement): Promise<HTMLElement>;
     stop(element: HTMLElement, reset?: boolean): Promise<HTMLElement>;
@@ -28,6 +26,9 @@ export declare class AnimationBuilder {
     removeAnimationClass(name: string): AnimationBuilder;
     private log(...values);
     private nextFrame(fn);
+    private camelCase(input);
+    private hideElement(element);
+    private showElement(element);
     private getPosition(element);
     private registerAnimationListeners(element, mode, resolve, reject);
     private addTimeout(element, timeout, reject?);
@@ -42,7 +43,6 @@ export declare class AnimationBuilder {
     private applyClasses(element, mode?);
     private removeClasses(element);
     private applyStyle(element, prop, value);
-    private camelCase(input);
     defaults: AnimationOptions;
     setDefaults(defaults: AnimationOptions): AnimationBuilder;
     options: AnimationOptions;
@@ -54,7 +54,6 @@ export declare class AnimationBuilder {
     setUseVisibility(useVisibility: boolean): AnimationBuilder;
     type: string;
     setType(type: string): AnimationBuilder;
-    applyType(element: HTMLElement): AnimationBuilder;
     fillMode: string;
     setFillMode(fillMode: string): AnimationBuilder;
     applyFillMode(element: HTMLElement): AnimationBuilder;
@@ -73,7 +72,11 @@ export declare class AnimationBuilder {
     delay: number;
     setDelay(delay: number): AnimationBuilder;
     applyDelayAsStyle(element: HTMLElement): AnimationBuilder;
-    iterationCount: number;
-    setIterationCount(iterationCount: number): AnimationBuilder;
+    /**
+     * @deprecated Use applyDelayAsStyle instead.
+     */
+    applyDelay(element: HTMLElement): AnimationBuilder;
+    iterationCount: number | string;
+    setIterationCount(iterationCount: number | string): AnimationBuilder;
     applyIterationCount(element: HTMLElement): AnimationBuilder;
 }

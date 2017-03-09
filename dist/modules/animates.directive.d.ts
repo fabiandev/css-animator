@@ -8,6 +8,7 @@ export declare class AnimatesDirective implements OnInit {
     private _initOptions;
     private _initMode;
     private _animationBuilder;
+    private _started;
     animates: AnimationOptions;
     animatesOnInit: AnimationOptions;
     animatesInitMode: string;
@@ -17,10 +18,11 @@ export declare class AnimatesDirective implements OnInit {
     start(options?: AnimationOptions): Promise<HTMLElement>;
     hide(options?: AnimationOptions): Promise<HTMLElement>;
     show(options?: AnimationOptions): Promise<HTMLElement>;
-    animate(): Promise<HTMLElement>;
+    animate(options?: AnimationOptions): Promise<HTMLElement>;
     pause(): void;
     resume(): void;
     toggle(): void;
     stop(): void;
+    startOrStop(options?: AnimationOptions): void;
     private setOptions(options);
 }

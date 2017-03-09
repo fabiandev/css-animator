@@ -11,5 +11,5 @@ export interface AnimationOptions {
     direction?: string;
     duration?: number;
     delay?: number;
-    iterationCount?: number;
+    iterationCount?: number | string;
 }

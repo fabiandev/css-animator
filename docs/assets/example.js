@@ -54079,8 +54079,8 @@
 	        providers: [
 	            css_animator_1.AnimationService
 	        ],
-	        template: "\n  <nav>\n    <button (click)=\"show(toAnimate)\" [disabled]=\"isAnimating ||\u00A0isVisible\">Show</button>\n    <button (click)=\"shake(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Shake</button>\n    <button (click)=\"hide(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Hide</button>\n  </nav>\n  <div\n    class=\"el\"\n    #toAnimate\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{type: 'fadeInUp', delay: 100, duration: 1000}\"\n    hidden\n  >\n  </div>\n  ",
-	        styles: ["\n    .el {\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }"
+	        template: "\n  <nav>\n    <button (click)=\"show(toAnimate)\" [disabled]=\"isAnimating ||\u00A0isVisible\">Show</button>\n    <button (click)=\"shake(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Shake</button>\n    <button (click)=\"hide(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Hide</button>\n  </nav>\n  <div\n    class=\"el\"\n    #toAnimate\n    animates\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{type: 'fadeInUp', delay: 100, duration: 1000}\"\n    hidden\n  >\n  </div>\n  <div\n    class=\"el2\"\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{ delay: 1200, type: 'fadeInUp' }\"\n    (click)=\"animation.startOrStop({delay: 0, duration: 1500, type: 'shake', iterationCount: 'infinite'})\"\n    (mouseleave)=\"animation.pause()\"\n    (mouseenter)=\"animation.resume()\"\n  >\n  </div>\n  ",
+	        styles: ["\n    .el {\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }\n    .el2 {\n      position: absolute;\n      width: 100px;\n      height: 100px;\n      top: 300px;\n      left: 50%;\n      margin-left: -50px;\n      background-color: yellow;\n    }"
 	        ]
 	    }),
 	    __metadata("design:paramtypes", [css_animator_1.AnimationService])
@@ -54142,7 +54142,7 @@
 	    // Public Methods
 	    function AnimationBuilder() {
 	        this.animationOptions = Object.assign({}, AnimationBuilder.defaults);
-	        this.defaultOptions = Object.assign({}, AnimationBuilder.defaults);
+	        this.defaultOptions = Object.assign({}, this.animationOptions);
 	        this.classes = [];
 	        this.activeClasses = new Map();
 	        this.listeners = new Map();
@@ -54150,20 +54150,6 @@
 	        this.styles = new Map();
 	        this.log('AnimationBuilder created.');
 	    }
-	    AnimationBuilder.prototype.hideElement = function (element) {
-	        if (this.animationOptions.useVisibility) {
-	            element.style.visibility = 'hidden';
-	            return;
-	        }
-	        element.setAttribute('hidden', '');
-	    };
-	    AnimationBuilder.prototype.showElement = function (element) {
-	        if (this.animationOptions.useVisibility) {
-	            element.style.visibility = 'visible';
-	            return;
-	        }
-	        element.removeAttribute('hidden');
-	    };
 	    AnimationBuilder.prototype.show = function (element) {
 	        this.hideElement(element);
 	        return this.animate(element, AnimationMode.Show);
@@ -54176,7 +54162,7 @@
 	        this.removeTimeouts(element);
 	        this.removeListeners(element);
 	        if (reset)
-	            this.reset(element);
+	            this.reset(element, false);
 	        return Promise.resolve(element);
 	    };
 	    AnimationBuilder.prototype.animate = function (element, mode) {
@@ -54279,58 +54265,41 @@
 	            AnimationBuilder.raf(fn);
 	        });
 	    };
-	    // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-	    //   return {
-	    //     left: element.offsetLeft,
-	    //     top: element.offsetTop,
-	    //     width: element.clientWidth,
-	    //     height: element.clientWidth,
-	    //   };
-	    // }
-	    // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-	    //   let rect = element.getBoundingClientRect();
-	    //   let cs = window.getComputedStyle(element);
-	    //
-	    //   return {
-	    //     left: rect.left + window.scrollX,
-	    //     top: rect.top + window.scrollY,
-	    //     width: rect.width -
-	    //       parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
-	    //       parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth), // scrollbar?
-	    //     height: rect.height -
-	    //       parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
-	    //       parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth), // scrollbar?
-	    //   };
-	    // }
-	    // private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-	    //   const computed = window.getComputedStyle(element);
-	    //
-	    //   return {
-	    //     left: element.offsetLeft,
-	    //     top: element.offsetTop,
-	    //     width: parseFloat(computed.width),
-	    //     height: parseFloat(computed.height),
-	    //   };
-	    // }
+	    AnimationBuilder.prototype.camelCase = function (input) {
+	        return input.toLowerCase().replace(/-(.)/g, function (match, group) {
+	            return group.toUpperCase();
+	        });
+	    };
+	    AnimationBuilder.prototype.hideElement = function (element) {
+	        if (this.animationOptions.useVisibility) {
+	            element.style.visibility = 'hidden';
+	            return;
+	        }
+	        element.setAttribute('hidden', '');
+	    };
+	    AnimationBuilder.prototype.showElement = function (element) {
+	        if (this.animationOptions.useVisibility) {
+	            element.style.visibility = 'visible';
+	            return;
+	        }
+	        element.removeAttribute('hidden');
+	    };
 	    AnimationBuilder.prototype.getPosition = function (element) {
 	        var rect = element.getBoundingClientRect();
 	        var cs = window.getComputedStyle(element);
 	        var left = element.offsetLeft;
 	        var top = element.offsetTop;
+	        var width = rect.width -
+	            parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
+	            parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+	        var height = rect.height -
+	            parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
+	            parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
 	        if (this.animationOptions.fixed) {
 	            left = rect.left + window.scrollX;
 	            top = rect.top + window.scrollY;
 	        }
-	        return {
-	            left: left,
-	            top: top,
-	            width: rect.width -
-	                parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
-	                parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth),
-	            height: rect.height -
-	                parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
-	                parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth),
-	        };
+	        return { left: left, top: top, width: width, height: height };
 	    };
 	    AnimationBuilder.prototype.registerAnimationListeners = function (element, mode, resolve, reject) {
 	        var _this = this;
@@ -54495,11 +54464,6 @@
 	        }
 	        return this;
 	    };
-	    AnimationBuilder.prototype.camelCase = function (input) {
-	        return input.toLowerCase().replace(/-(.)/g, function (match, group1) {
-	            return group1.toUpperCase();
-	        });
-	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "defaults", {
 	        // Getters and Setters
 	        get: function () {
@@ -54579,9 +54543,6 @@
 	    });
 	    AnimationBuilder.prototype.setType = function (type) {
 	        this.type = type;
-	        return this;
-	    };
-	    AnimationBuilder.prototype.applyType = function (element) {
 	        return this;
 	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "fillMode", {
@@ -54693,6 +54654,12 @@
 	        this.applyStyle(element, 'animation-delay', this.animationOptions.delay);
 	        return this;
 	    };
+	    /**
+	     * @deprecated Use applyDelayAsStyle instead.
+	     */
+	    AnimationBuilder.prototype.applyDelay = function (element) {
+	        return this;
+	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "iterationCount", {
 	        get: function () {
 	            return this.animationOptions.iterationCount;
@@ -54713,7 +54680,6 @@
 	    };
 	    return AnimationBuilder;
 	}());
-	// Members
 	AnimationBuilder.DEBUG = false;
 	AnimationBuilder.defaults = {
 	    fixed: false,
@@ -54853,6 +54819,7 @@
 	        });
 	    };
 	    AnimatesDirective.prototype.start = function (options) {
+	        this._started = true;
 	        this.setOptions(options);
 	        return this._animationBuilder
 	            .animate(this._elementRef.nativeElement)
@@ -54877,10 +54844,8 @@
 	            // Animation interrupted
 	        });
 	    };
-	    AnimatesDirective.prototype.animate = function () {
-	        if (!this._defaultOptions) {
-	            return;
-	        }
+	    AnimatesDirective.prototype.animate = function (options) {
+	        this.setOptions(options);
 	        return this._animationBuilder
 	            .setOptions(this._defaultOptions)
 	            .animate(this._elementRef.nativeElement)
@@ -54889,26 +54854,40 @@
 	        });
 	    };
 	    AnimatesDirective.prototype.pause = function () {
+	        if (!this._started)
+	            return;
 	        this._animationBuilder
 	            .setPlayState('paused')
 	            .applyPlayState(this._elementRef.nativeElement);
 	    };
 	    AnimatesDirective.prototype.resume = function () {
+	        if (!this._started)
+	            return;
 	        this._animationBuilder
 	            .setPlayState('running')
 	            .applyPlayState(this._elementRef.nativeElement);
 	    };
 	    AnimatesDirective.prototype.toggle = function () {
+	        if (!this._started)
+	            return;
 	        this._animationBuilder
 	            .setPlayState(this._animationBuilder.playState === 'running' ? 'paused' : 'running')
 	            .applyPlayState(this._elementRef.nativeElement);
 	    };
 	    AnimatesDirective.prototype.stop = function () {
+	        this._started = false;
 	        this._animationBuilder
 	            .stop(this._elementRef.nativeElement)
 	            .then(function (element) { return element; }, function (error) {
 	            // Animation interrupted
 	        });
+	    };
+	    AnimatesDirective.prototype.startOrStop = function (options) {
+	        if (!this._started) {
+	            this.start(options);
+	            return;
+	        }
+	        this.stop();
 	    };
 	    AnimatesDirective.prototype.setOptions = function (options) {
 	        if (options) {
