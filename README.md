@@ -208,7 +208,7 @@ export interface AnimationOptions {
   direction?: string;
   duration?: number;
   delay?: number;
-  iterationCount?: number;
+  iterationCount?: number|string;
 
 }
 ```
@@ -416,21 +416,15 @@ reset(element: HTMLElement, ): void
 
 ## AnimatesDirective
 
+#### start
+
 ```ts
 start(options?: AnimationOptions): Promise<HTMLElement>
 ```
 
 Animates the element.
 
-```ts
-show(options?: AnimationOptions): Promise<HTMLElement>
-```
-
-Shows an element that was hidden.
-
-```ts
-hide(options?: AnimationOptions): Promise<HTMLElement>
-```
+#### stop
 
 Adds the attribute `hidden` to the element after the animation has finished.
 You may need to add something like `[hidden] { display: none; }` to your CSS.
@@ -439,17 +433,45 @@ You may need to add something like `[hidden] { display: none; }` to your CSS.
 stop(): void
 ```
 
+#### startOrStop
+
+```ts
+startOrStop(options?: AnimationOptions)
+```
+
+Calls `start` if the element was already started and stop otherwise.
+
+#### show
+
+```ts
+show(options?: AnimationOptions): Promise<HTMLElement>
+```
+
+Shows an element that was hidden.
+
+#### hide
+
+```ts
+hide(options?: AnimationOptions): Promise<HTMLElement>
+```
+
+#### pause
+
 Stop the current animation on an element, reset it's position, and removes the event listener that listens for animation end.
 
 ```ts
 pause(): void
 ```
 
+#### resume
+
 Pauses the animation (sets the playState option to `paused`).
 
 ```ts
 resume(): void
 ```
+
+#### toggle
 
 Resumes a previously paused animation (sets the playState option to `running`).
 
