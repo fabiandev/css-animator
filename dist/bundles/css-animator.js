@@ -82,7 +82,6 @@ System.register("css-animator/builder/animation_builder", [], function (exports_
                     this.log('AnimationBuilder created.');
                 }
                 AnimationBuilder.prototype.show = function (element) {
-                    this.hideElement(element);
                     return this.animate(element, AnimationMode.Show);
                 };
                 AnimationBuilder.prototype.hide = function (element) {
@@ -99,6 +98,9 @@ System.register("css-animator/builder/animation_builder", [], function (exports_
                 AnimationBuilder.prototype.animate = function (element, mode) {
                     var _this = this;
                     if (mode === void 0) { mode = AnimationMode.Animate; }
+                    if (mode === AnimationMode.Show) {
+                        this.hideElement(element);
+                    }
                     return new Promise(function (resolve, reject) {
                         _this.removeTimeouts(element);
                         var delay = setTimeout(function () {

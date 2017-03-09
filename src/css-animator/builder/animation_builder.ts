@@ -63,7 +63,6 @@ export class AnimationBuilder {
   }
 
   public show(element: HTMLElement): Promise<HTMLElement> {
-    this.hideElement(element);
     return this.animate(element, AnimationMode.Show);
   }
 
@@ -79,6 +78,10 @@ export class AnimationBuilder {
   }
 
   public animate(element: HTMLElement, mode = AnimationMode.Animate): Promise<HTMLElement> {
+    if (mode === AnimationMode.Show) {
+      this.hideElement(element);
+    }
+
     return new Promise<HTMLElement>((resolve: Function, reject: Function) => {
       this.removeTimeouts(element);
 

@@ -343,7 +343,7 @@ See [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/ani
 #### animate
 
 ```ts
-animate(element: HTMLElement, mode = 'default'): Promise<HTMLElement>
+animate(element: HTMLElement, mode = AnimationMode.Animate): Promise<HTMLElement>
 ```
 
 Simply animate an element.
@@ -354,7 +354,14 @@ Simply animate an element.
 show(element: HTMLElement): Promise<HTMLElement>
 ```
 
-Animate an element, that was previously hidden.
+Animate an element, that was previously hidden.  
+
+Calling `show` is equivalent to:
+
+```ts
+import { AnimationMode } from 'css-animator/builder';
+animator.animate(element, AnimationMode.Show);
+```
 
 #### hide
 
@@ -363,12 +370,14 @@ hide(element: HTMLElement): Promise<HTMLElement>
 ```
 
 Adds the attribute `hidden` to the element after the animation has finished.
-You may need to add something like `[hidden] { display: none; }` to your CSS.
+You may need to add something like `[hidden] { display: none; }` to your CSS.  
+
+Again you can also use the `animate` function by passing `AnimationMode.Hide`.
 
 #### stop
 
 ```ts
-stop(element: HTMLElement, reset = true, detach = true): Promise<HTMLElement>
+stop(element: HTMLElement, reset = true): Promise<HTMLElement>
 ```
 
 #### setOptions
@@ -411,7 +420,21 @@ Won't add classes for future animations, previously added with `addAnimationClas
 #### reset
 
 ```ts
-reset(element: HTMLElement, ): void
+reset(element: HTMLElement, removePending = true, rejectTimeouts = false, rejectListeners = false): void
+```
+
+#### dispose
+
+```ts
+dispose(): void
+```
+
+Removes all elements, timeouts and listeners. Call if you don't want to use the builder anymore:
+
+```ts
+let animator = new AnimationBuilder();
+animator.dispose();
+animator = null;
 ```
 
 ## AnimatesDirective
@@ -423,6 +446,22 @@ start(options?: AnimationOptions): Promise<HTMLElement>
 ```
 
 Animates the element.
+
+#### show
+
+```ts
+show(options?: AnimationOptions): Promise<HTMLElement>
+```
+
+Shows an element that was hidden.
+
+#### hide
+
+```ts
+hide(options?: AnimationOptions): Promise<HTMLElement>
+```
+
+Hides an element.
 
 #### stop
 
@@ -440,20 +479,6 @@ startOrStop(options?: AnimationOptions)
 ```
 
 Calls `start` if the element was already started and stop otherwise.
-
-#### show
-
-```ts
-show(options?: AnimationOptions): Promise<HTMLElement>
-```
-
-Shows an element that was hidden.
-
-#### hide
-
-```ts
-hide(options?: AnimationOptions): Promise<HTMLElement>
-```
 
 #### pause
 
