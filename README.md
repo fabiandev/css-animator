@@ -1,6 +1,9 @@
 # css-animator
 
-This package was created out of the need for using CSS animations with a library like [animate.css](https://github.com/daneden/animate.css) in Angular2. There is no useful animation builder available yet, but I'm sure the Angular2 team will come up with something really cool! Anyway, I'm happy if css-animator can help you with getting some neat animations into your project.
+This package was created out of the need for using CSS animations with a library like [animate.css](https://github.com/daneden/animate.css) in Angular2 when there was no useful animation builder available yet.  
+
+css-animator works with any JavaScript application and takes the pain out of applying CSS animations
+manually. It also takes care of positioning elements that are being animated, among other useful things.
 
 Feel free to [open an issue](https://github.com/fabianweb/css-animator/issues/new) if you're experiencing issues, or if you have any suggestions or comments.  
 
@@ -25,7 +28,7 @@ $ jspm install npm:css-animator
 
 `css-animator` is being used in the project [angular2-quiz-app](https://github.com/fabiandev/angular2-quiz-app).  
 
-A very basic example can be found in the `docs/` folder, which is also hosted on GitHub Pages: https://fabiandev.github.io/css-animator/
+A very basic example can be found in the [`docs/`](/docs) folder, which is also hosted on GitHub Pages: https://fabiandev.github.io/css-animator/
 
 # Usage
 
@@ -40,7 +43,7 @@ $ yarn add css-animator animate.css
 
 ## Basic Usage
 
-You can use css-animator without Angular2. Just import the class and animate any HTMLElement.
+You can use css-animator without Angular2. Just import the class and animate any `HTMLElement`.
 
 ```ts
 import { AnimationBuilder } from 'css-animator/builder';
@@ -182,17 +185,48 @@ animatesInitMode="show" // Can be used with [animatesOnInit] for "show" or "hide
 
 ## AnimationOptions
 
-This are all options supported. You may notice, that these are all [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation), so you can look up which values are supported.  
+Below are all options supported by css-animator. You may notice, that all [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation) are included, so you can look up which values are supported, where the options `delay` and `duration` have to be set as numbers in `ms` (e.g. `1000` for one second).  
 
-An exception is the `delay` option, as it is handled via JavaScript timeouts. If you really want to
-use the CSS rule, you can use `applyDelayAsStyle` to apply the delay immediately on the element.
+```ts
+export interface AnimationOptions {
+  fixed?: boolean;
+  reject?: boolean;
+  useVisibility?: boolean;
+  pin?: boolean;
 
-### Special Options
+  type?: string;
+  fillMode?: string;
+  timingFunction?: string;
+  playState?: string;
+  direction?: string;
+  duration?: number;
+  delay?: number;
+  iterationCount?: number;
+}
+```
+
+> The `delay` option is an exception and won't be set as CSS animation property,
+> as delays are handled via JavaScript timeouts. If you really want to
+> use the CSS rule, you can call `applyDelayAsStyle` to apply the delay immediately on the element.  
+
+#### fixed (default: false)
+
+As mentioned above, elements being animated are positioned `absolute`. If you want to change
+the position mode to `fixed`, set the fixed option to `true`.
+
+> Setting this option to true results in a more accurate positioning, as `css-animator`
+> won't round to the nearest full pixel (integer instead of float). But keep in mind,
+> that you might experience unexpected behavior when scrolling while an element is being animated.
 
 #### reject (default: true)
 
 The promise for an animation is rejected with `animation_aborted`, if it is interrupted somehow. To change
 this behavior, set `reject: false` or call `setReject(true)` on an `AnimationBuilder` instance. You may also use the setter on the `AnimationBuilder` instance: `animator.reject = false`.
+
+#### useVisibility
+
+`AnimationBuilder` uses the `hidden` attribute on elements to hide them. If you want to use the `visibility` CSS rule,
+set `useVisibility` to `true`.
 
 #### pin (default: true)
 
@@ -201,35 +235,37 @@ Also the relative position (`top` and `left`) will be calculated and set on the 
 Furthermore the element's calculated `width` and `height` will be set explicitly.
 If you want css-animator to only apply the animation, without changing the element's style temporarily, set `pin` to `false`.
 
-#### fixed (default: false)
+#### type (default: 'shake')
 
-As mentioned above, elements being animated are positioned `absolute`. If you want to change
-the position mode to `fixed`, set the fixed option to `true`.
+The class that will be applied to the element alongside `animated` and `animated-show`, if the element will be shown, or `animated-hide`, if the element will be hidden.
 
-#### useVisibility
+#### fillMode (default: 'none')
 
-`AnimationBuilder` uses the `hidden` attribute on elements to hide them. If you want to use the `visibility` CSS rule,
-set `useVisibility` to `true`.
+See [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation).
 
-### All Options
+#### timingFunction (default: 'ease')
 
-```ts
-export interface AnimationOptions {
-  [key: string]: string|number;
-  reject?: boolean;
-  useVisibility?: boolean;
-  pin?: boolean;
-  type?: string;
-  fillMode?: string;
-  timingFunction?: string;
-  playState?: string;
-  direction?: string;
-  duration?: string|number;
-  delay?: string|number;
-  iterationCount?: string|number;
-  keepFlow?: boolean;
-}
-```
+See [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation).
+
+#### playState (default: 'running')
+
+See [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation).
+
+#### direction (default: 'normal')
+
+See [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation).
+
+#### duration (default: 1000)
+
+Set the animation duration as integer in ms.
+
+#### delay (default: 0)
+
+Set a delay, before the animation should start as integer in ms.
+
+#### iterationCount (default: 1)
+
+See [CSS animation properties](https://developer.mozilla.org/en/docs/Web/CSS/animation).
 
 ## AnimationBuilder
 
@@ -262,19 +298,19 @@ Stop the current animation on an element, reset it's position, reject the promis
 setOptions(options: AnimationOptions): AnimationBuilder
 ```
 
-Set multiple options via method chaining.
+Set multiple options at once.
 
 ```ts
 set{Option}(option: string|number): AnimationBuilder
 ```
 
-You may set options individually like `setDuration(500)`
+You may set options individually like `setDuration(500)` and make use of method chaining.
 
 ```ts
 addAnimationClass(name: string): AnimationBuilder
 ```
 
-Adds your custom classes while animating alongside the classes `animated` `animated-{mode}` (where mode is `show`, `hide` or `default`, unless you pass another string to the `animate` method).
+Adds your custom classes while animating alongside the classes `animated` and `animated-{mode}` (where mode can be `show` or `hide`).
 
 ```ts
 removeAnimationClass(name: string): AnimationBuilder
