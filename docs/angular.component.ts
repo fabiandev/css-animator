@@ -16,10 +16,20 @@ import { AnimationService, AnimationBuilder } from 'css-animator';
     class="el"
     #toAnimate
     animates
-    #animation="animates"
     animatesInitMode="show"
     [animatesOnInit]="{type: 'fadeInUp', delay: 100, duration: 1000}"
     hidden
+  >
+  </div>
+  <div
+    class="el2"
+    animates
+    #animation="animates"
+    animatesInitMode="show"
+    [animatesOnInit]="{ delay: 1200, type: 'fadeInUp' }"
+    (click)="animation.startOrStop({delay: 0, duration: 1500, type: 'shake', iterationCount: 'infinite'})"
+    (mouseleave)="animation.pause()"
+    (mouseenter)="animation.resume()"
   >
   </div>
   `,
@@ -29,6 +39,15 @@ import { AnimationService, AnimationBuilder } from 'css-animator';
       height: 100px;
       margin: 0 auto;
       background-color: cyan;
+    }
+    .el2 {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      top: 300px;
+      left: 50%;
+      margin-left: -50px;
+      background-color: yellow;
     }`
   ]
 })
