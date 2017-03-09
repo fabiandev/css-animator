@@ -505,3 +505,11 @@ toggle(): void
 ```
 
 Switches between `pause()` and `resume()`.
+
+# Build css-animator
+
+```sh
+$ git clone https://github.com/fabiandev/css-animator.git
+$ cd css-animator
+$ yarn && gulp build
+```
