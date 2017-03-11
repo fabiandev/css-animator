@@ -17,8 +17,7 @@ import { AnimationService, AnimationBuilder } from 'css-animator';
     #toAnimate
     animates
     animatesInitMode="show"
-    [animatesOnInit]="{type: 'fadeInUp', delay: 100, duration: 1000}"
-    hidden
+    [animatesOnInit]="{useVisibility: true, type: 'fadeInUp', delay: 100, duration: 1000}"
   >
   </div>
   <div
@@ -26,15 +25,17 @@ import { AnimationService, AnimationBuilder } from 'css-animator';
     animates
     #animation="animates"
     animatesInitMode="show"
-    [animatesOnInit]="{ delay: 1200, type: 'fadeInUp' }"
+    [animatesOnInit]="{ delay: 350, type: 'fadeInUp' }"
     (click)="animation.startOrStop({delay: 0, duration: 1500, type: 'shake', iterationCount: 'infinite'})"
     (mouseleave)="animation.pause()"
     (mouseenter)="animation.resume()"
+    hidden
   >
   </div>
   `,
   styles: [`
     .el {
+      visibility: hidden;
       width: 100px;
       height: 100px;
       margin: 0 auto;
@@ -60,6 +61,7 @@ export class AppComponent {
 
   constructor(animationService: AnimationService) {
     this.animator = animationService.builder();
+    this.animator.useVisibility = true;
   }
 
   public show(element: HTMLElement) {

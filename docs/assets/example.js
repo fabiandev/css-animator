@@ -54023,6 +54023,7 @@
 	        this.isVisible = true;
 	        this.isAnimating = false;
 	        this.animator = animationService.builder();
+	        this.animator.useVisibility = true;
 	    }
 	    AppComponent.prototype.show = function (element) {
 	        var _this = this;
@@ -54079,8 +54080,8 @@
 	        providers: [
 	            css_animator_1.AnimationService
 	        ],
-	        template: "\n  <nav>\n    <button (click)=\"show(toAnimate)\" [disabled]=\"isAnimating ||\u00A0isVisible\">Show</button>\n    <button (click)=\"shake(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Shake</button>\n    <button (click)=\"hide(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Hide</button>\n  </nav>\n  <div\n    class=\"el\"\n    #toAnimate\n    animates\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{type: 'fadeInUp', delay: 100, duration: 1000}\"\n    hidden\n  >\n  </div>\n  <div\n    class=\"el2\"\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{ delay: 1200, type: 'fadeInUp' }\"\n    (click)=\"animation.startOrStop({delay: 0, duration: 1500, type: 'shake', iterationCount: 'infinite'})\"\n    (mouseleave)=\"animation.pause()\"\n    (mouseenter)=\"animation.resume()\"\n  >\n  </div>\n  ",
-	        styles: ["\n    .el {\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }\n    .el2 {\n      position: absolute;\n      width: 100px;\n      height: 100px;\n      top: 300px;\n      left: 50%;\n      margin-left: -50px;\n      background-color: yellow;\n    }"
+	        template: "\n  <nav>\n    <button (click)=\"show(toAnimate)\" [disabled]=\"isAnimating ||\u00A0isVisible\">Show</button>\n    <button (click)=\"shake(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Shake</button>\n    <button (click)=\"hide(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Hide</button>\n  </nav>\n  <div\n    class=\"el\"\n    #toAnimate\n    animates\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{useVisibility: true, type: 'fadeInUp', delay: 100, duration: 1000}\"\n  >\n  </div>\n  <div\n    class=\"el2\"\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{ delay: 350, type: 'fadeInUp' }\"\n    (click)=\"animation.startOrStop({delay: 0, duration: 1500, type: 'shake', iterationCount: 'infinite'})\"\n    (mouseleave)=\"animation.pause()\"\n    (mouseenter)=\"animation.resume()\"\n    hidden\n  >\n  </div>\n  ",
+	        styles: ["\n    .el {\n      visibility: hidden;\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }\n    .el2 {\n      position: absolute;\n      width: 100px;\n      height: 100px;\n      top: 300px;\n      left: 50%;\n      margin-left: -50px;\n      background-color: yellow;\n    }"
 	        ]
 	    }),
 	    __metadata("design:paramtypes", [css_animator_1.AnimationService])
@@ -54175,39 +54176,16 @@
 	            var delay = setTimeout(function () {
 	                _this.reset(element, true, false, true);
 	                _this.registerAnimationListeners(element, mode, resolve, reject);
-	                _this.styles.set(element, Object.assign({}, element.style));
-	                var classes = _this.classes.slice(0);
-	                switch (mode) {
-	                    case AnimationMode.Show:
-	                        classes.push('animated-show');
-	                        break;
-	                    case AnimationMode.Hide:
-	                        classes.push('animated-hide');
-	                        break;
-	                }
-	                classes.push('animated', _this.animationOptions.type);
-	                _this.activeClasses.set(element, classes);
-	                if (_this.animationOptions.pin) {
-	                    if (mode === AnimationMode.Show) {
-	                        element.style.visibility = 'hidden';
-	                    }
-	                    _this.showElement(element);
-	                    var position = _this.getPosition(element);
-	                    element.style.position = _this.animationOptions.fixed ? 'fixed' : 'absolute';
-	                    element.style.top = position.top + "px";
-	                    element.style.left = position.left + "px";
-	                    element.style.width = position.width + "px";
-	                    element.style.height = position.height + "px";
-	                    element.style.margin = '0px';
-	                }
+	                _this.saveStyle(element);
+	                _this.saveClasses(element, mode);
+	                _this.pinElement(element, mode);
 	                _this.nextFrame(function () {
-	                    element.style.visibility = 'visible';
-	                    _this.showElement(element);
+	                    _this.showElement(element, mode);
 	                    _this.applyProperties(element, mode);
 	                });
 	            }, _this.animationOptions.delay);
-	            _this.log("Timeout " + delay + " registered for element", element);
 	            _this.addTimeout(element, delay, reject);
+	            _this.log("Timeout " + delay + " registered for element", element);
 	        });
 	    };
 	    AnimationBuilder.prototype.reset = function (element, removePending, rejectTimeouts, rejectListeners) {
@@ -54272,19 +54250,39 @@
 	            return group.toUpperCase();
 	        });
 	    };
-	    AnimationBuilder.prototype.hideElement = function (element) {
+	    AnimationBuilder.prototype.hideElement = function (element, mode) {
 	        if (this.animationOptions.useVisibility) {
 	            element.style.visibility = 'hidden';
 	            return;
 	        }
 	        element.setAttribute('hidden', '');
 	    };
-	    AnimationBuilder.prototype.showElement = function (element) {
+	    AnimationBuilder.prototype.showElement = function (element, mode) {
+	        if (this.animationOptions.pin && mode === AnimationMode.Show) {
+	            element.style.visibility = 'visible';
+	        }
 	        if (this.animationOptions.useVisibility) {
 	            element.style.visibility = 'visible';
 	            return;
 	        }
 	        element.removeAttribute('hidden');
+	    };
+	    AnimationBuilder.prototype.pinElement = function (element, mode) {
+	        if (!this.animationOptions.pin)
+	            return;
+	        if (mode === AnimationMode.Show) {
+	            element.style.visibility = 'hidden';
+	        }
+	        if (!this.animationOptions.useVisibility) {
+	            this.showElement(element);
+	        }
+	        var position = this.getPosition(element);
+	        element.style.position = this.animationOptions.fixed ? 'fixed' : 'absolute';
+	        element.style.top = position.top + "px";
+	        element.style.left = position.left + "px";
+	        element.style.width = position.width + "px";
+	        element.style.height = position.height + "px";
+	        element.style.margin = '0px';
 	    };
 	    AnimationBuilder.prototype.getPosition = function (element) {
 	        var rect = element.getBoundingClientRect();
@@ -54414,6 +54412,9 @@
 	        this.applyClasses(element, mode);
 	        this.applyStyles(element, mode);
 	    };
+	    AnimationBuilder.prototype.saveStyle = function (element) {
+	        this.styles.set(element, Object.assign({}, element.style));
+	    };
 	    AnimationBuilder.prototype.applyStyles = function (element, mode) {
 	        this.applyFillMode(element);
 	        this.applyTimingFunction(element);
@@ -54433,6 +54434,19 @@
 	            }
 	        }
 	        this.styles.delete(element);
+	    };
+	    AnimationBuilder.prototype.saveClasses = function (element, mode) {
+	        var classes = this.classes.slice(0);
+	        switch (mode) {
+	            case AnimationMode.Show:
+	                classes.push('animated-show');
+	                break;
+	            case AnimationMode.Hide:
+	                classes.push('animated-hide');
+	                break;
+	        }
+	        classes.push('animated', this.animationOptions.type);
+	        this.activeClasses.set(element, classes);
 	    };
 	    AnimationBuilder.prototype.applyClasses = function (element, mode) {
 	        var active = this.activeClasses.get(element) || [];
@@ -54561,9 +54575,8 @@
 	        this.fillMode = fillMode;
 	        return this;
 	    };
-	    AnimationBuilder.prototype.applyFillMode = function (element) {
-	        this.applyStyle(element, 'animation-fill-mode', this.animationOptions.fillMode ?
-	            this.animationOptions.fillMode : null);
+	    AnimationBuilder.prototype.applyFillMode = function (element, fillMode) {
+	        this.applyStyle(element, 'animation-fill-mode', fillMode || this.animationOptions.fillMode);
 	        return this;
 	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "timingFunction", {
@@ -54580,8 +54593,8 @@
 	        this.timingFunction = timingFunction;
 	        return this;
 	    };
-	    AnimationBuilder.prototype.applyTimingFunction = function (element) {
-	        this.applyStyle(element, 'animation-timing-function', this.animationOptions.timingFunction);
+	    AnimationBuilder.prototype.applyTimingFunction = function (element, timingFunction) {
+	        this.applyStyle(element, 'animation-timing-function', timingFunction || this.animationOptions.timingFunction);
 	        return this;
 	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "playState", {
@@ -54598,8 +54611,8 @@
 	        this.playState = playState;
 	        return this;
 	    };
-	    AnimationBuilder.prototype.applyPlayState = function (element) {
-	        this.applyStyle(element, 'animation-play-state', this.animationOptions.playState);
+	    AnimationBuilder.prototype.applyPlayState = function (element, playState) {
+	        this.applyStyle(element, 'animation-play-state', playState || this.animationOptions.playState);
 	        return this;
 	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "direction", {
@@ -54616,8 +54629,8 @@
 	        this.direction = direction;
 	        return this;
 	    };
-	    AnimationBuilder.prototype.applyDirection = function (element) {
-	        this.applyStyle(element, 'animation-direction', this.animationOptions.direction);
+	    AnimationBuilder.prototype.applyDirection = function (element, direction) {
+	        this.applyStyle(element, 'animation-direction', direction || this.animationOptions.direction);
 	        return this;
 	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "duration", {
@@ -54634,8 +54647,8 @@
 	        this.duration = duration;
 	        return this;
 	    };
-	    AnimationBuilder.prototype.applyDuration = function (element) {
-	        this.applyStyle(element, 'animation-duration', this.animationOptions.duration + "ms");
+	    AnimationBuilder.prototype.applyDuration = function (element, duration) {
+	        this.applyStyle(element, 'animation-duration', (duration || this.animationOptions.duration) + "ms");
 	        return this;
 	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "delay", {
@@ -54652,14 +54665,8 @@
 	        this.delay = delay;
 	        return this;
 	    };
-	    AnimationBuilder.prototype.applyDelayAsStyle = function (element) {
-	        this.applyStyle(element, 'animation-delay', this.animationOptions.delay);
-	        return this;
-	    };
-	    /**
-	     * @deprecated Use applyDelayAsStyle instead.
-	     */
-	    AnimationBuilder.prototype.applyDelay = function (element) {
+	    AnimationBuilder.prototype.applyDelayAsStyle = function (element, delay) {
+	        this.applyStyle(element, 'animation-delay', (delay || this.animationOptions.delay) + "ms");
 	        return this;
 	    };
 	    Object.defineProperty(AnimationBuilder.prototype, "iterationCount", {
@@ -54676,8 +54683,8 @@
 	        this.iterationCount = iterationCount;
 	        return this;
 	    };
-	    AnimationBuilder.prototype.applyIterationCount = function (element) {
-	        this.applyStyle(element, 'animation-iteration-count', this.animationOptions.iterationCount);
+	    AnimationBuilder.prototype.applyIterationCount = function (element, iterationCount) {
+	        this.applyStyle(element, 'animation-iteration-count', iterationCount || this.animationOptions.iterationCount);
 	        return this;
 	    };
 	    return AnimationBuilder;
