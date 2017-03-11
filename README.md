@@ -268,12 +268,17 @@ You can apply options, that are related to the animation itself.
 Supported options are: `fillMode`, `timingFunction`, `playState`,
 `direction`, `duration` and `iterationCount`.  
 
-Settings that are applied are immediately set on the element, without the need for starting an animation. css-animator can't take care of resetting the element though, so be careful with this feature.
+Settings that are applied are immediately set on the element, without the need for starting an animation or saving them on the instance. css-animator can't take care of resetting the element though, so be careful with this feature.
 
 ```ts
 animator
-  .setType('shake')
-  .applyType(element)
+  .applyIterationCount(element, 3);
+```
+
+You can also save a value and apply it afterwards:
+
+```ts
+animator
   .setIterationCount(3)
   .applyIterationCount(element);
 ```
