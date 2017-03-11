@@ -1,9 +1,4 @@
-import {
-  AnimationOptions,
-  ElementProps,
-  ListenerRef,
-  TimeoutRef,
-} from '../contracts';
+import { AnimationOptions, ElementProps, ListenerRef, TimeoutRef, } from '../contracts';
 
 export enum AnimationMode {
   Animate,
@@ -88,50 +83,18 @@ export class AnimationBuilder {
       const delay = setTimeout(() => {
         this.reset(element, true, false, true);
         this.registerAnimationListeners(element, mode, resolve, reject);
-        this.styles.set(element, Object.assign({}, element.style));
-
-        const classes = this.classes.slice(0);
-
-        switch (mode) {
-          case AnimationMode.Show:
-            classes.push('animated-show');
-            break;
-          case AnimationMode.Hide:
-            classes.push('animated-hide');
-            break;
-        }
-
-        classes.push('animated', this.animationOptions.type);
-
-        this.activeClasses.set(element, classes);
-
-        if (this.animationOptions.pin) {
-          if (mode === AnimationMode.Show) {
-            element.style.visibility = 'hidden';
-          }
-
-          this.showElement(element);
-
-          const position = this.getPosition(element);
-
-          element.style.position = this.animationOptions.fixed ? 'fixed' : 'absolute';
-          element.style.top = `${position.top}px`;
-          element.style.left = `${position.left}px`;
-          element.style.width = `${position.width}px`;
-          element.style.height = `${position.height}px`;
-          element.style.margin = '0px';
-        }
+        this.saveStyle(element);
+        this.saveClasses(element, mode)
+        this.pinElement(element, mode);
 
         this.nextFrame(() => {
-          element.style.visibility = 'visible';
-          this.showElement(element);
+          this.showElement(element, mode);
           this.applyProperties(element, mode);
         });
       }, this.animationOptions.delay);
 
-      this.log(`Timeout ${delay} registered for element`, element);
-
       this.addTimeout(element, delay, reject);
+      this.log(`Timeout ${delay} registered for element`, element);
     });
   }
 
@@ -202,7 +165,7 @@ export class AnimationBuilder {
     });
   }
 
-  private hideElement(element: HTMLElement): void {
+  private hideElement(element: HTMLElement, mode?: AnimationMode): void {
     if (this.animationOptions.useVisibility) {
       element.style.visibility = 'hidden';
       return;
@@ -211,13 +174,38 @@ export class AnimationBuilder {
     element.setAttribute('hidden', '');
   }
 
-  private showElement(element: HTMLElement): void {
+  private showElement(element: HTMLElement, mode?: AnimationMode): void {
+    if (this.animationOptions.pin && mode === AnimationMode.Show) {
+      element.style.visibility = 'visible';
+    }
+
     if (this.animationOptions.useVisibility) {
       element.style.visibility = 'visible';
       return;
     }
 
     element.removeAttribute('hidden');
+  }
+
+  private pinElement(element: HTMLElement, mode: AnimationMode): void {
+    if (!this.animationOptions.pin) return;
+
+    if (mode === AnimationMode.Show) {
+      element.style.visibility = 'hidden';
+    }
+
+    if (!this.animationOptions.useVisibility) {
+      this.showElement(element);
+    }
+
+    const position = this.getPosition(element);
+
+    element.style.position = this.animationOptions.fixed ? 'fixed' : 'absolute';
+    element.style.top = `${position.top}px`;
+    element.style.left = `${position.left}px`;
+    element.style.width = `${position.width}px`;
+    element.style.height = `${position.height}px`;
+    element.style.margin = '0px';
   }
 
   private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
@@ -369,6 +357,10 @@ export class AnimationBuilder {
     this.applyStyles(element, mode);
   }
 
+  private saveStyle(element: HTMLElement): void {
+    this.styles.set(element, Object.assign({}, element.style));
+  }
+
   private applyStyles(element: HTMLElement, mode?: AnimationMode): void {
     this.applyFillMode(element);
     this.applyTimingFunction(element);
@@ -391,6 +383,22 @@ export class AnimationBuilder {
     }
 
     this.styles.delete(element);
+  }
+
+  private saveClasses(element: HTMLElement, mode: AnimationMode): void {
+    const classes = this.classes.slice(0);
+
+    switch (mode) {
+      case AnimationMode.Show:
+        classes.push('animated-show');
+        break;
+      case AnimationMode.Hide:
+        classes.push('animated-hide');
+        break;
+    }
+
+    classes.push('animated', this.animationOptions.type);
+    this.activeClasses.set(element, classes);
   }
 
   private applyClasses(element: HTMLElement, mode?: AnimationMode): void {
@@ -525,12 +533,11 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyFillMode(element: HTMLElement): AnimationBuilder {
+  public applyFillMode(element: HTMLElement, fillMode?: string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-fill-mode',
-      this.animationOptions.fillMode ?
-        this.animationOptions.fillMode : null,
+      fillMode || this.animationOptions.fillMode,
     );
 
     return this;
@@ -549,11 +556,11 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyTimingFunction(element: HTMLElement): AnimationBuilder {
+  public applyTimingFunction(element: HTMLElement, timingFunction?: string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-timing-function',
-      this.animationOptions.timingFunction,
+      timingFunction || this.animationOptions.timingFunction
     );
 
     return this;
@@ -572,11 +579,11 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyPlayState(element: HTMLElement): AnimationBuilder {
+  public applyPlayState(element: HTMLElement, playState?: string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-play-state',
-      this.animationOptions.playState,
+      playState || this.animationOptions.playState,
     );
 
     return this;
@@ -595,11 +602,11 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyDirection(element: HTMLElement): AnimationBuilder {
+  public applyDirection(element: HTMLElement, direction?: string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-direction',
-      this.animationOptions.direction,
+      direction || this.animationOptions.direction,
     );
 
     return this;
@@ -618,11 +625,11 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyDuration(element: HTMLElement): AnimationBuilder {
+  public applyDuration(element: HTMLElement, duration?: number): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-duration',
-      `${this.animationOptions.duration}ms`,
+      `${duration || this.animationOptions.duration}ms`,
     );
 
     return this;
@@ -641,41 +648,34 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyDelayAsStyle(element: HTMLElement): AnimationBuilder {
+  public applyDelayAsStyle(element: HTMLElement, delay?: number): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-delay',
-      this.animationOptions.delay,
+      `${delay || this.animationOptions.delay}ms`,
     );
 
     return this;
   }
 
-  /**
-   * @deprecated Use applyDelayAsStyle instead.
-   */
-  public applyDelay(element: HTMLElement): AnimationBuilder {
-    return this;
-  }
-
-  get iterationCount(): number|string {
+  get iterationCount(): number | string {
     return this.animationOptions.iterationCount;
   }
 
-  set iterationCount(iterationCount: number|string) {
+  set iterationCount(iterationCount: number | string) {
     this.animationOptions.iterationCount = iterationCount;
   }
 
-  public setIterationCount(iterationCount: number|string): AnimationBuilder {
+  public setIterationCount(iterationCount: number | string): AnimationBuilder {
     this.iterationCount = iterationCount;
     return this;
   }
 
-  public applyIterationCount(element: HTMLElement): AnimationBuilder {
+  public applyIterationCount(element: HTMLElement, iterationCount?: number | string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-iteration-count',
-      this.animationOptions.iterationCount,
+      iterationCount || this.animationOptions.iterationCount,
     );
 
     return this;
