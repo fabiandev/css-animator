@@ -27,8 +27,9 @@ export declare class AnimationBuilder {
     private log(...values);
     private nextFrame(fn);
     private camelCase(input);
-    private hideElement(element);
-    private showElement(element);
+    private hideElement(element, mode?);
+    private showElement(element, mode?);
+    private pinElement(element, mode);
     private getPosition(element);
     private registerAnimationListeners(element, mode, resolve, reject);
     private addTimeout(element, timeout, reject?);
@@ -38,8 +39,10 @@ export declare class AnimationBuilder {
     private animationEndEvent(element);
     private animationStartEvent(element);
     private applyProperties(element, mode?);
+    private saveStyle(element);
     private applyStyles(element, mode?);
     private removeStyles(element);
+    private saveClasses(element, mode);
     private applyClasses(element, mode?);
     private removeClasses(element);
     private applyStyle(element, prop, value);
@@ -56,27 +59,23 @@ export declare class AnimationBuilder {
     setType(type: string): AnimationBuilder;
     fillMode: string;
     setFillMode(fillMode: string): AnimationBuilder;
-    applyFillMode(element: HTMLElement): AnimationBuilder;
+    applyFillMode(element: HTMLElement, fillMode?: string): AnimationBuilder;
     timingFunction: string;
     setTimingFunction(timingFunction: string): AnimationBuilder;
-    applyTimingFunction(element: HTMLElement): AnimationBuilder;
+    applyTimingFunction(element: HTMLElement, timingFunction?: string): AnimationBuilder;
     playState: string;
     setPlayState(playState: string): AnimationBuilder;
-    applyPlayState(element: HTMLElement): AnimationBuilder;
+    applyPlayState(element: HTMLElement, playState?: string): AnimationBuilder;
     direction: string;
     setDirection(direction: string): AnimationBuilder;
-    applyDirection(element: HTMLElement): AnimationBuilder;
+    applyDirection(element: HTMLElement, direction?: string): AnimationBuilder;
     duration: number;
     setDuration(duration: number): AnimationBuilder;
-    applyDuration(element: HTMLElement): AnimationBuilder;
+    applyDuration(element: HTMLElement, duration?: number): AnimationBuilder;
     delay: number;
     setDelay(delay: number): AnimationBuilder;
-    applyDelayAsStyle(element: HTMLElement): AnimationBuilder;
-    /**
-     * @deprecated Use applyDelayAsStyle instead.
-     */
-    applyDelay(element: HTMLElement): AnimationBuilder;
+    applyDelayAsStyle(element: HTMLElement, delay?: number): AnimationBuilder;
     iterationCount: number | string;
     setIterationCount(iterationCount: number | string): AnimationBuilder;
-    applyIterationCount(element: HTMLElement): AnimationBuilder;
+    applyIterationCount(element: HTMLElement, iterationCount?: number | string): AnimationBuilder;
 }
