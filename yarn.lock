@@ -436,6 +436,12 @@ crypto-browserify@3.3.0:
     ripemd160 "0.2.0"
     sha.js "2.2.6"
 
+css-animator@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/css-animator/-/css-animator-2.1.0.tgz#20029f3bef657f4ed31e05edecd871c562ddbb86"
+  dependencies:
+    css-animator next
+
 css-animator@next:
   version "2.1.0-beta.5"
   resolved "https://registry.yarnpkg.com/css-animator/-/css-animator-2.1.0-beta.5.tgz#6943c521811c03d6c1c70f18932f8fe298b1ed70"
