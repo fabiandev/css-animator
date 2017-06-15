@@ -516,5 +516,5 @@ Switches between `pause()` and `resume()`.
 ```sh
 $ git clone https://github.com/fabiandev/css-animator.git
 $ cd css-animator
-$ yarn && gulp build
+$ yarn && yarn build
 ```

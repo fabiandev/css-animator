@@ -1,10 +1,13 @@
 {
   "name": "css-animator",
-  "version": "2.1.0-beta.1",
+  "version": "2.1.0-beta.3",
   "description": "Animate elements using CSS classes with support for Angular2.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fabiandev/css-animator.git"
+  },
+  "scripts": {
+    "build": "node_modules/.bin/ngc -p tsconfig-aot.json && gulp build"
   },
   "main": "index.js",
   "keywords": [

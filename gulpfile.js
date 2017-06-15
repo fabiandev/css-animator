@@ -16,7 +16,7 @@ var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
 
 gulp.task('default', ['copy', 'process', 'bundle', 'example']);
 gulp.task('clean', ['clean:process', 'clean:bundle']);
-gulp.task('copy', ['copy:src', 'copy:readme', 'copy:license', 'copy:package']);
+gulp.task('copy', ['copy:metadata', 'copy:readme', 'copy:license']);
 gulp.task('example', ['example:build', 'example:copy']);
 
 gulp.task('build', function(done) {
@@ -93,8 +93,8 @@ gulp.task('clean:bundle', function() {
   ]);
 });
 
-gulp.task('copy:src', function() {
-  return gulp.src('./src/css-animator/**/*.ts')
+gulp.task('copy:metadata', function() {
+  return gulp.src('./compiled/**/*.metadata.json')
     .pipe(gulp.dest('./dist'));
 });
 
