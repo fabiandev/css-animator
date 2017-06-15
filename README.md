@@ -124,7 +124,6 @@ Feel free to create your own directive around css-animator. For you to get start
 
 ```ts
 import { Component } from '@angular/core';
-import { AnimatesDirective } from 'css-animator';
 
 @Component({
   selector: 'my-app',
