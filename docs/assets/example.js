@@ -58236,6 +58236,7 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var core_1 = __webpack_require__(7);
 	var animates_directive_1 = __webpack_require__(51);
+	var animation_service_1 = __webpack_require__(52);
 	var AnimatorModule = (function () {
 	    function AnimatorModule() {
 	    }
@@ -58246,6 +58247,9 @@
 	            ],
 	            exports: [
 	                animates_directive_1.AnimatesDirective
+	            ],
+	            providers: [
+	                animation_service_1.AnimationService
 	            ]
 	        })
 	    ], AnimatorModule);
