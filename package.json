@@ -1,10 +1,17 @@
 {
   "name": "css-animator",
-  "version": "2.0.2",
+  "version": "2.1.0-beta.5",
   "description": "Animate elements using CSS classes with support for Angular2.",
-  "repository": "https://github.com/fabiandev/css-animator.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabiandev/css-animator.git"
+  },
+  "scripts": {
+    "build": "node_modules/.bin/ngc -p tsconfig-aot.json && gulp build"
+  },
   "main": "index.js",
   "keywords": [
+    "angular",
     "angular2",
     "animation",
     "animate",
@@ -12,24 +19,31 @@
     "css",
     "animate.css"
   ],
-  "author": "Fabian Pirklbauer",
+  "author": "Fabian Pirklbauer <hi@fabiandev.io>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fabiandev/css-animator/issues"
+  },
+  "homepage": "https://github.com/fabiandev/css-animator#readme",
   "dependencies": {
     "css-animator": "next"
   },
   "devDependencies": {
-    "@angular/common": "^2.4.9",
-    "@angular/compiler": "^2.4.9",
-    "@angular/core": "^2.4.9",
-    "@angular/platform-browser": "^2.4.9",
-    "@angular/platform-browser-dynamic": "^2.4.9",
-    "@types/core-js": "^0.9.35",
+    "@angular/animations": "^4.2.2",
+    "@angular/common": "^4.2.2",
+    "@angular/compiler": "^4.2.2",
+    "@angular/compiler-cli": "^4.2.2",
+    "@angular/core": "^4.2.2",
+    "@angular/platform-browser": "^4.2.2",
+    "@angular/platform-browser-dynamic": "^4.2.2",
+    "@angular/platform-server": "^4.2.2",
     "animate.css": "^3.5.2",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
+    "gulp-file": "^0.3.0",
     "gulp-filter": "^5.0.0",
     "gulp-rename": "^1.2.2",
-    "gulp-typescript": "^3.1.5",
+    "gulp-typescript": "^3.1.7",
     "gulp-uglify": "^1.5.3",
     "lodash.assign": "^4.0.7",
     "merge2": "^1.0.2",
@@ -38,8 +52,8 @@
     "run-sequence": "^1.2.2",
     "rxjs": "^5.0.1",
     "ts-loader": "^2.0.1",
-    "typescript": "^2.2.1",
+    "typescript": "^2.3.4",
     "webpack-stream": "^3.2.0",
-    "zone.js": "^0.7.2"
+    "zone.js": "^0.8.4"
   }
 }

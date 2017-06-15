@@ -67,7 +67,7 @@ export class AnimatesDirective implements OnInit {
     });
   }
 
-  public start(options?: AnimationOptions): Promise<HTMLElement> {
+  public start(options?: AnimationOptions): Promise<void | HTMLElement> {
     this._started = true;
     this.setOptions(options);
 
@@ -78,7 +78,7 @@ export class AnimatesDirective implements OnInit {
       });
   }
 
-  public hide(options?: AnimationOptions): Promise<HTMLElement> {
+  public hide(options?: AnimationOptions): Promise<void | HTMLElement> {
     this.setOptions(options);
 
     return this._animationBuilder
@@ -89,7 +89,7 @@ export class AnimatesDirective implements OnInit {
       });
   }
 
-  public show(options?: AnimationOptions): Promise<HTMLElement> {
+  public show(options?: AnimationOptions): Promise<void | HTMLElement> {
     this.setOptions(options);
 
     return this._animationBuilder

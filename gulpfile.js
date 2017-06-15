@@ -1,5 +1,6 @@
 var assign = require('lodash.assign');
 var del = require('del');
+var file = require('gulp-file');
 var filter = require('gulp-filter');
 var gulp = require('gulp');
 var merge = require('merge2');
@@ -15,7 +16,7 @@ var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
 
 gulp.task('default', ['copy', 'process', 'bundle', 'example']);
 gulp.task('clean', ['clean:process', 'clean:bundle']);
-gulp.task('copy', ['copy:readme', 'copy:license']);
+gulp.task('copy', ['copy:metadata', 'copy:readme', 'copy:license', 'copy:package']);
 gulp.task('example', ['example:build', 'example:copy']);
 
 gulp.task('build', function(done) {
@@ -82,10 +83,7 @@ gulp.task('example:copy', function() {
 gulp.task('clean:process', function() {
   return del([
     './dist/**/*',
-    '!./dist/bundles',
-    '!./dist/package.json',
-    '!./dist/README.md',
-    '!./dist/LICENSE'
+    '!./dist/bundles'
   ]);
 });
 
@@ -93,6 +91,11 @@ gulp.task('clean:bundle', function() {
   return del([
     './dist/bundles/**/*'
   ]);
+});
+
+gulp.task('copy:metadata', function() {
+  return gulp.src('./compiled/**/*.metadata.json')
+    .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('copy:readme', function() {
@@ -104,3 +107,13 @@ gulp.task('copy:license', function() {
   return gulp.src('./LICENSE')
     .pipe(gulp.dest('./dist'));
 });
+
+gulp.task('copy:package', function () {
+  var pkg = require('./package.json')
+
+  delete pkg.devDependencies;
+  delete pkg.main;
+
+    return file('package.json', JSON.stringify(pkg, null, '\t'), {src: true})
+        .pipe(gulp.dest('./dist'))
+})

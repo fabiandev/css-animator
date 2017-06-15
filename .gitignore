@@ -1,4 +1,8 @@
 node_modules
 typings
+compiled
+aot
 .DS_Store
 npm-debug.log
+*.ngsummary.json
+dist

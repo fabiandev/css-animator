@@ -2,12 +2,15 @@
   "compileOnSave": false,
   "compilerOptions": {
     "target": "ES5",
+    "module": "ES2015",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "strictNullChecks": false,
+    "outDir": "./compiled",
+    "rootDir": "./src/css-animator",
     "lib": [
       "DOM",
       "ES6",
@@ -21,5 +24,9 @@
   "files": [
     "src/css-animator/angular/animator.module.ts",
     "src/css-animator/index.ts"
-  ]
+  ],
+  "angularCompilerOptions": {
+   "genDir": "aot",
+   "skipMetadataEmit" : false
+ }
 }

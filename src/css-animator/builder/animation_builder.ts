@@ -69,7 +69,7 @@ export class AnimationBuilder {
     this.removeTimeouts(element);
     this.removeListeners(element);
     if (reset) this.reset(element, false);
-    return Promise.resolve(element);
+    return Promise.resolve<HTMLElement>(element);
   }
 
   public animate(element: HTMLElement, mode = AnimationMode.Animate): Promise<HTMLElement> {

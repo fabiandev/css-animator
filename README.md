@@ -76,7 +76,33 @@ AnimationBuilder.defaults.fixed = true;
 AnimationBuilder.defaults.duration = 1500;
 ```
 
-## Angular2 Service Usage
+## Angular Usage
+
+Before getting started and to make use of the directive and the service provided by css-animator,
+you have to import its module:
+
+```ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { AnimatorModule } from 'css-animator';
+
+@NgModule({
+  imports: [
+    BrowserModule,
+    AnimatorModule
+  ],
+  declarations: [
+    AppComponent
+  ],
+  bootstrap: [
+    AppComponent
+  ],
+})
+export class AppModule { }
+```
+
+### Angular Service
 
 There is a little Angular2 service included, that gives you the power of dependency injection out of the box.
 
@@ -100,31 +126,12 @@ export class SomeComponent implements OnInit {
 }
 ```
 
-`AnimationService` must be defined as provider to make it injectable. You could do so in you main app component like this:
-
-```ts
-import { Component } from '@angular/core';
-import { AnimationService } from 'css-animator';
-
-@Component({
-  selector: 'app',
-  templateUrl: '/app.html',
-  providers: [
-    AnimationService
-  ]
-})
-export class AppComponent {
-
-}
-```
-
-## Angular2 Directive Usage
+### Angular Directive
 
 Feel free to create your own directive around css-animator. For you to get started, there is one included in this package.
 
 ```ts
 import { Component } from '@angular/core';
-import { AnimatesDirective } from 'css-animator';
 
 @Component({
   selector: 'my-app',
@@ -139,31 +146,8 @@ export class AppComponent {
 }
 ```
 
-To make use of the directive within an Angular2 module, you have to declare it:
-
-```ts
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppComponent } from './app.component';
-import { AnimatesDirective } from 'css-animator';
-
-@NgModule({
-  imports: [
-    BrowserModule,
-  ],
-  declarations: [
-    AnimatesDirective,
-    AppComponent,
-  ],
-  bootstrap: [
-    AppComponent,
-  ],
-})
-export class AppModule { }
-```
-
-Set default options for the animates directive. Those will be used if you use `animation.start()`.
-You can optionally pass all options that the interface `AnimationOptions` supports like this: `animation.start({type: 'bounce', duration: 800})`.
+It is possible to default options on the element, that will be used if you call `animation.start()`.
+You can pass any option that the interface `AnimationOptions` supports like this: `animation.start({type: 'bounce', duration: 800})`.
 
 ```html
 <div
@@ -516,5 +500,5 @@ Switches between `pause()` and `resume()`.
 ```sh
 $ git clone https://github.com/fabiandev/css-animator.git
 $ cd css-animator
-$ yarn && gulp build
+$ yarn && yarn build
 ```
