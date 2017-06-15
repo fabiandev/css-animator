@@ -1,9 +1,4 @@
-import {
-  AnimationOptions,
-  ElementProps,
-  ListenerRef,
-  TimeoutRef,
-} from '../contracts';
+import { AnimationOptions, ElementProps, ListenerRef, TimeoutRef, } from '../contracts';
 
 export enum AnimationMode {
   Animate,
@@ -13,11 +8,10 @@ export enum AnimationMode {
 
 export class AnimationBuilder {
 
-  // Members
-
   public static DEBUG: boolean = false;
 
-  public static defaultOptions: AnimationOptions = {
+  public static readonly defaults: AnimationOptions = {
+    fixed: false,
     reject: true,
     useVisibility: false,
     pin: true,
@@ -35,13 +29,8 @@ export class AnimationBuilder {
     ? window.requestAnimationFrame.bind(window)
     : setTimeout;
 
-  private animationOptions: AnimationOptions = Object.assign(
-    {}, AnimationBuilder.defaultOptions,
-  );
-
-  private defaultOptions: AnimationOptions = Object.assign(
-    {}, AnimationBuilder.defaultOptions,
-  );
+  private animationOptions: AnimationOptions;
+  private defaultOptions: AnimationOptions;
 
   private classes: string[];
   private activeClasses: Map<HTMLElement, string[]>;
@@ -52,6 +41,14 @@ export class AnimationBuilder {
   // Public Methods
 
   constructor() {
+    this.animationOptions = Object.assign(
+      {}, AnimationBuilder.defaults,
+    );
+
+    this.defaultOptions = Object.assign(
+      {}, this.animationOptions,
+    );
+
     this.classes = [];
     this.activeClasses = new Map<HTMLElement, string[]>();
     this.listeners = new Map<HTMLElement, ListenerRef[]>();
@@ -60,26 +57,7 @@ export class AnimationBuilder {
     this.log('AnimationBuilder created.');
   }
 
-  private hideElement(element: HTMLElement): void {
-    if (this.animationOptions.useVisibility) {
-      element.style.visibility = 'hidden';
-      return;
-    }
-
-    element.setAttribute('hidden', '');
-  }
-
-  private showElement(element: HTMLElement): void {
-    if (this.animationOptions.useVisibility) {
-      element.style.visibility = 'visible';
-      return;
-    }
-
-    element.removeAttribute('hidden');
-  }
-
   public show(element: HTMLElement): Promise<HTMLElement> {
-    this.hideElement(element);
     return this.animate(element, AnimationMode.Show);
   }
 
@@ -90,61 +68,33 @@ export class AnimationBuilder {
   public stop(element: HTMLElement, reset = true): Promise<HTMLElement> {
     this.removeTimeouts(element);
     this.removeListeners(element);
-    if (reset) this.reset(element);
-    return Promise.resolve(element);
+    if (reset) this.reset(element, false);
+    return Promise.resolve<HTMLElement>(element);
   }
 
   public animate(element: HTMLElement, mode = AnimationMode.Animate): Promise<HTMLElement> {
+    if (mode === AnimationMode.Show) {
+      this.hideElement(element);
+    }
+
     return new Promise<HTMLElement>((resolve: Function, reject: Function) => {
       this.removeTimeouts(element);
 
       const delay = setTimeout(() => {
         this.reset(element, true, false, true);
         this.registerAnimationListeners(element, mode, resolve, reject);
-        this.styles.set(element, Object.assign({}, element.style));
-
-        const classes = this.classes.slice(0);
-
-        switch (mode) {
-          case AnimationMode.Show:
-            classes.push('animated-show');
-            break;
-          case AnimationMode.Hide:
-            classes.push('animated-hide');
-            break;
-        }
-
-        classes.push('animated', this.animationOptions.type);
-
-        this.activeClasses.set(element, classes);
-
-        if (this.animationOptions.pin) {
-          if (mode === AnimationMode.Show) {
-            element.style.visibility = 'hidden';
-          }
-
-          this.showElement(element);
-
-          const position = this.getPosition(element);
-
-          element.style.position = 'fixed';
-          element.style.top = `${position.top}px`;
-          element.style.left = `${position.left}px`;
-          element.style.width = `${position.width}px`;
-          element.style.height = `${position.height}px`;
-          element.style.margin = '0px';
-        }
+        this.saveStyle(element);
+        this.saveClasses(element, mode)
+        this.pinElement(element, mode);
 
         this.nextFrame(() => {
-          element.style.visibility = 'visible';
-          this.showElement(element);
+          this.showElement(element, mode);
           this.applyProperties(element, mode);
         });
       }, this.animationOptions.delay);
 
-      this.log(`Timeout ${delay} registered for element`, element);
-
       this.addTimeout(element, delay, reject);
+      this.log(`Timeout ${delay} registered for element`, element);
     });
   }
 
@@ -197,7 +147,7 @@ export class AnimationBuilder {
 
   // Private Methods
 
-  private log(...values: any[]) {
+  private log(...values: any[]): void {
     if (AnimationBuilder.DEBUG) {
       console.log('css-animator:', ...values);
     }
@@ -209,15 +159,76 @@ export class AnimationBuilder {
     });
   }
 
-  private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
-    let el = element.getBoundingClientRect();
+  private camelCase(input: string): string {
+    return input.toLowerCase().replace(/-(.)/g, (match, group) => {
+      return group.toUpperCase();
+    });
+  }
 
-    return {
-      left: el.left + window.scrollX,
-      top: el.top + window.scrollY,
-      width: el.width,
-      height: el.height,
-    };
+  private hideElement(element: HTMLElement, mode?: AnimationMode): void {
+    if (this.animationOptions.useVisibility) {
+      element.style.visibility = 'hidden';
+      return;
+    }
+
+    element.setAttribute('hidden', '');
+  }
+
+  private showElement(element: HTMLElement, mode?: AnimationMode): void {
+    if (this.animationOptions.pin && mode === AnimationMode.Show) {
+      element.style.visibility = 'visible';
+    }
+
+    if (this.animationOptions.useVisibility) {
+      element.style.visibility = 'visible';
+      return;
+    }
+
+    element.removeAttribute('hidden');
+  }
+
+  private pinElement(element: HTMLElement, mode: AnimationMode): void {
+    if (!this.animationOptions.pin) return;
+
+    if (mode === AnimationMode.Show) {
+      element.style.visibility = 'hidden';
+    }
+
+    if (!this.animationOptions.useVisibility) {
+      this.showElement(element);
+    }
+
+    const position = this.getPosition(element);
+
+    element.style.position = this.animationOptions.fixed ? 'fixed' : 'absolute';
+    element.style.top = `${position.top}px`;
+    element.style.left = `${position.left}px`;
+    element.style.width = `${position.width}px`;
+    element.style.height = `${position.height}px`;
+    element.style.margin = '0px';
+  }
+
+  private getPosition(element: HTMLElement): { left: number, top: number, width: number, height: number } {
+    const rect = element.getBoundingClientRect();
+    const cs = window.getComputedStyle(element);
+
+    let left = element.offsetLeft;
+    let top = element.offsetTop;
+
+    let width = rect.width -
+      parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) -
+      parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+
+    let height = rect.height -
+      parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
+      parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
+
+    if (this.animationOptions.fixed) {
+      left = rect.left + window.scrollX;
+      top = rect.top + window.scrollY;
+    }
+
+    return { left, top, width, height };
   }
 
   private registerAnimationListeners(element: HTMLElement, mode: AnimationMode, resolve: Function, reject: Function): void {
@@ -346,6 +357,10 @@ export class AnimationBuilder {
     this.applyStyles(element, mode);
   }
 
+  private saveStyle(element: HTMLElement): void {
+    this.styles.set(element, Object.assign({}, element.style));
+  }
+
   private applyStyles(element: HTMLElement, mode?: AnimationMode): void {
     this.applyFillMode(element);
     this.applyTimingFunction(element);
@@ -368,6 +383,22 @@ export class AnimationBuilder {
     }
 
     this.styles.delete(element);
+  }
+
+  private saveClasses(element: HTMLElement, mode: AnimationMode): void {
+    const classes = this.classes.slice(0);
+
+    switch (mode) {
+      case AnimationMode.Show:
+        classes.push('animated-show');
+        break;
+      case AnimationMode.Hide:
+        classes.push('animated-hide');
+        break;
+    }
+
+    classes.push('animated', this.animationOptions.type);
+    this.activeClasses.set(element, classes);
   }
 
   private applyClasses(element: HTMLElement, mode?: AnimationMode): void {
@@ -414,12 +445,6 @@ export class AnimationBuilder {
     return this;
   }
 
-  private camelCase(input: string): string {
-    return input.toLowerCase().replace(/-(.)/g, (match, group1) => {
-      return group1.toUpperCase();
-    });
-  }
-
   // Getters and Setters
 
   get defaults(): AnimationOptions {
@@ -444,7 +469,7 @@ export class AnimationBuilder {
   }
 
   public setOptions(options: AnimationOptions): AnimationBuilder {
-    this.options = options;
+    Object.assign(this.options, options);
     return this;
   }
 
@@ -495,10 +520,6 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyType(element: HTMLElement): AnimationBuilder {
-    return this;
-  }
-
   get fillMode(): string {
     return this.animationOptions.fillMode;
   }
@@ -512,12 +533,11 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyFillMode(element: HTMLElement): AnimationBuilder {
+  public applyFillMode(element: HTMLElement, fillMode?: string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-fill-mode',
-      this.animationOptions.fillMode ?
-        this.animationOptions.fillMode : null,
+      fillMode || this.animationOptions.fillMode,
     );
 
     return this;
@@ -536,11 +556,11 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyTimingFunction(element: HTMLElement): AnimationBuilder {
+  public applyTimingFunction(element: HTMLElement, timingFunction?: string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-timing-function',
-      this.animationOptions.timingFunction,
+      timingFunction || this.animationOptions.timingFunction
     );
 
     return this;
@@ -559,11 +579,11 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyPlayState(element: HTMLElement): AnimationBuilder {
+  public applyPlayState(element: HTMLElement, playState?: string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-play-state',
-      this.animationOptions.playState,
+      playState || this.animationOptions.playState,
     );
 
     return this;
@@ -582,80 +602,80 @@ export class AnimationBuilder {
     return this;
   }
 
-  public applyDirection(element: HTMLElement): AnimationBuilder {
+  public applyDirection(element: HTMLElement, direction?: string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-direction',
-      this.animationOptions.direction,
+      direction || this.animationOptions.direction,
     );
 
     return this;
   }
 
-  get duration(): string | number {
+  get duration(): number {
     return this.animationOptions.duration;
   }
 
-  set duration(duration: string | number) {
+  set duration(duration: number) {
     this.animationOptions.duration = duration;
   }
 
-  public setDuration(duration: string | number): AnimationBuilder {
+  public setDuration(duration: number): AnimationBuilder {
     this.duration = duration;
     return this;
   }
 
-  public applyDuration(element: HTMLElement): AnimationBuilder {
+  public applyDuration(element: HTMLElement, duration?: number): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-duration',
-      `${this.animationOptions.duration}ms`,
+      `${duration || this.animationOptions.duration}ms`,
     );
 
     return this;
   }
 
-  get delay(): string | number {
+  get delay(): number {
     return this.animationOptions.delay;
   }
 
-  set delay(delay: string | number) {
+  set delay(delay: number) {
     this.animationOptions.delay = delay;
   }
 
-  public setDelay(delay: string | number): AnimationBuilder {
+  public setDelay(delay: number): AnimationBuilder {
     this.delay = delay;
     return this;
   }
 
-  public applyDelayAsStyle(element: HTMLElement): AnimationBuilder {
+  public applyDelayAsStyle(element: HTMLElement, delay?: number): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-delay',
-      this.animationOptions.delay,
+      `${delay || this.animationOptions.delay}ms`,
     );
 
     return this;
   }
 
-  get iterationCount(): string | number {
+  get iterationCount(): number | string {
     return this.animationOptions.iterationCount;
   }
 
-  set iterationCount(iterationCount: string | number) {
+  set iterationCount(iterationCount: number | string) {
     this.animationOptions.iterationCount = iterationCount;
   }
 
-  public setIterationCount(iterationCount: string | number): AnimationBuilder {
+  public setIterationCount(iterationCount: number | string): AnimationBuilder {
     this.iterationCount = iterationCount;
     return this;
   }
 
-  public applyIterationCount(element: HTMLElement): AnimationBuilder {
+  public applyIterationCount(element: HTMLElement, iterationCount?: number | string): AnimationBuilder {
     this.applyStyle(
       element,
       'animation-iteration-count',
-      this.animationOptions.iterationCount,
+      iterationCount || this.animationOptions.iterationCount,
     );
 
     return this;

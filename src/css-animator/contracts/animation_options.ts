@@ -1,5 +1,6 @@
 export interface AnimationOptions {
   [key: string]: string|number|boolean;
+  fixed?: boolean;
   reject?: boolean;
   useVisibility?: boolean;
   pin?: boolean;
@@ -8,7 +9,7 @@ export interface AnimationOptions {
   timingFunction?: string;
   playState?: string;
   direction?: string;
-  duration?: string|number;
-  delay?: string|number;
-  iterationCount?: string|number;
+  duration?: number;
+  delay?: number;
+  iterationCount?: number|string;
 }
