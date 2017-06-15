@@ -58241,7 +58241,12 @@
 	    }
 	    AnimatorModule = __decorate([
 	        core_1.NgModule({
-	            declarations: [animates_directive_1.AnimatesDirective]
+	            declarations: [
+	                animates_directive_1.AnimatesDirective
+	            ],
+	            exports: [
+	                animates_directive_1.AnimatesDirective
+	            ]
 	        })
 	    ], AnimatorModule);
 	    return AnimatorModule;
