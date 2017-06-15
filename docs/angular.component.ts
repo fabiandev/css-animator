@@ -3,9 +3,6 @@ import { AnimationService, AnimationBuilder } from 'css-animator';
 
 @Component({
   selector: 'angular-app',
-  providers: [
-    AnimationService
-  ],
   template: `
   <nav>
     <button (click)="show(toAnimate)" [disabled]="isAnimating || isVisible">Show</button>

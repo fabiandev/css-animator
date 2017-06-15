@@ -57573,9 +57573,6 @@
 	    AppComponent = __decorate([
 	        core_1.Component({
 	            selector: 'angular-app',
-	            providers: [
-	                css_animator_1.AnimationService
-	            ],
 	            template: "\n  <nav>\n    <button (click)=\"show(toAnimate)\" [disabled]=\"isAnimating ||\u00A0isVisible\">Show</button>\n    <button (click)=\"shake(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Shake</button>\n    <button (click)=\"hide(toAnimate)\" [disabled]=\"isAnimating ||\u00A0!isVisible\">Hide</button>\n  </nav>\n  <div\n    class=\"el\"\n    #toAnimate\n    animates\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{useVisibility: true, type: 'fadeInUp', delay: 100, duration: 1000}\"\n  >\n  </div>\n  <div\n    class=\"el2\"\n    animates\n    #animation=\"animates\"\n    animatesInitMode=\"show\"\n    [animatesOnInit]=\"{ delay: 350, type: 'fadeInUp' }\"\n    (click)=\"animation.startOrStop({delay: 0, duration: 1500, type: 'shake', iterationCount: 'infinite'})\"\n    (mouseleave)=\"animation.pause()\"\n    (mouseenter)=\"animation.resume()\"\n    hidden\n  >\n  </div>\n  ",
 	            styles: ["\n    .el {\n      visibility: hidden;\n      width: 100px;\n      height: 100px;\n      margin: 0 auto;\n      background-color: cyan;\n    }\n    .el2 {\n      position: absolute;\n      width: 100px;\n      height: 100px;\n      top: 300px;\n      left: 50%;\n      margin-left: -50px;\n      background-color: yellow;\n    }"
 	            ]
