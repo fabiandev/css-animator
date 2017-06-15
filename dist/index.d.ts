@@ -1,3 +1,3 @@
 export * from './builder';
-export * from './modules';
+export * from './angular';
 export * from './contracts';

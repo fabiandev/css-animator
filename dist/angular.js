@@ -3,5 +3,6 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./builder"));
-__export(require("./angular"));
+__export(require("./angular/animator.module"));
+__export(require("./angular/animates.directive"));
+__export(require("./angular/animation.service"));

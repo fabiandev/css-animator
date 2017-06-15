@@ -555,24 +555,24 @@ var AnimationBuilder = (function () {
         this.applyStyle(element, 'animation-iteration-count', iterationCount || this.animationOptions.iterationCount);
         return this;
     };
+    AnimationBuilder.DEBUG = false;
+    AnimationBuilder.defaults = {
+        fixed: false,
+        reject: true,
+        useVisibility: false,
+        pin: true,
+        type: 'bounce',
+        fillMode: 'none',
+        timingFunction: 'ease',
+        playState: 'running',
+        direction: 'normal',
+        duration: 1000,
+        delay: 0,
+        iterationCount: 1,
+    };
+    AnimationBuilder.raf = window.requestAnimationFrame
+        ? window.requestAnimationFrame.bind(window)
+        : setTimeout;
     return AnimationBuilder;
 }());
-AnimationBuilder.DEBUG = false;
-AnimationBuilder.defaults = {
-    fixed: false,
-    reject: true,
-    useVisibility: false,
-    pin: true,
-    type: 'bounce',
-    fillMode: 'none',
-    timingFunction: 'ease',
-    playState: 'running',
-    direction: 'normal',
-    duration: 1000,
-    delay: 0,
-    iterationCount: 1,
-};
-AnimationBuilder.raf = window.requestAnimationFrame
-    ? window.requestAnimationFrame.bind(window)
-    : setTimeout;
 exports.AnimationBuilder = AnimationBuilder;
