@@ -57484,9 +57484,9 @@
 	        core_1.NgModule({
 	            imports: [
 	                platform_browser_1.BrowserModule,
+	                css_animator_1.AnimatorModule,
 	            ],
 	            declarations: [
-	                css_animator_1.AnimatesDirective,
 	                angular_component_1.AppComponent,
 	            ],
 	            bootstrap: [
