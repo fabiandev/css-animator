@@ -2,12 +2,15 @@
   "compileOnSave": false,
   "compilerOptions": {
     "target": "ES5",
+    "module": "commonjs",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "strictNullChecks": false,
+    "sourceMap": true,
+    "skipLibCheck": true,
     "lib": [
       "DOM",
       "ES6",
@@ -19,7 +22,10 @@
     ]
   },
   "files": [
-    "src/css-animator/angular/animator.module.ts",
-    "src/css-animator/index.ts"
+    "src/index.ts",
+    "docs/index.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

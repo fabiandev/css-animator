@@ -1,15 +1,19 @@
+var path = require('path');
 var assign = require('lodash.assign');
 var del = require('del');
+var merge = require('merge2');
+var runSequence = require('run-sequence');
+var wp = require('webpack');
+var webpack = require('webpack-stream');
+var gulp = require('gulp');
 var file = require('gulp-file');
 var filter = require('gulp-filter');
-var gulp = require('gulp');
-var merge = require('merge2');
+var sourcemaps = require('gulp-sourcemaps');
 var rename = require('gulp-rename');
-var runSequence = require('run-sequence');
 var ts = require('gulp-typescript');
 var uglify = require('gulp-uglify');
-var webpack = require('webpack-stream');
 
+var wpConfig = require('./webpack.config');
 var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
   declaration: true
 });
@@ -17,7 +21,10 @@ var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
 gulp.task('default', ['copy', 'process', 'bundle', 'example']);
 gulp.task('clean', ['clean:process', 'clean:bundle']);
 gulp.task('copy', ['copy:metadata', 'copy:readme', 'copy:license', 'copy:package']);
-gulp.task('example', ['example:build', 'example:copy']);
+
+gulp.task('example', function(done) {
+  runSequence('example:build', 'example:copy', done);
+});
 
 gulp.task('build', function(done) {
   runSequence('clean', 'copy', 'process', 'bundle', 'example', done);
@@ -67,9 +74,21 @@ gulp.task('bundle', function() {
 });
 
 gulp.task('example:build', function() {
-  return gulp.src('./docs/index.ts')
-    .pipe(webpack(require('./webpack.config.js')))
+  return gulp.src('./docs/assets/app.js')
+    .pipe(webpack(require('./webpack.config.js'), wp))
     .pipe(gulp.dest('./docs/assets'));
+});
+
+gulp.task('example:compress', function() {
+  var location = wpConfig.output.path;
+  var filename = wpConfig.output.filename;
+  return gulp.src(path.join(location, filename))
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(uglify({
+      compress: { sequences: false }
+    }))
+    .pipe(sourcemaps.write('.', { addComment: true }))
+    .pipe(gulp.dest(location));
 });
 
 gulp.task('example:copy', function() {
