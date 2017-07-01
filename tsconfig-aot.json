@@ -11,6 +11,7 @@
     "strictNullChecks": false,
     "outDir": "./compiled",
     "rootDir": "./src/css-animator",
+    "skipLibCheck": true,
     "lib": [
       "DOM",
       "ES6",
