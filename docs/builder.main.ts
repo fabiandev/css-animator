@@ -23,7 +23,7 @@ showButton.onclick = () => {
       hideButton.removeAttribute('disabled');
       shakeButton.removeAttribute('disabled');
     })
-    .catch(e => {
+    .catch((e: any) => {
       console.log('css-animator: Animation aborted', e);
       hideButton.removeAttribute('disabled');
       shakeButton.removeAttribute('disabled');
@@ -42,7 +42,7 @@ shakeButton.onclick = () => {
       shakeButton.removeAttribute('disabled');
       hideButton.removeAttribute('disabled');
     })
-    .catch(e => {
+    .catch((e: any) => {
       console.log('css-animator: Animation aborted', e);
       shakeButton.removeAttribute('disabled');
       hideButton.removeAttribute('disabled');
@@ -61,7 +61,7 @@ hideButton.onclick = () => {
       showButton.removeAttribute('disabled');
       shakeButton.setAttribute('disabled', '');
     })
-    .catch(e => {
+    .catch((e: any) => {
       console.log('css-animator: Animation aborted', e);
       showButton.removeAttribute('disabled');
       shakeButton.setAttribute('disabled', '');
