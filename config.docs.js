@@ -12,7 +12,7 @@ module.exports = {
     alias: {
       'css-animator': '../src/css-animator'
     },
-    extensions: ['.ts', '.tsx', '.js']
+    extensions: ['.ts', '.js']
   },
   module: {
     rules: [
@@ -20,7 +20,7 @@ module.exports = {
         test: /\.(js|ts)$/,
         exclude: [path.join(__dirname, 'node_modules', '@angular/compiler')],
         use: ['source-map-loader'],
-        enforce: "pre"
+        enforce: 'pre'
       }, {
         test: /\.tsx?$/,
         use: [

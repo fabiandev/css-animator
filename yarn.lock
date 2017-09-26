@@ -77,6 +77,10 @@
     normalize-path "^2.0.1"
     through2 "^2.0.3"
 
+"@types/core-js@^0.9.43":
+  version "0.9.43"
+  resolved "https://registry.yarnpkg.com/@types/core-js/-/core-js-0.9.43.tgz#65d646c5e8c0cd1bdee37065799f9d3d48748253"
+
 "@types/node@^6.0.46":
   version "6.0.79"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.79.tgz#5efe7d4a6d8c453c7e9eaf55d931f4a22fac5169"
@@ -494,6 +498,10 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
   dependencies:
     inherits "^2.0.1"
 
+"classlist.js@git+https://github.com/eligrey/classList.js.git":
+  version "1.1.20170112"
+  resolved "git+https://github.com/eligrey/classList.js.git#e77e448bfca5babdc7212f96d0ab507b21000549"
+
 cliui@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cliui/-/cliui-2.1.0.tgz#4b475760ff80264c762c3a1719032e91c7fea0d1"
@@ -568,6 +576,10 @@ convert-source-map@1.X, convert-source-map@^1.1.1:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.5.0.tgz#9acd70851c6d5dfdd93d9282e5edf94a03ff46b5"
 
+core-js@^2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.1.tgz#ae6874dc66937789b80754ff5428df66819ca50b"
+
 core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
@@ -628,10 +640,6 @@ crypto-browserify@^3.11.0:
     pbkdf2 "^3.0.3"
     public-encrypt "^4.0.0"
     randombytes "^2.0.0"
-
-css-animator@^2.1.0:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/css-animator/-/css-animator-2.1.1.tgz#534d71a9c83943f7dbfb18f8f86ad68fcccc07e9"
 
 css@2.X, css@^2.2.1:
   version "2.2.1"
@@ -1913,6 +1921,10 @@ lodash._shimkeys@~2.4.1:
 lodash.assign@^4.0.7:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/lodash.assign/-/lodash.assign-4.2.0.tgz#0d99f3ccd7a6d261d19bdaeb9245005d285808e7"
+
+lodash.camelcase@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
 
 lodash.clone@^4.3.2:
   version "4.5.0"
@@ -3430,6 +3442,12 @@ watchpack@^1.3.1:
     async "^2.1.2"
     chokidar "^1.4.3"
     graceful-fs "^4.1.2"
+
+webpack-angular-externals@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/webpack-angular-externals/-/webpack-angular-externals-1.0.2.tgz#cdcfe9496a3c5f46551441e9fcd3223c4be802d2"
+  dependencies:
+    lodash.camelcase "^4.3.0"
 
 webpack-core@~0.6.9:
   version "0.6.9"

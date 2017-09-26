@@ -13,21 +13,20 @@ var rename = require('gulp-rename');
 var ts = require('gulp-typescript');
 var uglify = require('gulp-uglify');
 
-var wpConfig = require('./webpack.config');
 var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
   declaration: true
 });
 
 gulp.task('default', ['copy', 'process', 'bundle', 'example']);
-gulp.task('clean', ['clean:process', 'clean:bundle']);
-gulp.task('copy', ['copy:metadata', 'copy:readme', 'copy:license', 'copy:package']);
+gulp.task('clean', ['clean:example', 'clean:process', 'clean:bundle']);
+gulp.task('copy', ['copy:metadata', 'copy:sourcemaps', 'copy:readme', 'copy:license', 'copy:package']);
 
 gulp.task('example', function(done) {
   runSequence('example:build', 'example:copy', done);
 });
 
 gulp.task('build', function(done) {
-  runSequence('clean', 'copy', 'process', 'bundle', 'example', done);
+  runSequence('clean', 'copy', 'process', 'bundle', 'shim', 'example', done);
 });
 
 gulp.task('watch-build', function(done) {
@@ -44,51 +43,75 @@ gulp.task('process', function() {
   var tsResult = gulp.src(['./src/**/*.ts'], {
       base: './src/css-animator'
     })
+    .pipe(f)
+    .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(ts(assign(tsConfig, {
       module: 'commonjs'
     })));
 
   return merge([
-    tsResult.dts.pipe(f).pipe(gulp.dest('./dist')),
-    tsResult.js.pipe(f).pipe(gulp.dest('./dist'))
+    tsResult.dts.pipe(gulp.dest('./dist')),
+    tsResult.js
+      .pipe(sourcemaps.write('.', { addComment: true }))
+      .pipe(gulp.dest('./dist'))
   ]);
 });
 
-gulp.task('bundle', function() {
-  var tsResult = gulp.src(['./src/**/*.ts'])
-    .pipe(ts(assign(tsConfig, {
-      module: 'system',
-      outFile: 'css-animator.js',
-      declaration: false
-    })));
+gulp.task('bundle', function(done) {
+  runSequence('bundle:build', 'bundle:compress', done);
+});
 
-  return tsResult.js
-    .pipe(gulp.dest('./dist/bundles'))
-    .pipe(rename('css-animator.min.js'))
-    .pipe(uglify({
-      mangle: {
-        keep_fnames: true
-      }
-    }))
+gulp.task('bundle:build', function() {
+  return gulp.src('./dist/index.js')
+    .pipe(webpack(require('./config.bundle'), wp))
     .pipe(gulp.dest('./dist/bundles'));
+});
+
+gulp.task('bundle:compress', function() {
+  var wpConfig = require('./config.bundle');
+  var location = wpConfig.output.path;
+  var filename = wpConfig.output.filename;
+  var filenameMin = wpConfig.output.filename.split('.');
+  filenameMin.splice(filenameMin.length - 1, 0, '.min.');
+  filenameMin = filenameMin.join('');
+  return gulp.src(path.join(location, filename))
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(uglify({
+      compress: { sequences: false }
+    }))
+    .pipe(rename(filenameMin))
+    .pipe(sourcemaps.write('.', { addComment: true }))
+    .pipe(gulp.dest(location));
 });
 
 gulp.task('example:build', function() {
   return gulp.src('./docs/assets/app.js')
-    .pipe(webpack(require('./webpack.config.js'), wp))
+    .pipe(webpack(require('./config.docs'), wp))
     .pipe(gulp.dest('./docs/assets'));
 });
 
 gulp.task('example:compress', function() {
+  var wpConfig = require('./config.docs');
   var location = wpConfig.output.path;
   var filename = wpConfig.output.filename;
+  var filenameMin = wpConfig.output.filename.split('.');
+  filenameMin.splice(filenameMin.length - 1, 0, '.min.');
+  filenameMin = filenameMin.join('');
   return gulp.src(path.join(location, filename))
-    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(sourcemaps.init({ loadMaps: true, largeFile: true }))
     .pipe(uglify({
       compress: { sequences: false }
     }))
+    .pipe(rename(filenameMin))
     .pipe(sourcemaps.write('.', { addComment: true }))
     .pipe(gulp.dest(location));
+});
+
+gulp.task('example:cleanup', function() {
+  return del([
+    'docs/assets/app.js',
+    'docs/assets/app.js.map'
+  ]);
 });
 
 gulp.task('example:copy', function() {
@@ -97,6 +120,42 @@ gulp.task('example:copy', function() {
     './node_modules/normalize.css/normalize.css'
   ])
     .pipe(gulp.dest('docs/assets'));
+});
+
+gulp.task('shim', function(done) {
+  runSequence('shim:build', 'shim:compress', done);
+});
+
+gulp.task('shim:build', function() {
+  return gulp.src('./dist/shim.js')
+    .pipe(webpack(require('./config.shim'), wp))
+    .pipe(gulp.dest('./dist/bundles'));
+});
+
+gulp.task('shim:compress', function() {
+  var wpConfig = require('./config.shim');
+  var location = wpConfig.output.path;
+  var filename = wpConfig.output.filename;
+  var filenameMin = wpConfig.output.filename.split('.');
+  filenameMin.splice(filenameMin.length - 1, 0, '.min.');
+  filenameMin = filenameMin.join('');
+  return gulp.src(path.join(location, filename))
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(uglify({
+      compress: { sequences: false }
+    }))
+    .pipe(rename(filenameMin))
+    .pipe(sourcemaps.write('.', { addComment: true }))
+    .pipe(gulp.dest(location));
+});
+
+gulp.task('clean:example', function() {
+  return del([
+    './docs/assets/app.js*',
+    './docs/assets/app.min.js*',
+    './docs/assets/shim.js*',
+    './docs/assets/shim.min.js*',
+  ]);
 });
 
 gulp.task('clean:process', function() {
@@ -110,6 +169,11 @@ gulp.task('clean:bundle', function() {
   return del([
     './dist/bundles/**/*'
   ]);
+});
+
+gulp.task('copy:sourcemaps', function() {
+  return gulp.src('./compiled/**/*.js.map')
+    .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('copy:metadata', function() {

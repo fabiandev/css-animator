@@ -12,18 +12,26 @@
     "outDir": "./compiled",
     "rootDir": "./src/css-animator",
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "css-animator/*": [
+        "src/css-animator/*",
+        "src/css-animator/*/index"
+      ]
+    },
+    "types": [
+      "core-js"
+    ],
     "lib": [
       "DOM",
       "ES6",
       "DOM.Iterable",
       "ScriptHost"
-    ],
-    "types": [
-
     ]
   },
   "files": [
     "src/css-animator/angular/animator.module.ts",
+    "src/css-animator/shim.ts",
     "src/css-animator/index.ts"
   ],
   "angularCompilerOptions": {

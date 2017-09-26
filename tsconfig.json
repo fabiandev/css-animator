@@ -9,20 +9,27 @@
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "strictNullChecks": false,
-    "sourceMap": true,
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "types": [
+      "core-js"
+    ],
+    "paths": {
+      "css-animator/*": [
+        "src/css-animator/*",
+        "src/css-animator/*/index"
+      ]
+    },
     "lib": [
       "DOM",
       "ES6",
       "DOM.Iterable",
       "ScriptHost"
-    ],
-    "types": [
-
     ]
   },
   "files": [
     "src/index.ts",
+    "src/css-animator/shim.ts",
     "docs/index.ts"
   ],
   "exclude": [

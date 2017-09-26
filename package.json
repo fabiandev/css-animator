@@ -35,8 +35,10 @@
     "@angular/platform-browser": "^4.2.2",
     "@angular/platform-browser-dynamic": "^4.2.2",
     "@angular/platform-server": "^4.2.2",
+    "@types/core-js": "^0.9.43",
     "animate.css": "^3.5.2",
-    "css-animator": "^2.1.0",
+    "classlist.js": "git+https://github.com/eligrey/classList.js.git",
+    "core-js": "^2.5.1",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-file": "^0.3.0",
@@ -55,6 +57,7 @@
     "ts-loader": "^2.0.1",
     "typescript": "^2.3.4",
     "webpack": "^3.0.0",
+    "webpack-angular-externals": "^1.0.2",
     "webpack-stream": "^3.2.0",
     "zone.js": "^0.8.4"
   }
