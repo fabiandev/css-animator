@@ -58,20 +58,47 @@ gulp.task('process', function() {
 });
 
 gulp.task('bundle', function(done) {
-  runSequence('bundle:build', 'bundle:compress', done);
+  runSequence(['bundle:build:1', 'bundle:build:2'], 'bundle:compress', done);
 });
 
-gulp.task('bundle:build', function() {
+gulp.task('bundle:build:1', function() {
   return gulp.src('./dist/index.js')
-    .pipe(webpack(require('./config.bundle'), wp))
+    .pipe(webpack(require('./config.bundle')[0], wp))
     .pipe(gulp.dest('./dist/bundles'));
 });
 
-gulp.task('bundle:compress', function() {
+gulp.task('bundle:build:2', function() {
+  return gulp.src('./dist/index.js')
+    .pipe(webpack(require('./config.bundle')[1], wp))
+    .pipe(gulp.dest('./dist/bundles'));
+});
+
+gulp.task('bundle:compress', function(done) {
+  runSequence(['bundle:compress:1', 'bundle:compress:2'], done);
+});
+
+gulp.task('bundle:compress:1', function() {
   var wpConfig = require('./config.bundle');
-  var location = wpConfig.output.path;
-  var filename = wpConfig.output.filename;
-  var filenameMin = wpConfig.output.filename.split('.');
+  var location = wpConfig[0].output.path;
+  var filename = wpConfig[0].output.filename;
+  var filenameMin = wpConfig[0].output.filename.split('.');
+  filenameMin.splice(filenameMin.length - 1, 0, '.min.');
+  filenameMin = filenameMin.join('');
+  return gulp.src(path.join(location, filename))
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(uglify({
+      compress: { sequences: false }
+    }))
+    .pipe(rename(filenameMin))
+    .pipe(sourcemaps.write('.', { addComment: true }))
+    .pipe(gulp.dest(location));
+});
+
+gulp.task('bundle:compress:2', function() {
+  var wpConfig = require('./config.bundle');
+  var location = wpConfig[1].output.path;
+  var filename = wpConfig[1].output.filename;
+  var filenameMin = wpConfig[1].output.filename.split('.');
   filenameMin.splice(filenameMin.length - 1, 0, '.min.');
   filenameMin = filenameMin.join('');
   return gulp.src(path.join(location, filename))
