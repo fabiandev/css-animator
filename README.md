@@ -7,8 +7,7 @@ manually. It also takes care of positioning elements that are being animated, am
 
 Feel free to [open an issue](https://github.com/fabianweb/css-animator/issues/new) if you're experiencing issues, or if you have any suggestions or comments.  
 
-The package includes ES5 compiled [Browserify](http://browserify.org) files, [SystemJS](https://github.com/systemjs/systemjs) bundle files and all TypeScript typings.
-Please leave a comment if there's something missing for you.
+The package includes ES5 compiled files, alongside TypeScript typings and source maps. Also UMD bundle files are included.
 
 # Installation
 
