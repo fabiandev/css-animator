@@ -449,16 +449,16 @@ Shows an element that was hidden.
 hide(options?: AnimationOptions): Promise<HTMLElement>
 ```
 
-Hides an element.
+Hides an element by adding the attribute `hidden` to the element after the animation has finished.
+You may need to add something like `[hidden] { display: none; }` to your CSS.
 
 #### stop
-
-Adds the attribute `hidden` to the element after the animation has finished.
-You may need to add something like `[hidden] { display: none; }` to your CSS.
 
 ```ts
 stop(): void
 ```
+
+Stops the current animation on an element, resets it's position, and removes the event listener that listens for animation end.
 
 #### startOrStop
 
@@ -470,23 +470,21 @@ Calls `start` if the element was already started and stop otherwise.
 
 #### pause
 
-Stop the current animation on an element, reset it's position, and removes the event listener that listens for animation end.
-
 ```ts
 pause(): void
 ```
 
-#### resume
-
 Pauses the animation (sets the playState option to `paused`).
+
+#### resume
 
 ```ts
 resume(): void
 ```
 
-#### toggle
-
 Resumes a previously paused animation (sets the playState option to `running`).
+
+#### toggle
 
 ```ts
 toggle(): void
