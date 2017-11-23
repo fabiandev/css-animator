@@ -31,7 +31,6 @@
   },
   "files": [
     "src/css-animator/angular/animator.module.ts",
-    "src/css-animator/shim.ts",
     "src/css-animator/index.ts"
   ],
   "angularCompilerOptions": {

@@ -26,7 +26,7 @@ gulp.task('example', function(done) {
 });
 
 gulp.task('build', function(done) {
-  runSequence('clean', 'copy', 'process', 'bundle', 'shim', 'example', done);
+  runSequence('clean', 'copy', 'process', 'bundle'/*, 'shim'*/ ,'example', done);
 });
 
 gulp.task('watch-build', function(done) {
@@ -149,39 +149,39 @@ gulp.task('example:copy', function() {
     .pipe(gulp.dest('docs/assets'));
 });
 
-gulp.task('shim', function(done) {
-  runSequence('shim:build', 'shim:compress', done);
-});
-
-gulp.task('shim:build', function() {
-  return gulp.src('./dist/shim.js')
-    .pipe(webpack(require('./config.shim'), wp))
-    .pipe(gulp.dest('./dist/bundles'));
-});
-
-gulp.task('shim:compress', function() {
-  var wpConfig = require('./config.shim');
-  var location = wpConfig.output.path;
-  var filename = wpConfig.output.filename;
-  var filenameMin = wpConfig.output.filename.split('.');
-  filenameMin.splice(filenameMin.length - 1, 0, '.min.');
-  filenameMin = filenameMin.join('');
-  return gulp.src(path.join(location, filename))
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(uglify({
-      compress: { sequences: false }
-    }))
-    .pipe(rename(filenameMin))
-    .pipe(sourcemaps.write('.', { addComment: true }))
-    .pipe(gulp.dest(location));
-});
+// gulp.task('shim', function(done) {
+//   runSequence('shim:build', 'shim:compress', done);
+// });
+//
+// gulp.task('shim:build', function() {
+//   return gulp.src('./dist/shim.js')
+//     .pipe(webpack(require('./config.shim'), wp))
+//     .pipe(gulp.dest('./dist/bundles'));
+// });
+//
+// gulp.task('shim:compress', function() {
+//   var wpConfig = require('./config.shim');
+//   var location = wpConfig.output.path;
+//   var filename = wpConfig.output.filename;
+//   var filenameMin = wpConfig.output.filename.split('.');
+//   filenameMin.splice(filenameMin.length - 1, 0, '.min.');
+//   filenameMin = filenameMin.join('');
+//   return gulp.src(path.join(location, filename))
+//     .pipe(sourcemaps.init({ loadMaps: true }))
+//     .pipe(uglify({
+//       compress: { sequences: false }
+//     }))
+//     .pipe(rename(filenameMin))
+//     .pipe(sourcemaps.write('.', { addComment: true }))
+//     .pipe(gulp.dest(location));
+// });
 
 gulp.task('clean:example', function() {
   return del([
     './docs/assets/app.js*',
     './docs/assets/app.min.js*',
-    './docs/assets/shim.js*',
-    './docs/assets/shim.min.js*',
+    // './docs/assets/shim.js*',
+    // './docs/assets/shim.min.js*',
   ]);
 });
 

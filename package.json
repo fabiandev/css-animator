@@ -37,8 +37,6 @@
     "@angular/platform-server": "^4.2.2",
     "@types/core-js": "^0.9.43",
     "animate.css": "^3.5.2",
-    "classlist.js": "git+https://github.com/eligrey/classList.js.git",
-    "core-js": "^2.5.1",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-file": "^0.3.0",

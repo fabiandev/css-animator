@@ -5,7 +5,13 @@ const angularExternals = require('webpack-angular-externals');
 module.exports = [{
   entry: path.join(__dirname, './dist/index.js'),
   output: {
-    library: 'css-animator',
+    umdNamedDefine: true,
+    library: {
+      root: 'css-animator',
+      amd: 'css-animator',
+      commonjs: 'css-animator',
+      commonjs2: 'css-animator'
+    },
     libraryTarget: 'umd',
     path: path.join(__dirname, './dist/bundles'),
     filename: 'css-animator.js'
@@ -31,7 +37,13 @@ module.exports = [{
 }, {
   entry: path.join(__dirname, './dist/builder/animation_builder.js'),
   output: {
-    library: 'css-animator/builder',
+    umdNamedDefine: true,
+    library: {
+      root: 'css-animator/builder',
+      amd: 'css-animator/builder',
+      commonjs: 'css-animator/builder',
+      commonjs2: 'css-animator/builder'
+    },
     libraryTarget: 'umd',
     path: path.join(__dirname, './dist/bundles'),
     filename: 'builder.js'
