@@ -358,7 +358,13 @@ export class AnimationBuilder {
   }
 
   private saveStyle(element: HTMLElement): void {
-    this.styles.set(element, Object.assign({}, element.style));
+    const styles: any = {};
+
+    for (let style in element.style) {
+      styles[style] = element.style.getPropertyValue(style)
+    }
+
+    this.styles.set(element, styles);
   }
 
   private applyStyles(element: HTMLElement, mode?: AnimationMode): void {
@@ -377,9 +383,7 @@ export class AnimationBuilder {
     element.removeAttribute('style');
 
     for (let style in styles) {
-      if (styles.hasOwnProperty(style)) {
-        element.style[style] = styles[style];
-      }
+      element.style.setProperty(style, styles[style]);
     }
 
     this.styles.delete(element);
