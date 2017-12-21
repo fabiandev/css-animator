@@ -8,11 +8,10 @@ export enum AnimationMode {
 
 export class AnimationBuilder {
 
-  public static DEBUG: boolean = false;
+  private static _DEBUG: boolean = false;
+  private static _disabled: boolean = false;
 
-  public static disabled: boolean = false;
-
-  public static readonly defaults: AnimationOptions = {
+  private static _defaults: AnimationOptions = {
     disabled: false,
     fixed: false,
     reject: true,
@@ -150,6 +149,28 @@ export class AnimationBuilder {
     }
 
     return this;
+  }
+
+  // Public Static Methods
+
+  public static get DEBUG(): boolean {
+    return AnimationBuilder._DEBUG;
+  }
+
+  public static set DEBUG(debug: boolean) {
+    AnimationBuilder._DEBUG = debug;
+  }
+
+  public static get disabled(): boolean {
+    return AnimationBuilder._disabled;
+  }
+
+  public static set disabled(disabled: boolean) {
+    AnimationBuilder._disabled = disabled;
+  }
+
+  public static get defaults(): AnimationOptions {
+    return AnimationBuilder._defaults;
   }
 
   // Private Methods
@@ -492,6 +513,14 @@ export class AnimationBuilder {
   public setOptions(options: AnimationOptions): AnimationBuilder {
     Object.assign(this.options, options);
     return this;
+  }
+
+  get disabled(): boolean {
+    return this.animationOptions.disabled;
+  }
+
+  set disabled(disabled: boolean) {
+    this.animationOptions.disabled = disabled;
   }
 
   get reject(): boolean {
