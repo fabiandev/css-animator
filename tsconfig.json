@@ -15,6 +15,9 @@
       "core-js"
     ],
     "paths": {
+      "css-animator": [
+        "src/css-animator"
+      ],
       "css-animator/*": [
         "src/css-animator/*",
         "src/css-animator/*/index"
