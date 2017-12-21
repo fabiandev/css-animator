@@ -185,6 +185,7 @@ The `animation-name` is currently not supported, as `type` is as set as class.
 export interface AnimationOptions {
 
   // General settings:
+  disabled?: boolean;
   fixed?: boolean;
   reject?: boolean;
   useVisibility?: boolean;
@@ -276,6 +277,16 @@ animator
 ```
 
 ### Options
+
+#### disabled (default: false)
+
+Setting this option to `true` on an `AnimationBuilder` instance bypasses animations and shows or hides an element immediately, while skipping animations entirely. It is also possible to disable animations for all instances by changing the global value:
+
+```ts
+import { AnimationBuilder } from 'css-animator/builder';
+
+AnimationBuilder.disabled = true;
+```
 
 #### fixed (default: false)
 
