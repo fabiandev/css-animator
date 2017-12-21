@@ -32,8 +32,10 @@ module.exports = {
     ]
   },
   plugins: [
+    // See https://github.com/angular/angular/issues/11580
+    // See https://github.com/angular/angular/issues/14898
     new webpack.ContextReplacementPlugin(
-      /angular(\\|\/)core(\\|\/)@angular/,
+      /angular(\\|\/)core(\\|\/)(@angular|esm5)/,
       path.resolve(__dirname, '../src')
     )
   ]
