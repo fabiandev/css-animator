@@ -10,7 +10,7 @@ export class AnimationBuilder {
 
   public static DEBUG: boolean = false;
 
-  public static disabled: boolean = true;
+  public static disabled: boolean = false;
 
   public static readonly defaults: AnimationOptions = {
     disabled: false,
