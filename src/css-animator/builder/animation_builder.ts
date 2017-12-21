@@ -10,7 +10,10 @@ export class AnimationBuilder {
 
   public static DEBUG: boolean = false;
 
+  public static disabled: boolean = true;
+
   public static readonly defaults: AnimationOptions = {
+    disabled: false,
     fixed: false,
     reject: true,
     useVisibility: false,
@@ -69,10 +72,14 @@ export class AnimationBuilder {
     this.removeTimeouts(element);
     this.removeListeners(element);
     if (reset) this.reset(element, false);
-    return Promise.resolve<HTMLElement>(element);
+    return Promise.resolve(element);
   }
 
   public animate(element: HTMLElement, mode = AnimationMode.Animate): Promise<HTMLElement> {
+    if (AnimationBuilder.disabled || this.animationOptions.disabled) {
+      return this.animateDisabled(element, mode);
+    }
+
     if (mode === AnimationMode.Show) {
       this.hideElement(element);
     }
@@ -146,6 +153,16 @@ export class AnimationBuilder {
   }
 
   // Private Methods
+
+  public animateDisabled(element: HTMLElement, mode: AnimationMode): Promise<HTMLElement> {
+    if (mode === AnimationMode.Show) {
+      this.showElement(element, mode);
+    } else if(mode === AnimationMode.Hide) {
+      this.hideElement(element, mode);
+    }
+
+    return Promise.resolve(element);
+  }
 
   private log(...values: any[]): void {
     if (AnimationBuilder.DEBUG) {

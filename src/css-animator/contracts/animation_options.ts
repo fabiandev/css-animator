@@ -1,5 +1,6 @@
 export interface AnimationOptions {
   [key: string]: string|number|boolean;
+  disabled?: boolean;
   fixed?: boolean;
   reject?: boolean;
   useVisibility?: boolean;
