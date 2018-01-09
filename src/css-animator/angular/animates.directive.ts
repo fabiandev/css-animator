@@ -11,7 +11,7 @@ import { AnimationOptions } from '../contracts';
     'animatesOnInit',
     'animatesInitMode',
     'animatesOnDestroy',
-    'animatesDestroytMode'
+    'animatesDestroyMode'
   ]
 })
 export class AnimatesDirective implements OnInit {
