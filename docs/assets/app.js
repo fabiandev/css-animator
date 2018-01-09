@@ -30726,7 +30726,7 @@ var AnimatesDirective = /** @class */ (function () {
                 'animatesOnInit',
                 'animatesInitMode',
                 'animatesOnDestroy',
-                'animatesDestroytMode'
+                'animatesDestroyMode'
             ]
         }),
         __param(0, core_1.Inject(core_1.ElementRef)), __param(1, core_1.Inject(animation_service_1.AnimationService)),
