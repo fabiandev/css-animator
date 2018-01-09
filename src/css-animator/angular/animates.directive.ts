@@ -1,4 +1,4 @@
-import { Directive, Inject, ElementRef, OnInit } from '@angular/core';
+import { Directive, Inject, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { AnimationService } from './animation.service';
 import { AnimationBuilder } from '../builder';
 import { AnimationOptions } from '../contracts';
@@ -9,13 +9,17 @@ import { AnimationOptions } from '../contracts';
   inputs: [
     'animates',
     'animatesOnInit',
-    'animatesInitMode'
+    'animatesInitMode',
+    'animatesOnDestroy',
+    'animatesDestroytMode'
   ]
 })
 export class AnimatesDirective implements OnInit {
   private _defaultOptions: AnimationOptions;
   private _initOptions: AnimationOptions;
   private _initMode: string;
+  private _destroyOptions: AnimationOptions;
+  private _destroyMode: string;
 
   private _animationBuilder: AnimationBuilder;
   private _started: boolean;
@@ -31,6 +35,16 @@ export class AnimatesDirective implements OnInit {
   set animatesInitMode(mode: string) {
     if (typeof mode === 'string') {
       this._initMode = mode.toLowerCase();
+    }
+  }
+
+  set animatesOnDestroy(options: AnimationOptions) {
+    this._destroyOptions = options;
+  }
+
+  set animatesDestroyMode(mode: string) {
+    if (typeof mode === 'string') {
+      this._destroyMode = mode.toLowerCase();
     }
   }
 
@@ -50,6 +64,31 @@ export class AnimatesDirective implements OnInit {
     let promise: Promise<HTMLElement>;
     let builder = this._animationBuilder
       .setOptions(this._initOptions);
+
+    switch (this._initMode) {
+      case 'show':
+        promise = builder.show(this._elementRef.nativeElement);
+        break;
+      case 'hide':
+        promise = builder.hide(this._elementRef.nativeElement);
+        break;
+      default:
+        promise = builder.animate(this._elementRef.nativeElement);
+    }
+
+    promise.then((element: HTMLElement) => element, (error: string) => {
+      // Animation interrupted
+    });
+  }
+
+  public ngOnDestroy() {
+    if (!this._destroyOptions) {
+      return;
+    }
+
+    let promise: Promise<HTMLElement>;
+    let builder = this._animationBuilder
+      .setOptions(this._destroyOptions);
 
     switch (this._initMode) {
       case 'show':
