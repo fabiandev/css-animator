@@ -30574,6 +30574,22 @@ var AnimatesDirective = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(AnimatesDirective.prototype, "animatesOnDestroy", {
+        set: function (options) {
+            this._destroyOptions = options;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AnimatesDirective.prototype, "animatesDestroyMode", {
+        set: function (mode) {
+            if (typeof mode === 'string') {
+                this._destroyMode = mode.toLowerCase();
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(AnimatesDirective.prototype, "animationBuilder", {
         get: function () {
             return this._animationBuilder;
@@ -30588,6 +30604,27 @@ var AnimatesDirective = /** @class */ (function () {
         var promise;
         var builder = this._animationBuilder
             .setOptions(this._initOptions);
+        switch (this._initMode) {
+            case 'show':
+                promise = builder.show(this._elementRef.nativeElement);
+                break;
+            case 'hide':
+                promise = builder.hide(this._elementRef.nativeElement);
+                break;
+            default:
+                promise = builder.animate(this._elementRef.nativeElement);
+        }
+        promise.then(function (element) { return element; }, function (error) {
+            // Animation interrupted
+        });
+    };
+    AnimatesDirective.prototype.ngOnDestroy = function () {
+        if (!this._destroyOptions) {
+            return;
+        }
+        var promise;
+        var builder = this._animationBuilder
+            .setOptions(this._destroyOptions);
         switch (this._initMode) {
             case 'show':
                 promise = builder.show(this._elementRef.nativeElement);
@@ -30687,7 +30724,9 @@ var AnimatesDirective = /** @class */ (function () {
             inputs: [
                 'animates',
                 'animatesOnInit',
-                'animatesInitMode'
+                'animatesInitMode',
+                'animatesOnDestroy',
+                'animatesDestroytMode'
             ]
         }),
         __param(0, core_1.Inject(core_1.ElementRef)), __param(1, core_1.Inject(animation_service_1.AnimationService)),
@@ -72770,6 +72809,34 @@ var AnimationBuilder = /** @class */ (function () {
         }
         return this;
     };
+    Object.defineProperty(AnimationBuilder, "DEBUG", {
+        // Public Static Methods
+        get: function () {
+            return AnimationBuilder._DEBUG;
+        },
+        set: function (debug) {
+            AnimationBuilder._DEBUG = debug;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AnimationBuilder, "disabled", {
+        get: function () {
+            return AnimationBuilder._disabled;
+        },
+        set: function (disabled) {
+            AnimationBuilder._disabled = disabled;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AnimationBuilder, "defaults", {
+        get: function () {
+            return AnimationBuilder._defaults;
+        },
+        enumerable: true,
+        configurable: true
+    });
     // Private Methods
     AnimationBuilder.prototype.animateDisabled = function (element, mode) {
         if (mode === AnimationMode.Show) {
@@ -73060,6 +73127,16 @@ var AnimationBuilder = /** @class */ (function () {
         Object.assign(this.options, options);
         return this;
     };
+    Object.defineProperty(AnimationBuilder.prototype, "disabled", {
+        get: function () {
+            return this.animationOptions.disabled;
+        },
+        set: function (disabled) {
+            this.animationOptions.disabled = disabled;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(AnimationBuilder.prototype, "reject", {
         get: function () {
             return this.animationOptions.reject;
@@ -73238,9 +73315,9 @@ var AnimationBuilder = /** @class */ (function () {
         this.applyStyle(element, 'animation-iteration-count', iterationCount || this.animationOptions.iterationCount);
         return this;
     };
-    AnimationBuilder.DEBUG = false;
-    AnimationBuilder.disabled = false;
-    AnimationBuilder.defaults = {
+    AnimationBuilder._DEBUG = false;
+    AnimationBuilder._disabled = false;
+    AnimationBuilder._defaults = {
         disabled: false,
         fixed: false,
         reject: true,

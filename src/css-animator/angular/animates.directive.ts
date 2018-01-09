@@ -90,7 +90,7 @@ export class AnimatesDirective implements OnInit {
     let builder = this._animationBuilder
       .setOptions(this._destroyOptions);
 
-    switch (this._initMode) {
+    switch (this._destroyMode) {
       case 'show':
         promise = builder.show(this._elementRef.nativeElement);
         break;
