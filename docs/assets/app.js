@@ -72770,6 +72770,34 @@ var AnimationBuilder = /** @class */ (function () {
         }
         return this;
     };
+    Object.defineProperty(AnimationBuilder, "DEBUG", {
+        // Public Static Methods
+        get: function () {
+            return AnimationBuilder._DEBUG;
+        },
+        set: function (debug) {
+            AnimationBuilder._DEBUG = debug;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AnimationBuilder, "disabled", {
+        get: function () {
+            return AnimationBuilder._disabled;
+        },
+        set: function (disabled) {
+            AnimationBuilder._disabled = disabled;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AnimationBuilder, "defaults", {
+        get: function () {
+            return AnimationBuilder._defaults;
+        },
+        enumerable: true,
+        configurable: true
+    });
     // Private Methods
     AnimationBuilder.prototype.animateDisabled = function (element, mode) {
         if (mode === AnimationMode.Show) {
@@ -73060,6 +73088,16 @@ var AnimationBuilder = /** @class */ (function () {
         Object.assign(this.options, options);
         return this;
     };
+    Object.defineProperty(AnimationBuilder.prototype, "disabled", {
+        get: function () {
+            return this.animationOptions.disabled;
+        },
+        set: function (disabled) {
+            this.animationOptions.disabled = disabled;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(AnimationBuilder.prototype, "reject", {
         get: function () {
             return this.animationOptions.reject;
@@ -73238,9 +73276,9 @@ var AnimationBuilder = /** @class */ (function () {
         this.applyStyle(element, 'animation-iteration-count', iterationCount || this.animationOptions.iterationCount);
         return this;
     };
-    AnimationBuilder.DEBUG = false;
-    AnimationBuilder.disabled = false;
-    AnimationBuilder.defaults = {
+    AnimationBuilder._DEBUG = false;
+    AnimationBuilder._disabled = false;
+    AnimationBuilder._defaults = {
         disabled: false,
         fixed: false,
         reject: true,
