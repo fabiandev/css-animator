@@ -8,9 +8,11 @@ export enum AnimationMode {
 
 export class AnimationBuilder {
 
-  public static DEBUG: boolean = false;
+  private static _DEBUG: boolean = false;
+  private static _disabled: boolean = false;
 
-  public static readonly defaults: AnimationOptions = {
+  private static _defaults: AnimationOptions = {
+    disabled: false,
     fixed: false,
     reject: true,
     useVisibility: false,
@@ -69,10 +71,14 @@ export class AnimationBuilder {
     this.removeTimeouts(element);
     this.removeListeners(element);
     if (reset) this.reset(element, false);
-    return Promise.resolve<HTMLElement>(element);
+    return Promise.resolve(element);
   }
 
   public animate(element: HTMLElement, mode = AnimationMode.Animate): Promise<HTMLElement> {
+    if (AnimationBuilder.disabled || this.animationOptions.disabled) {
+      return this.animateDisabled(element, mode);
+    }
+
     if (mode === AnimationMode.Show) {
       this.hideElement(element);
     }
@@ -145,7 +151,39 @@ export class AnimationBuilder {
     return this;
   }
 
+  // Public Static Methods
+
+  public static get DEBUG(): boolean {
+    return AnimationBuilder._DEBUG;
+  }
+
+  public static set DEBUG(debug: boolean) {
+    AnimationBuilder._DEBUG = debug;
+  }
+
+  public static get disabled(): boolean {
+    return AnimationBuilder._disabled;
+  }
+
+  public static set disabled(disabled: boolean) {
+    AnimationBuilder._disabled = disabled;
+  }
+
+  public static get defaults(): AnimationOptions {
+    return AnimationBuilder._defaults;
+  }
+
   // Private Methods
+
+  public animateDisabled(element: HTMLElement, mode: AnimationMode): Promise<HTMLElement> {
+    if (mode === AnimationMode.Show) {
+      this.showElement(element, mode);
+    } else if(mode === AnimationMode.Hide) {
+      this.hideElement(element, mode);
+    }
+
+    return Promise.resolve(element);
+  }
 
   private log(...values: any[]): void {
     if (AnimationBuilder.DEBUG) {
@@ -475,6 +513,14 @@ export class AnimationBuilder {
   public setOptions(options: AnimationOptions): AnimationBuilder {
     Object.assign(this.options, options);
     return this;
+  }
+
+  get disabled(): boolean {
+    return this.animationOptions.disabled;
+  }
+
+  set disabled(disabled: boolean) {
+    this.animationOptions.disabled = disabled;
   }
 
   get reject(): boolean {

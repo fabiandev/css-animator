@@ -9,8 +9,7 @@ module.exports = [{
     library: {
       root: 'css-animator',
       amd: 'css-animator',
-      commonjs: 'css-animator',
-      commonjs2: 'css-animator'
+      commonjs: 'css-animator'
     },
     libraryTarget: 'umd',
     path: path.join(__dirname, './dist/bundles'),
@@ -41,8 +40,7 @@ module.exports = [{
     library: {
       root: 'css-animator/builder',
       amd: 'css-animator/builder',
-      commonjs: 'css-animator/builder',
-      commonjs2: 'css-animator/builder'
+      commonjs: 'css-animator/builder'
     },
     libraryTarget: 'umd',
     path: path.join(__dirname, './dist/bundles'),
