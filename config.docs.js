@@ -18,7 +18,7 @@ module.exports = {
     rules: [
       {
         test: /\.(js|ts)$/,
-        exclude: [path.join(__dirname, 'node_modules', '@angular/compiler')],
+        exclude: [path.join(__dirname, 'node_modules')],
         use: ['source-map-loader'],
         enforce: 'pre'
       }, {
