@@ -2,6 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
+  mode: 'production',
   entry: path.join(__dirname, './docs/index.ts'),
   output: {
     path: path.join(__dirname, './docs/assets'),
@@ -35,7 +36,7 @@ module.exports = {
     // See https://github.com/angular/angular/issues/11580
     // See https://github.com/angular/angular/issues/14898
     new webpack.ContextReplacementPlugin(
-      /angular(\\|\/)core(\\|\/)(@angular|esm5)/,
+      /angular(\\|\/)core(\\|\/)(@angular|fesm5|fesm7)/,
       path.resolve(__dirname, '../src')
     )
   ]

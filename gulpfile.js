@@ -2,7 +2,6 @@ var path = require('path');
 var assign = require('lodash.assign');
 var del = require('del');
 var merge = require('merge2');
-var runSequence = require('run-sequence');
 var wp = require('webpack');
 var webpack = require('webpack-stream');
 var gulp = require('gulp');
@@ -15,22 +14,6 @@ var uglify = require('gulp-uglify');
 
 var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
   declaration: true
-});
-
-gulp.task('default', ['copy', 'process', 'bundle', 'example']);
-gulp.task('clean', ['clean:example', 'clean:process', 'clean:bundle']);
-gulp.task('copy', ['copy:metadata', 'copy:sourcemaps', 'copy:readme', 'copy:license', 'copy:package']);
-
-gulp.task('example', function(done) {
-  runSequence('example:build', 'example:copy', done);
-});
-
-gulp.task('build', function(done) {
-  runSequence('clean', 'copy', 'process', 'bundle'/*, 'shim'*/ ,'example', done);
-});
-
-gulp.task('watch-build', function(done) {
-  runSequence('process', done);
 });
 
 gulp.task('watch', function() {
@@ -57,10 +40,6 @@ gulp.task('process', function() {
   ]);
 });
 
-gulp.task('bundle', function(done) {
-  runSequence(['bundle:build:1', 'bundle:build:2'], 'bundle:compress', done);
-});
-
 gulp.task('bundle:build:1', function() {
   return gulp.src('./dist/index.js')
     .pipe(webpack(require('./config.bundle')[0], wp))
@@ -71,10 +50,6 @@ gulp.task('bundle:build:2', function() {
   return gulp.src('./dist/index.js')
     .pipe(webpack(require('./config.bundle')[1], wp))
     .pipe(gulp.dest('./dist/bundles'));
-});
-
-gulp.task('bundle:compress', function(done) {
-  runSequence(['bundle:compress:1', 'bundle:compress:2'], done);
 });
 
 gulp.task('bundle:compress:1', function() {
@@ -111,8 +86,12 @@ gulp.task('bundle:compress:2', function() {
     .pipe(gulp.dest(location));
 });
 
+gulp.task('bundle:compress', gulp.series(gulp.parallel('bundle:compress:1', 'bundle:compress:2')));
+
+gulp.task('bundle', gulp.series(gulp.parallel('bundle:build:1', 'bundle:build:2'), 'bundle:compress'));
+
 gulp.task('example:build', function() {
-  return gulp.src('./docs/assets/app.js')
+  return gulp.src('./docs/assets/app.js', { allowEmpty: true })
     .pipe(webpack(require('./config.docs'), wp))
     .pipe(gulp.dest('./docs/assets'));
 });
@@ -160,7 +139,7 @@ gulp.task('example:copy', function() {
 // });
 //
 // gulp.task('shim:compress', function() {
-//   var wpConfig = require('./config.shim');
+//   var wpConfig = require('./config.source');
 //   var location = wpConfig.output.path;
 //   var filename = wpConfig.output.filename;
 //   var filenameMin = wpConfig.output.filename.split('.');
@@ -227,3 +206,17 @@ gulp.task('copy:package', function () {
     return file('package.json', JSON.stringify(pkg, null, '\t'), {src: true})
         .pipe(gulp.dest('./dist'))
 })
+
+gulp.task('clean:example', gulp.parallel('clean:example'));
+gulp.task('clean', gulp.parallel('clean:process', 'clean:bundle'));
+
+gulp.task('copy', gulp.parallel('copy:metadata', 'copy:sourcemaps', 'copy:readme', 'copy:license', 'copy:package'));
+
+gulp.task('example', gulp.series('example:build', 'example:copy'));
+
+gulp.task('build', gulp.series('clean', 'copy', 'process', 'bundle'/*, 'shim'*/));
+gulp.task('build:example', gulp.series('clean:example', 'example'));
+
+gulp.task('watch-build', gulp.series('process'));
+
+gulp.task('default', gulp.parallel('build'));
