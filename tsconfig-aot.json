@@ -34,7 +34,11 @@
     "src/css-animator/index.ts"
   ],
   "angularCompilerOptions": {
-   "genDir": "aot",
-   "skipMetadataEmit" : false
+    "genDir": "aot",
+    "skipMetadataEmit" : false,
+    "enableIvy": true,
+    "allowEmptyCodegenFiles": true,
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true
  }
 }
