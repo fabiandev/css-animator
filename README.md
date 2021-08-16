@@ -40,6 +40,7 @@ $ jspm install npm:css-animator
 <html>
 <head>
   <script src="https://unpkg.com/css-animator@2.4.0-beta.4/bundles/builder.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"/>
 </head>
 <body>
   <!-- ... -->
