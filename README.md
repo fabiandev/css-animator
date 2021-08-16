@@ -36,6 +36,8 @@ $ jspm install npm:css-animator
 
 ## Use the bundle
 
+See https://jsfiddle.net/qxtvgL98/72/ for a full example
+
 ```html
 <html>
 <head>
@@ -56,8 +58,6 @@ $ jspm install npm:css-animator
 </body>
 </html>
 ```
-
-See https://jsfiddle.net/qxtvgL98/72/ for an example
 
 # Example
 
