@@ -3,7 +3,7 @@ var webpack = require('webpack');
 const angularExternals = require('webpack-angular-externals');
 
 module.exports = [{
-  mode: 'production',
+  mode: 'development',
   entry: path.join(__dirname, './dist/index.js'),
   output: {
     umdNamedDefine: true,
@@ -35,7 +35,7 @@ module.exports = [{
     ]
   }
 }, {
-  mode: 'production',
+  mode: 'development',
   entry: path.join(__dirname, './dist/builder/animation_builder.js'),
   output: {
     umdNamedDefine: true,
