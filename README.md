@@ -20,6 +20,8 @@ Did you see css-animator in the wild? [Let me know](https://github.com/fabiandev
 
 # Installation
 
+## Use as dependency
+
 ```bash
 $ yarn add css-animator
 ```
@@ -31,6 +33,30 @@ $ npm install --save css-animator
 ```bash
 $ jspm install npm:css-animator
 ```
+
+## Use the bundle
+
+```html
+<html>
+<head>
+  <script src="https://unpkg.com/css-animator@2.4.0-beta.4/bundles/builder.min.js"></script>
+</head>
+<body>
+  <!-- ... -->
+
+  <script>
+    (function() {
+      const AnimationBuilder = window['css-animator/builder'].AnimationBuilder;
+      const animator = new AnimationBuilder();
+
+      // ...
+    });
+  </script>
+</body>
+</html>
+```
+
+See https://jsfiddle.net/qxtvgL98/72/ for an example
 
 # Example
 
