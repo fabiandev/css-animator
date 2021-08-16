@@ -15,6 +15,11 @@ The package includes ES5 compiled files, alongside TypeScript typings and source
 
 *Answer:* **Try to change the `pin` and `useVisibility` options** (and have a look at all the other customization options)
 
+```ts
+animator.pin = false;
+animator.useVisibility = true;
+```
+
 ## In the Wild
 
 [Mind your Maths](https://play.google.com/store/apps/details?id=mind.your.maths) (Android App)  
