@@ -41,7 +41,7 @@
     "genDir": "aot",
     "skipMetadataEmit" : false,
     "compilationMode": "partial",
-    "enableIvy": false,
+    "enableIvy": true,
     "allowEmptyCodegenFiles": true
  }
 }
