@@ -9,6 +9,12 @@ Feel free to [open an issue](https://github.com/fabianweb/css-animator/issues/ne
 
 The package includes ES5 compiled files, alongside TypeScript typings and source maps. Also UMD bundle files are included.
 
+## TL;DR (if you are having positioning issues)
+
+*Question:* **Other elements jump around during animation or after showing/hiding**
+
+*Answer:* **Try to change the `pin` and `useVisibility` options** (and have a look at all the other customazation options)
+
 ## In the Wild
 
 [Mind your Maths](https://play.google.com/store/apps/details?id=mind.your.maths) (Android App)  
@@ -107,9 +113,11 @@ You may also change the default options for every instance that is created once 
 ```ts
 import { AnimationBuilder } from 'css-animator/builder';
 
-AnimationBuilder.defaults.fixed = true;
-AnimationBuilder.defaults.duration = 1500;
+AnimationBuilder.defaults.pin = false;
+AnimationBuilder.defaults.useVisibility = true;
 ```
+
+> Note: changing `pin` and `useVisibility` may be the way to go if you have issues with the possition of other elements during animation
 
 ## Angular Usage
 
