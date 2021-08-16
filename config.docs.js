@@ -29,6 +29,10 @@ module.exports = {
             loader: 'ts-loader'
           }
         ]
+      },
+      {
+        test: /[\/\\]@angular[\/\\]core[\/\\].+\.js$/,
+        parser: { system: true },  // enable SystemJS
       }
     ]
   },
@@ -36,7 +40,7 @@ module.exports = {
     // See https://github.com/angular/angular/issues/11580
     // See https://github.com/angular/angular/issues/14898
     new webpack.ContextReplacementPlugin(
-      /angular(\\|\/)core(\\|\/)(@angular|fesm5|fesm7)/,
+      /angular(\\|\/)core(\\|\/)(@angular|fesm5|fesm7|fesm2015)/,
       path.resolve(__dirname, '../src')
     )
   ]
