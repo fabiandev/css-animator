@@ -9,6 +9,15 @@ Feel free to [open an issue](https://github.com/fabianweb/css-animator/issues/ne
 
 The package includes ES5 compiled files, alongside TypeScript typings and source maps. Also UMD bundle files are included.
 
+## In the Wild
+
+[Mind your Maths](https://play.google.com/store/apps/details?id=mind.your.maths) (Android App)  
+[Devdactic - How to Add Animations To Your Ionic App](http://devdactic.com/animations-ionic-app/) (Tutorial)  
+[Devdactic - How to Add Animations To Your Ionic App](https://www.youtube.com/watch?v=8pOsJDZbJk0) (Video Tutorial)  
+[Ionic Academy - Include CSS+JS Files from NPM Packages with Ionic](https://ionicacademy.com/ionic-include-css-files-from-npm/) (Tutorial)
+
+Did you see css-animator in the wild? [Let me know](https://github.com/fabiandev/css-animator/issues/new)!
+
 ## TL;DR (if you are having positioning issues)
 
 *Question:* **Other elements jump around during animation or after showing/hiding**
@@ -19,15 +28,6 @@ The package includes ES5 compiled files, alongside TypeScript typings and source
 animator.pin = false;
 animator.useVisibility = true;
 ```
-
-## In the Wild
-
-[Mind your Maths](https://play.google.com/store/apps/details?id=mind.your.maths) (Android App)  
-[Devdactic - How to Add Animations To Your Ionic App](http://devdactic.com/animations-ionic-app/) (Tutorial)  
-[Devdactic - How to Add Animations To Your Ionic App](https://www.youtube.com/watch?v=8pOsJDZbJk0) (Video Tutorial)  
-[Ionic Academy - Include CSS+JS Files from NPM Packages with Ionic](https://ionicacademy.com/ionic-include-css-files-from-npm/) (Tutorial)
-
-Did you see css-animator in the wild? [Let me know](https://github.com/fabiandev/css-animator/issues/new)!
 
 # Installation
 
