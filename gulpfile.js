@@ -12,10 +12,6 @@ var rename = require('gulp-rename');
 var ts = require('gulp-typescript');
 var uglify = require('gulp-uglify');
 
-var tsConfig = assign(require('./tsconfig.json').compilerOptions, {
-  declaration: true
-});
-
 gulp.task('bundle:build:1', function() {
   return gulp.src('./dist/index.js')
     .pipe(webpack(require('./config.bundle')[0], wp))
@@ -111,7 +107,13 @@ gulp.task('clean:example', function() {
   ]);
 });
 
-gulp.task('clean:files', function() {
+gulp.task('clean:compiled', function() {
+  return del([
+    './compiled/**/*'
+  ]);
+});
+
+gulp.task('clean:dist', function() {
   return del([
     './dist/**/*',
     '!./dist/bundles'
@@ -150,7 +152,7 @@ gulp.task('copy:package', function () {
 })
 
 gulp.task('clean:example', gulp.parallel('clean:example'));
-gulp.task('clean', gulp.parallel('clean:files', 'clean:bundle'));
+gulp.task('clean', gulp.series('clean:dist', 'clean:bundle'));
 
 gulp.task('copy', gulp.parallel('copy:files', 'copy:readme', 'copy:license', 'copy:package'));
 
