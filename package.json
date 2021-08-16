@@ -7,8 +7,10 @@
     "url": "git+https://github.com/fabiandev/css-animator.git"
   },
   "scripts": {
-    "build": "node_modules/.bin/ngcc --properties es2015 browser module main -p tsconfig-aot.json && gulp build",
-    "build:docs": "node_modules/.bin/ngcc --properties es2015 browser module main -p tsconfig-aot.json && gulp build:example"
+    "build": "npm run build:source && gulp build",
+    "build:docs": "npm run build:source && gulp build:example",
+    "build:source": "node_modules/.bin/ngc -p tsconfig.dist.json",
+    "postinstall": "node_modules/.bin/ngcc --properties es2015 browser module main --tsconfig tsconfig.dist.json"
   },
   "main": "index.js",
   "keywords": [
