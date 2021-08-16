@@ -13,7 +13,7 @@ The package includes ES5 compiled files, alongside TypeScript typings and source
 
 *Question:* **Other elements jump around during animation or after showing/hiding**
 
-*Answer:* **Try to change the `pin` and `useVisibility` options** (and have a look at all the other customazation options)
+*Answer:* **Try to change the `pin` and `useVisibility` options** (and have a look at all the other customization options)
 
 ## In the Wild
 
