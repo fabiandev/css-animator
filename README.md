@@ -26,8 +26,9 @@ animator.pin = false;
 animator.useVisibility = true;
 ```
 
-# Installation
+# Usage
 
+You can install `css-animator` from `npm` or use one of the available `UMD` bundles.
 ## Use as dependency
 
 ```bash
