@@ -42,15 +42,20 @@ $ npm install --save css-animator
 $ jspm install npm:css-animator
 ```
 
-## Use the bundle
+## Use the `UMD` bundle
 
-See https://jsfiddle.net/qxtvgL98/72/ for a full example
+| Name (to `require`) | Bundle | |
+| --- | --- | ---
+| `css-animator/builder` | `bundles/builder.min.js` | Includes `AnimationBuilder` only |
+| `css-animator` | `bundles/css-animator.min.js` | Requires `@angular/core` as peer dependency |
+
+> See https://jsfiddle.net/4ec57wpb/1/ for a full basic example
 
 ```html
 <html>
 <head>
-  <script src="https://unpkg.com/css-animator@2.4.0-beta.4/bundles/builder.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"/>
+  <script src="https://unpkg.com/css-animator@latest/bundles/builder.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css"/>
 </head>
 <body>
   <!-- ... -->
@@ -61,7 +66,7 @@ See https://jsfiddle.net/qxtvgL98/72/ for a full example
       const animator = new AnimationBuilder();
 
       // ...
-    });
+    })();
   </script>
 </body>
 </html>
