@@ -3,16 +3,20 @@
   "compilerOptions": {
     "target": "ES5",
     "module": "ES2015",
+    "declaration": true,
+    "downlevelIteration": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
+    "importHelpers": true,
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "strictNullChecks": false,
+    "sourceMap": true,
     "outDir": "./compiled",
     "rootDir": "./src/css-animator",
     "skipLibCheck": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "css-animator/*": [
         "src/css-animator/*",
@@ -34,7 +38,10 @@
     "src/css-animator/index.ts"
   ],
   "angularCompilerOptions": {
-   "genDir": "aot",
-   "skipMetadataEmit" : false
+    "genDir": "aot",
+    "skipMetadataEmit" : false,
+    "compilationMode": "partial",
+    "enableIvy": true,
+    "allowEmptyCodegenFiles": true
  }
 }

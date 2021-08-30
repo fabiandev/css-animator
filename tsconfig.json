@@ -11,6 +11,7 @@
     "strictNullChecks": false,
     "skipLibCheck": true,
     "baseUrl": ".",
+    "sourceMap": true,
     "types": [
       "core-js"
     ],

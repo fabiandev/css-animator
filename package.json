@@ -7,8 +7,10 @@
     "url": "git+https://github.com/fabiandev/css-animator.git"
   },
   "scripts": {
-    "build": "node_modules/.bin/ngc -p tsconfig-aot.json && gulp build",
-    "build:docs": "node_modules/.bin/ngc -p tsconfig-aot.json && gulp build:example"
+    "build": "npm run clean && npm run build:source && gulp bundle",
+    "docs": "npm run clean && npm run build:source && gulp build:example",
+    "build:source": "node_modules/.bin/ngc -p tsconfig.dist.json",
+    "clean": "rm -r ./compiled 2> /dev/null || true"
   },
   "main": "index.js",
   "keywords": [
@@ -20,7 +22,7 @@
     "css",
     "animate.css"
   ],
-  "author": "Fabian Pirklbauer <hi@fabiandev.io>",
+  "author": "Fabian Leutgeb <hi@fabiandev.io>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/fabiandev/css-animator/issues"
@@ -28,14 +30,16 @@
   "homepage": "https://github.com/fabiandev/css-animator#readme",
   "dependencies": {},
   "devDependencies": {
-    "@angular/animations": "^8.1.0",
-    "@angular/common": "^8.1.0",
-    "@angular/compiler": "^8.1.0",
-    "@angular/compiler-cli": "^8.1.0",
-    "@angular/core": "^8.1.0",
-    "@angular/platform-browser": "^8.1.0",
-    "@angular/platform-browser-dynamic": "^8.1.0",
-    "@angular/platform-server": "^8.1.0",
+    "@angular/animations": "^12.2.1",
+    "@angular/cli": "^12.2.1",
+    "@angular/common": "^12.2.1",
+    "@angular/compiler": "^12.2.1",
+    "@angular/compiler-cli": "~12.2.1",
+    "@angular/core": "^12.2.1",
+    "@angular/platform-browser": "^12.2.1",
+    "@angular/platform-browser-dynamic": "^12.2.1",
+    "@angular/platform-server": "^12.2.1",
+    "@angular/upgrade": "^12.2.1",
     "@types/core-js": "^2.5.2",
     "animate.css": "^3.5.2",
     "del": "^5.0.0",
@@ -53,10 +57,10 @@
     "rxjs": "^6.5.2",
     "source-map-loader": "^0.2.1",
     "ts-loader": "^6.0.4",
-    "typescript": ">=3.4.0 <3.5.0",
+    "typescript": "4.3.x",
     "webpack": "^4.35.3",
     "webpack-angular-externals": "^1.0.2",
     "webpack-stream": "^5.2.1",
-    "zone.js": "^0.9.1"
+    "zone.js": "~0.11.4"
   }
 }

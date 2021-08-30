@@ -9,16 +9,27 @@ Feel free to [open an issue](https://github.com/fabianweb/css-animator/issues/ne
 
 The package includes ES5 compiled files, alongside TypeScript typings and source maps. Also UMD bundle files are included.
 
-## In the Wild
+## Tutorials
 
-[Mind your Maths](https://play.google.com/store/apps/details?id=mind.your.maths) (Android App)  
 [Devdactic - How to Add Animations To Your Ionic App](http://devdactic.com/animations-ionic-app/) (Tutorial)  
 [Devdactic - How to Add Animations To Your Ionic App](https://www.youtube.com/watch?v=8pOsJDZbJk0) (Video Tutorial)  
 [Ionic Academy - Include CSS+JS Files from NPM Packages with Ionic](https://ionicacademy.com/ionic-include-css-files-from-npm/) (Tutorial)
 
-Did you see css-animator in the wild? [Let me know](https://github.com/fabiandev/css-animator/issues/new)!
+## TL;DR (if you are having positioning issues)
 
-# Installation
+*Question:* **Other elements jump around during animation or after showing/hiding**
+
+*Answer:* **Try to change the `pin` and `useVisibility` options** (and have a look at all the other customization options)
+
+```ts
+animator.pin = false;
+animator.useVisibility = true;
+```
+
+# Usage
+
+You can install `css-animator` from `npm` or use one of the available `UMD` bundles.
+## Use as dependency
 
 ```bash
 $ yarn add css-animator
@@ -30,6 +41,36 @@ $ npm install --save css-animator
 
 ```bash
 $ jspm install npm:css-animator
+```
+
+## Use the `UMD` bundle
+
+| Name (to `require`) | Bundle | |
+| --- | --- | ---
+| `css-animator/builder` | `bundles/builder.min.js` | Includes `AnimationBuilder` only |
+| `css-animator` | `bundles/css-animator.min.js` | Requires `@angular/core` as peer dependency |
+
+> See https://jsfiddle.net/4ec57wpb/1/ for a full basic example
+
+```html
+<html>
+<head>
+  <script src="https://unpkg.com/css-animator@latest/bundles/builder.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css"/>
+</head>
+<body>
+  <!-- ... -->
+
+  <script>
+    (function() {
+      const AnimationBuilder = window['css-animator/builder'].AnimationBuilder;
+      const animator = new AnimationBuilder();
+
+      // ...
+    })();
+  </script>
+</body>
+</html>
 ```
 
 # Example
@@ -80,9 +121,11 @@ You may also change the default options for every instance that is created once 
 ```ts
 import { AnimationBuilder } from 'css-animator/builder';
 
-AnimationBuilder.defaults.fixed = true;
-AnimationBuilder.defaults.duration = 1500;
+AnimationBuilder.defaults.pin = false;
+AnimationBuilder.defaults.useVisibility = true;
 ```
+
+> Note: changing `pin` and `useVisibility` may be the way to go if you have issues with the possition of other elements during animation
 
 ## Angular Usage
 
