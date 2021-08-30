@@ -7,8 +7,8 @@
     "url": "git+https://github.com/fabiandev/css-animator.git"
   },
   "scripts": {
-    "build": "npm run clean && npm run build:source && gulp build",
-    "build:docs": "npm run clean && npm run build:source && gulp build:example",
+    "build": "npm run clean && npm run build:source && gulp bundle",
+    "docs": "npm run clean && npm run build:source && gulp build:example",
     "build:source": "node_modules/.bin/ngc -p tsconfig.dist.json",
     "clean": "rm -r ./compiled 2> /dev/null || true"
   },

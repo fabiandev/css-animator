@@ -158,7 +158,7 @@ gulp.task('copy', gulp.parallel('copy:files', 'copy:readme', 'copy:license', 'co
 
 gulp.task('example', gulp.series('example:build', 'example:copy'));
 
-gulp.task('build', gulp.series('clean', 'copy', 'bundle'));
+gulp.task('bundle', gulp.series('clean', 'copy', 'bundle'));
 gulp.task('build:example', gulp.series('clean:example', 'example'));
 
-gulp.task('default', gulp.parallel('build'));
+gulp.task('default', gulp.parallel('bundle'));
